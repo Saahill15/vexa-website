@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Services - VEXA Digital</title>
+    <title>What we do - VEXA Digital</title>
+    <meta name="description" content="Strategy and orchestration in gaming for brand managers. Association thesis, pilot gates, Word outline, Canva design, then a live run.">
     <style>
         * {
             margin: 0;
@@ -18,7 +19,6 @@
             background: #ffffff;
         }
 
-        /* Navigation Bar */
         nav {
             background: #1a1a1a;
             padding: 1.2rem 0;
@@ -35,6 +35,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1.5rem;
         }
 
         .logo {
@@ -43,20 +44,23 @@
             font-weight: 700;
             text-decoration: none;
             letter-spacing: 1px;
+            white-space: nowrap;
         }
 
         .nav-menu {
             display: flex;
-            gap: 3rem;
+            gap: 1.8rem;
             list-style: none;
             align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
         .nav-menu a {
             color: #ffffff;
             text-decoration: none;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             transition: color 0.3s;
         }
 
@@ -74,6 +78,7 @@
             font-size: 0.9rem;
             transition: all 0.3s;
             opacity: 0.9;
+            display: inline-block;
         }
 
         .book-btn:hover {
@@ -81,7 +86,6 @@
             transform: translateY(-1px);
         }
 
-        /* Page Header */
         .page-header {
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             color: white;
@@ -90,23 +94,33 @@
         }
 
         .page-header h1 {
-            font-size: 3rem;
+            font-size: 2.6rem;
             margin-bottom: 1rem;
             color: #FF6B35;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .page-header p {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             color: #e0e0e0;
             max-width: 800px;
             margin: 0 auto;
+            line-height: 1.8;
         }
 
-        /* Services Detail Section */
         .services-detail {
             padding: 5rem 40px;
             max-width: 1200px;
             margin: 0 auto;
+        }
+
+        .intro-block {
+            margin-bottom: 3rem;
+            color: #555;
+            line-height: 1.8;
+            font-size: 1.05rem;
         }
 
         .service-block {
@@ -120,26 +134,13 @@
 
         .service-block h2 {
             color: #FF6B35;
-            font-size: 2rem;
+            font-size: 1.8rem;
             margin-bottom: 1rem;
-        }
-
-        .service-block .price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 1.5rem;
-        }
-
-        .service-block .duration {
-            color: #666;
-            font-size: 1rem;
-            margin-bottom: 2rem;
         }
 
         .service-block h3 {
             color: #1a1a1a;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             margin-top: 2rem;
             margin-bottom: 1rem;
         }
@@ -180,7 +181,25 @@
             color: #FF6B35;
         }
 
-        /* CTA Section */
+        .not-list {
+            background: #f8f8f8;
+            padding: 2rem 2.5rem;
+            border-radius: 8px;
+            margin-bottom: 3rem;
+        }
+
+        .not-list h2 {
+            color: #1a1a1a;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .not-list ul {
+            color: #555;
+            padding-left: 1.2rem;
+            line-height: 1.9;
+        }
+
         .cta-section {
             background: #f8f8f8;
             padding: 4rem 40px;
@@ -202,7 +221,6 @@
             margin-right: auto;
         }
 
-        /* Footer */
         footer {
             background: #1a1a1a;
             color: white;
@@ -241,189 +259,141 @@
             color: #FF6B35;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 20px;
+                flex-wrap: wrap;
+            }
             .nav-menu {
-                gap: 1.5rem;
+                gap: 1rem;
                 font-size: 0.85rem;
             }
             .service-block {
                 padding: 2rem;
             }
+            .page-header h1 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
     <nav>
         <div class="nav-container">
             <a href="index.html" class="logo">VEXA DIGITAL</a>
             <ul class="nav-menu">
-                <li><a href="index.html#about">About</a></li>
-                <li><a href="services.html">Services</a></li>
+                <li><a href="services.html">What we do</a></li>
+                <li><a href="index.html#how-it-works">How it works</a></li>
+                <li><a href="index.html#pilots">Pilots</a></li>
+                <li><a href="index.html#team">Team</a></li>
                 <li><a href="index.html#contact">Contact</a></li>
+                <li><a href="booking.html" class="book-btn">Book discovery</a></li>
             </ul>
-            <a href="booking.html" class="book-btn">Book Consultation</a>
         </div>
     </nav>
 
-    <!-- Page Header -->
     <section class="page-header">
-        <h1>SERVICES</h1>
-        <p>Comprehensive business architecture services designed to reduce sponsor dependency and build sustainable revenue systems.</p>
+        <h1>Strategy and orchestration in gaming. Not another agency menu.</h1>
+        <p>We help a brand manager choose a tournament, a club, or a creator, write the case, design the work, and stay on the run. Proof first. Scale second.</p>
     </section>
 
-    <!-- Services Detail -->
     <section class="services-detail">
-        
-        <!-- Service 1: Consultation -->
-        <div class="service-block">
-            <h2>CONSULTATION</h2>
-            <div class="price">₹3,000</div>
-            <div class="duration">30-45 minutes | Video Call</div>
-            
-            <h3>What You Get:</h3>
+        <div class="intro-block">
+            <p>If you do not understand gaming, the market will sell you inventory. Our job is the decision before the inventory: which association, what a small live test must prove, and whether the next cheque should exist.</p>
+            <p>Commercial shape is simple. A control pilot, then a full campaign. We scope the work after discovery, once the test is clear. We do not publish rate cards on this site.</p>
+        </div>
+
+        <div class="not-list">
+            <h2>What this is not</h2>
             <ul>
-                <li>One-time diagnostic video call</li>
-                <li>Verbal diagnosis of your current business state</li>
-                <li>Reality check on viability and market positioning</li>
-                <li>Identification of structural failures</li>
-                <li>Clear direction on next steps</li>
-                <li>Service recommendation based on your actual needs</li>
+                <li>Not an SEO package, a monthly content retainer, or a media-buying black box.</li>
+                <li>Not a service that emails clubs on your behalf and calls that strategy.</li>
+                <li>Not a shop that writes operating systems for esports organisations.</li>
+                <li>Not a trophy page. We will not invent brand wins.</li>
             </ul>
+        </div>
 
-            <h3>Who This Is For:</h3>
-            <p>Organizations that need clarity on their current state, want to understand what's broken, or need direction before committing to larger services.</p>
+        <div class="service-block">
+            <h2>Association thesis</h2>
+            <p>Which layer, which property, and why that property for this brand. Tournament, club, or creator. Written so a brand manager can take it into a review without translating gamer slang.</p>
+            <h3>What you can use</h3>
+            <ul>
+                <li>A clear pick, and the picks we rejected</li>
+                <li>Who the audience actually is, in buyer language</li>
+                <li>What the association can and cannot do for the brand</li>
+            </ul>
+        </div>
 
+        <div class="service-block">
+            <h2>Pilot design and gates</h2>
+            <p>A small live test before national spend. We define what we will run, what we will measure, and the gates that decide the next move.</p>
+            <h3>What you can use</h3>
+            <ul>
+                <li>A control pilot you can defend internally</li>
+                <li>Gate X: do not scale</li>
+                <li>Gate Y: scale into a full campaign</li>
+            </ul>
             <div class="note">
-                <strong>Note:</strong> All larger services (Audit, Blueprint, Outreach, Retainer) start with this consultation. The consultation fee is deducted if you proceed with a larger service.
+                <strong>Walk-out:</strong> Evidence. If the test fails the gate, we say so. That is still a finished piece of work.
             </div>
         </div>
 
-        <!-- Service 2: Business Audit -->
         <div class="service-block">
-            <h2>BUSINESS AUDIT</h2>
-            <div class="price">Quoted After Consultation</div>
-            <div class="duration">7-10 days delivery</div>
-            
-            <h3>What You Get:</h3>
+            <h2>Word outline</h2>
+            <p>A cross-examination document. Your team can push back on the argument before anyone opens a design file. If the outline does not survive the room, we do not decorate it.</p>
+            <h3>What you can use</h3>
             <ul>
-                <li>Comprehensive review of existing business plan or pitch deck</li>
-                <li>Written diagnostic report identifying structural failures</li>
-                <li>Analysis of revenue model viability</li>
-                <li>Market positioning assessment</li>
-                <li>Sponsorship readiness evaluation</li>
-                <li>Prioritized action items with implementation roadmap</li>
-                <li>One follow-up call to discuss findings</li>
+                <li>The thesis in a form legal, brand, and media can mark up</li>
+                <li>The pilot story, the risks, and the ask</li>
+                <li>A single source the design work has to follow</li>
             </ul>
-
-            <h3>Who This Is For:</h3>
-            <p>Organizations with existing business plans or pitch decks that aren't working. You've tried pitching sponsors, investors, or partners—but nothing is landing.</p>
-
-            <div class="note">
-                <strong>Prerequisite:</strong> Requires consultation first. Pricing depends on complexity and scope identified during consultation.
-            </div>
         </div>
 
-        <!-- Service 3: Blueprint Creation -->
         <div class="service-block">
-            <h2>BLUEPRINT CREATION</h2>
-            <div class="price">Quoted After Consultation</div>
-            <div class="duration">14-21 days delivery</div>
-            
-            <h3>What You Get:</h3>
+            <h2>Campaign design</h2>
+            <p>Bhaskar designs in Canva from the approved outline. The point is work you can show internally, not a moodboard that needs another agency to finish.</p>
+            <h3>What you can use</h3>
             <ul>
-                <li>Complete business architecture built from ground up</li>
-                <li>Revenue model designed to reduce sponsor dependency</li>
-                <li>Owned revenue pathway identification and structuring</li>
-                <li>Market positioning and differentiation strategy</li>
-                <li>Operational structure and resource allocation</li>
-                <li>Financial projections and sustainability roadmap</li>
-                <li>Sponsorship-ready pitch deck (if applicable)</li>
-                <li>Two review calls during creation process</li>
+                <li>Design that follows the Word outline, not the other way around</li>
+                <li>Assets a brand team can review without a gaming decoder</li>
+                <li>A pack ready for the live test or the larger run</li>
             </ul>
-
-            <h3>Who This Is For:</h3>
-            <p>Organizations starting from scratch or those whose existing structure is fundamentally broken. You need complete business architecture, not just tweaks.</p>
-
-            <div class="note">
-                <strong>Prerequisite:</strong> Requires consultation first. This is the most comprehensive service and pricing reflects scope, complexity, and your organization's specific needs.
-            </div>
         </div>
 
-        <!-- Service 4: Sponsorship Outreach -->
         <div class="service-block">
-            <h2>SPONSORSHIP OUTREACH</h2>
-            <div class="price">Quoted After Consultation</div>
-            <div class="duration">30-45 days execution</div>
-            
-            <h3>What You Get:</h3>
+            <h2>Run and report</h2>
+            <p>You buy the plan. We stay on the execution and come back with what happened, against the gates we set together.</p>
+            <h3>What you can use</h3>
             <ul>
-                <li>Audit of existing pitch deck and positioning</li>
-                <li>Correction of messaging and value proposition</li>
-                <li>Brand identification and targeting strategy</li>
-                <li>Outreach execution on your behalf</li>
-                <li>Professional communication with brands</li>
-                <li>Follow-up management and negotiation support</li>
-                <li>Weekly progress reports</li>
+                <li>Someone on the run, not a PDF left on a shared drive</li>
+                <li>A report in the same language as the thesis</li>
+                <li>A scale or stop recommendation you can take upstairs</li>
             </ul>
-
-            <h3>Who This Is For:</h3>
-            <p>Organizations with solid business structure who need help executing sponsorship outreach professionally. You have the foundation—you need the execution.</p>
-
             <div class="note">
-                <strong>Prerequisite:</strong> Requires consultation + either completed Audit or Blueprint. We don't execute outreach for organizations without proper structure.
+                <strong>How it starts:</strong> A free discovery call. We do not pitch on it. If the work is real, we say what the pilot should be. If it is not, we say that too.
             </div>
         </div>
-
-        <!-- Service 5: Advisory Retainer -->
-        <div class="service-block">
-            <h2>ADVISORY RETAINER</h2>
-            <div class="price">Quoted After Consultation</div>
-            <div class="duration">Monthly engagement</div>
-            
-            <h3>What You Get:</h3>
-            <ul>
-                <li>Ongoing strategic supervision and guidance</li>
-                <li>Monthly review calls (2-4 per month based on tier)</li>
-                <li>Email/message support for strategic decisions</li>
-                <li>Review of new initiatives and opportunities</li>
-                <li>Course correction when needed</li>
-                <li>Accountability and execution tracking</li>
-                <li>Priority access for urgent consultations</li>
-            </ul>
-
-            <h3>Who This Is For:</h3>
-            <p>Organizations that have completed an Audit or Blueprint and need ongoing supervision during execution. You have the plan—you need accountability and strategic oversight.</p>
-
-            <div class="note">
-                <strong>Prerequisite:</strong> Only available to organizations that have completed Business Audit or Blueprint Creation. Retainer pricing is tiered based on engagement level needed.
-            </div>
-        </div>
-
     </section>
 
-    <!-- CTA Section -->
     <section class="cta-section">
-        <h2>READY TO START?</h2>
-        <p>All services begin with consultation. Book your diagnostic call to identify what you actually need.</p>
-        <a href="booking.html" class="book-btn">Book Consultation - ₹3,000</a>
+        <h2>Start with discovery</h2>
+        <p>Bring the company, your role, why gaming is on the table, and what you have already tried. The call is free.</p>
+        <a href="https://calendly.com/partnerships-vexadigital/30min" class="book-btn" target="_blank" rel="noopener noreferrer">Book a free discovery call</a>
     </section>
 
-    <!-- Footer -->
     <footer>
         <div class="footer-content">
             <div class="footer-logo">VEXA DIGITAL</div>
-            <p>Esports Business Architecture & Advisory</p>
-            
+            <p>Gaming and esports strategy for brands</p>
+
             <div class="footer-links">
-                <a href="mailto:vexadigital.in@gmail.com">vexadigital.in@gmail.com</a>
+                <a href="mailto:partnerships@vexadigital.in">partnerships@vexadigital.in</a>
                 <a href="tel:+919958895505">+91 9958895505</a>
-                <a href="https://instagram.com/vexadigital.in" target="_blank">Instagram</a>
-                <a href="https://www.linkedin.com/company/vexa-digital-in/" target="_blank">LinkedIn</a>
+                <a href="https://instagram.com/vexadigital.in" target="_blank" rel="noopener noreferrer">Instagram</a>
+                <a href="https://www.linkedin.com/company/vexa-digital-in/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
             </div>
-            
-            <p style="font-style: italic; margin: 2rem 0; color: #e0e0e0;">Operating Principle: Very Easy is Never Awesome</p>
+
+            <p style="font-style: italic; margin: 2rem 0; color: #e0e0e0;">Operating principle: Very Easy is Never Awesome</p>
             <p style="color: #888;">VEXA Digital</p>
         </div>
     </footer>

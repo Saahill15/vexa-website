@@ -1,5 +1,7 @@
 # VEXA Digital - Complete Booking System Setup Guide
 
+> **Not product truth.** The public site offer is a free discovery call via Calendly (`https://calendly.com/partnerships-vexadigital/30min`) or email to `partnerships@vexadigital.in`. The Razorpay / Firebase / paid consultation flow described below is a leftover demo stack. Do not treat it as the live commercial offer. Do not expand it as a product.
+
 ## 🎯 WHAT'S BEEN BUILT
 
 A complete 4-step booking system with:

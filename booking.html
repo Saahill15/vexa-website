@@ -3,246 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Consultation - VEXA Digital</title>
+    <title>Book a discovery call - VEXA Digital</title>
+    <meta name="description" content="Book a free Vexa discovery call. We do not pitch on it. Brand managers only need the company, their role, why gaming, and what they have tried.">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/booking.css">
+    <style>
+        .discovery-page {
+            min-height: 100vh;
+            padding: 3rem 0 5rem 0;
+            background: var(--vexa-light-gray);
+        }
+
+        .discovery-lede {
+            max-width: 720px;
+            margin: 0 auto 2.5rem auto;
+            text-align: center;
+        }
+
+        .discovery-lede h1 {
+            color: var(--vexa-orange);
+            margin-bottom: 1rem;
+            font-size: 2.1rem;
+        }
+
+        .discovery-lede p {
+            color: var(--vexa-text-light);
+            line-height: 1.8;
+        }
+
+        .primary-cta {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .calendly-wrap {
+            background: var(--vexa-white);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+
+        .talk-card h2 {
+            margin-bottom: 0.75rem;
+        }
+
+        .talk-card p {
+            color: var(--vexa-text-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .direct-contacts {
+            margin-top: 1.5rem;
+            color: var(--vexa-text-light);
+        }
+
+        .direct-contacts a {
+            font-weight: 600;
+        }
+
+        .demo-note {
+            margin-top: 2rem;
+            padding: 1rem 1.25rem;
+            background: #fafafa;
+            border-left: 4px solid #ddd;
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 700px) {
+            .form-row {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav>
         <div class="nav-container">
-            <a href="index.html" class="logo-container">
-                <img src="https://nyc3.digitaloceanspaces.com/bhindi-drive/files/561636d0-b6ff-40b9-a4db-46a29062b569/2026-01-01T12-44-24-973Z-3ce6c2d8-chat-image-1767271464953-0.jpg" alt="VEXA Digital" class="logo-img">
-            </a>
+            <a href="index.html" class="logo-text" style="color: #FF6B35; text-decoration: none;">VEXA DIGITAL</a>
             <ul class="nav-menu">
-                <li><a href="index.html#about">About</a></li>
-                <li><a href="services.html">Services</a></li>
+                <li><a href="services.html">What we do</a></li>
+                <li><a href="index.html#how-it-works">How it works</a></li>
+                <li><a href="index.html#pilots">Pilots</a></li>
+                <li><a href="index.html#team">Team</a></li>
                 <li><a href="index.html#contact">Contact</a></li>
             </ul>
         </div>
     </nav>
 
-    <!-- Booking Container -->
-    <div class="booking-page">
+    <div class="discovery-page">
         <div class="container-narrow">
-            
-            <!-- Progress Bar -->
-            <div class="progress-container">
-                <div class="progress-bar">
-                    <div class="progress-bar-fill"></div>
-                </div>
-                <div class="progress-steps">
-                    <div class="step-indicator active">
-                        <div class="step-number">1</div>
-                        <div class="step-label">Details</div>
-                    </div>
-                    <div class="step-indicator">
-                        <div class="step-number">2</div>
-                        <div class="step-label">Schedule</div>
-                    </div>
-                    <div class="step-indicator">
-                        <div class="step-number">3</div>
-                        <div class="step-label">Review</div>
-                    </div>
-                    <div class="step-indicator">
-                        <div class="step-number">4</div>
-                        <div class="step-label">Payment</div>
-                    </div>
-                </div>
+            <div class="discovery-lede">
+                <h1>Book a discovery call (we do not pitch on it)</h1>
+                <p>The call is free. Kaustubh runs it. Bring the company, your role, why gaming is on the table, and what you have already tried. Thirty minutes. No deck dump.</p>
             </div>
 
-            <!-- Booking Form -->
-            <form id="bookingForm" class="booking-form">
-                
-                <!-- STEP 1: Pre-Qualification Form -->
-                <div class="form-step active" data-step="1">
-                    <div class="card">
-                        <h2 class="mb-3">Tell Us About Your Organization</h2>
-                        <p class="text-light mb-4">This information helps us prepare for a productive consultation.</p>
+            <div class="primary-cta">
+                <a href="https://calendly.com/partnerships-vexadigital/30min" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Open the discovery calendar</a>
+            </div>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="fullName" class="form-label required">Full Name</label>
-                                <input type="text" id="fullName" name="fullName" class="form-input" required>
-                            </div>
+            <div class="calendly-wrap">
+                <div class="calendly-inline-widget" data-url="https://calendly.com/partnerships-vexadigital/30min" style="min-width:320px;height:700px;"></div>
+            </div>
 
-                            <div class="form-group">
-                                <label for="email" class="form-label required">Email Address</label>
-                                <input type="email" id="email" name="email" class="form-input" required>
-                            </div>
-                        </div>
+            <div class="card talk-card">
+                <h2>Talk to us</h2>
+                <p>If you would rather write first, send this. It goes to partnerships. It is not a booking fee and it is not a payment form.</p>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="phone" class="form-label required">Phone Number</label>
-                                <input type="tel" id="phone" name="phone" class="form-input" placeholder="+91 9958895505" required>
-                                <span class="form-help">Include country code</span>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="orgName" class="form-label required">Organization Name</label>
-                                <input type="text" id="orgName" name="orgName" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="orgType" class="form-label required">Organization Type</label>
-                                <select id="orgType" name="orgType" class="form-select" required>
-                                    <option value="">Select type...</option>
-                                    <option value="esports-team">Esports Team</option>
-                                    <option value="tournament-organizer">Tournament Organizer</option>
-                                    <option value="content-creator">Content Creator/Streamer</option>
-                                    <option value="gaming-community">Gaming Community</option>
-                                    <option value="esports-agency">Esports Agency</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="teamSize" class="form-label required">Current Team Size</label>
-                                <select id="teamSize" name="teamSize" class="form-select" required>
-                                    <option value="">Select size...</option>
-                                    <option value="solo">Solo/Just Starting</option>
-                                    <option value="2-5">2-5 people</option>
-                                    <option value="6-15">6-15 people</option>
-                                    <option value="16-50">16-50 people</option>
-                                    <option value="50+">50+ people</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="primaryGame" class="form-label required">Primary Game/Focus</label>
-                                <input type="text" id="primaryGame" name="primaryGame" class="form-input" placeholder="e.g., BGMI, Valorant, Multi-game" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="monthlyRevenue" class="form-label required">Current Monthly Revenue</label>
-                                <select id="monthlyRevenue" name="monthlyRevenue" class="form-select" required>
-                                    <option value="">Select range...</option>
-                                    <option value="no-revenue">No revenue yet</option>
-                                    <option value="0-50k">₹0 - ₹50,000</option>
-                                    <option value="50k-2l">₹50,000 - ₹2,00,000</option>
-                                    <option value="2l-5l">₹2,00,000 - ₹5,00,000</option>
-                                    <option value="5l+">₹5,00,000+</option>
-                                    <option value="prefer-not-say">Prefer not to say</option>
-                                </select>
-                            </div>
-                        </div>
-
+                <form id="discoveryForm">
+                    <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
                         <div class="form-group">
-                            <label for="mainChallenge" class="form-label required">Main Challenge/Goal</label>
-                            <textarea id="mainChallenge" name="mainChallenge" class="form-textarea" rows="5" placeholder="What's the biggest challenge you're facing right now? Be specific - this helps us prepare for the call." required></textarea>
-                            <span class="form-help">Minimum 200 characters. Be detailed - this is important.</span>
+                            <label for="fullName" class="form-label required">Your name</label>
+                            <input type="text" id="fullName" name="fullName" class="form-input" required>
                         </div>
-
                         <div class="form-group">
-                            <label for="referralSource" class="form-label required">How did you hear about VEXA?</label>
-                            <select id="referralSource" name="referralSource" class="form-select" required>
-                                <option value="">Select source...</option>
-                                <option value="instagram">Instagram</option>
-                                <option value="linkedin">LinkedIn</option>
-                                <option value="google">Google Search</option>
-                                <option value="referral">Referral</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-primary" data-next-step="2">
-                                Continue to Schedule →
-                            </button>
+                            <label for="email" class="form-label required">Work email</label>
+                            <input type="email" id="email" name="email" class="form-input" required>
                         </div>
                     </div>
-                </div>
 
-                <!-- STEP 2: Calendar Selection -->
-                <div class="form-step" data-step="2">
-                    <div class="card">
-                        <h2 class="mb-3">Select Date & Time</h2>
-                        <p class="text-light mb-4">Choose a convenient slot for your 30-45 minute consultation.</p>
-
-                        <div class="timezone-info mb-3">
-                            <strong>Timezone:</strong> India Standard Time (IST)
+                    <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="tel" id="phone" name="phone" class="form-input" placeholder="+91 9958895505">
                         </div>
-
-                        <div id="calendar" class="calendar-container">
-                            <!-- Calendar will be dynamically generated -->
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-secondary" data-prev-step="1">
-                                ← Back
-                            </button>
-                            <button type="button" class="btn btn-primary" data-next-step="3" disabled>
-                                Continue to Review →
-                            </button>
+                        <div class="form-group">
+                            <label for="company" class="form-label required">Company</label>
+                            <input type="text" id="company" name="company" class="form-input" required>
                         </div>
                     </div>
-                </div>
 
-                <!-- STEP 3: Booking Summary -->
-                <div class="form-step" data-step="3">
-                    <div class="card">
-                        <h2 class="mb-3">Review Your Booking</h2>
-                        <p class="text-light mb-4">Please review your details before proceeding to payment.</p>
-
-                        <div id="bookingSummary" class="booking-summary">
-                            <!-- Summary will be dynamically generated -->
-                        </div>
-
-                        <div class="form-group mt-4">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="termsAccepted" required>
-                                <span>I understand the consultation fee is non-refundable but will be adjusted if I proceed with larger services. I agree to the <a href="/terms.html" target="_blank">cancellation policy</a> (24-hour notice required).</span>
-                            </label>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-secondary" data-prev-step="2">
-                                ← Back
-                            </button>
-                            <button type="button" class="btn btn-primary" data-next-step="4">
-                                Proceed to Payment - ₹3,000 →
-                            </button>
-                        </div>
+                    <div class="form-group">
+                        <label for="role" class="form-label required">Your role</label>
+                        <input type="text" id="role" name="role" class="form-input" placeholder="Brand manager, partnerships, marketing lead..." required>
                     </div>
+
+                    <div class="form-group">
+                        <label for="whyGaming" class="form-label required">Why is gaming on the table?</label>
+                        <textarea id="whyGaming" name="whyGaming" class="form-textarea" rows="4" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="alreadyTried" class="form-label required">What have you already tried?</label>
+                        <textarea id="alreadyTried" name="alreadyTried" class="form-textarea" rows="4" placeholder="Pitches, creator posts, event sponsors, nothing yet..." required></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Email this to partnerships</button>
+                        <a href="https://calendly.com/partnerships-vexadigital/30min" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">Prefer the calendar</a>
+                    </div>
+                </form>
+
+                <div class="direct-contacts">
+                    <p><a href="mailto:partnerships@vexadigital.in">partnerships@vexadigital.in</a><br>
+                    <a href="tel:+919958895505">+91 9958895505</a></p>
                 </div>
 
-            </form>
-
+                <p class="demo-note">A leftover demo booking and payment flow used to live on this URL. It is not the product. Discovery is free and happens on Calendly or by email.</p>
+            </div>
         </div>
     </div>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay hidden">
-        <div class="loading-content">
-            <div class="spinner"></div>
-            <p class="loading-message">Processing...</p>
-        </div>
-    </div>
-
-    <!-- Footer -->
     <footer>
         <div class="footer-content">
-            <img src="https://nyc3.digitaloceanspaces.com/bhindi-drive/files/561636d0-b6ff-40b9-a4db-46a29062b569/2026-01-01T12-44-24-973Z-3ce6c2d8-chat-image-1767271464953-0.jpg" alt="VEXA Digital" class="footer-logo">
-            <p>Esports Business Architecture & Advisory</p>
-            
+            <div class="footer-logo" style="height:auto;font-size:1.8rem;font-weight:700;color:#FF6B35;">VEXA DIGITAL</div>
+            <p>Gaming and esports strategy for brands</p>
+
             <div class="footer-links">
-                <a href="mailto:vexadigital.in@gmail.com">vexadigital.in@gmail.com</a>
+                <a href="mailto:partnerships@vexadigital.in">partnerships@vexadigital.in</a>
                 <a href="tel:+919958895505">+91 9958895505</a>
-                <a href="https://instagram.com/vexadigital.in" target="_blank">Instagram</a>
-                <a href="https://www.linkedin.com/company/vexa-digital-in/" target="_blank">LinkedIn</a>
+                <a href="https://instagram.com/vexadigital.in" target="_blank" rel="noopener noreferrer">Instagram</a>
+                <a href="https://www.linkedin.com/company/vexa-digital-in/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
             </div>
-            
-            <p style="font-style: italic; margin: 2rem 0;">Operating Principle: Very Easy is Never Awesome</p>
+
+            <p style="font-style: italic; margin: 2rem 0;">Operating principle: Very Easy is Never Awesome</p>
             <p style="color: #888;">VEXA Digital</p>
         </div>
     </footer>
 
+    <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
     <script src="js/booking.js"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </body>
 </html>

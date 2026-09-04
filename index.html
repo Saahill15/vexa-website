@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VEXA Digital - Esports Business Architecture</title>
+    <title>VEXA Digital - Gaming strategy for brands</title>
+    <meta name="description" content="Vexa helps brand managers who do not understand gaming pick the right tournament, club, or creator, prove it with a small pilot, then scale.">
     <style>
         * {
             margin: 0;
@@ -17,7 +18,6 @@
             color: #1a1a1a;
         }
 
-        /* Navigation Bar */
         nav {
             background: #1a1a1a;
             padding: 1.2rem 0;
@@ -34,6 +34,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1.5rem;
         }
 
         .logo {
@@ -42,20 +43,23 @@
             font-weight: 700;
             text-decoration: none;
             letter-spacing: 1px;
+            white-space: nowrap;
         }
 
         .nav-menu {
             display: flex;
-            gap: 3rem;
+            gap: 1.8rem;
             list-style: none;
             align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
         .nav-menu a {
             color: #ffffff;
             text-decoration: none;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             transition: color 0.3s;
         }
 
@@ -73,6 +77,7 @@
             font-size: 0.9rem;
             transition: all 0.3s;
             opacity: 0.9;
+            display: inline-block;
         }
 
         .book-btn:hover {
@@ -80,7 +85,12 @@
             transform: translateY(-1px);
         }
 
-        /* Hero Section */
+        .book-btn-secondary {
+            background: transparent;
+            color: #FF6B35;
+            border: 2px solid #FF6B35;
+        }
+
         .hero {
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             color: white;
@@ -89,78 +99,113 @@
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 2.6rem;
             margin-bottom: 1rem;
             color: #FF6B35;
             font-weight: 700;
-            letter-spacing: 2px;
+            letter-spacing: 0.5px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hero h2 {
-            font-size: 1.8rem;
-            margin-bottom: 3rem;
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
             font-weight: 400;
             color: #ffffff;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hero p {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             max-width: 800px;
-            margin: 0 auto 3rem auto;
+            margin: 0 auto 2.5rem auto;
             line-height: 1.8;
             color: #e0e0e0;
         }
 
-        /* About Section */
-        .about {
-            background: #ffffff;
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        section {
             padding: 6rem 40px;
         }
 
-        .about-container {
+        .section-inner {
             max-width: 1200px;
             margin: 0 auto;
         }
 
-        .about h2 {
+        .section-inner h2,
+        .page-block h2 {
             text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 4rem;
+            font-size: 2.3rem;
+            margin-bottom: 1.2rem;
             color: #1a1a1a;
             font-weight: 700;
         }
 
-        .about-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 3rem;
-            margin-bottom: 4rem;
+        .section-lead {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #555;
+            max-width: 800px;
+            margin: 0 auto 3.5rem auto;
+            line-height: 1.8;
         }
 
-        .about-card {
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5rem;
+        }
+
+        .card-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem;
+        }
+
+        .card {
             background: #ffffff;
             padding: 2.5rem;
             border-radius: 8px;
             box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        .about-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-        }
-
-        .about-card h3 {
+        .card h3 {
             color: #FF6B35;
-            font-size: 1.3rem;
-            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
             font-weight: 600;
         }
 
-        .about-card p {
+        .card p,
+        .card li {
             color: #333;
             line-height: 1.8;
             font-size: 0.95rem;
+        }
+
+        .card ol,
+        .card ul {
+            padding-left: 1.2rem;
+        }
+
+        .step-num {
+            display: inline-block;
+            color: #FF6B35;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            letter-spacing: 1px;
+            font-size: 0.85rem;
         }
 
         .principle {
@@ -170,98 +215,74 @@
             color: #1a1a1a;
         }
 
-        .about-me-full {
+        .ecosystem {
+            background: #ffffff;
+        }
+
+        .process {
             background: #f8f8f8;
-            padding: 3rem;
+        }
+
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .pilots {
+            background: #ffffff;
+        }
+
+        .note-box {
+            background: #f8f8f8;
+            padding: 2rem;
             border-radius: 8px;
             border-left: 4px solid #FF6B35;
+            margin-top: 3rem;
         }
 
-        .about-me-full h3 {
-            color: #FF6B35;
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .about-me-full p {
+        .note-box p {
             color: #555;
             line-height: 1.8;
-            margin-bottom: 1rem;
         }
 
-        /* Services Section */
-        .services {
+        .team {
             background: #f8f8f8;
-            padding: 6rem 40px;
         }
 
-        .services-container {
-            max-width: 1200px;
-            margin: 0 auto;
+        .team-note {
             text-align: center;
-        }
-
-        .services h2 {
-            font-size: 2.5rem;
-            margin-bottom: 2rem;
-            color: #1a1a1a;
-            font-weight: 700;
-        }
-
-        .services-intro {
-            font-size: 1.1rem;
+            margin-top: 2.5rem;
             color: #555;
-            margin-bottom: 4rem;
-            max-width: 800px;
+            max-width: 700px;
             margin-left: auto;
             margin-right: auto;
         }
 
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .service-card {
+        .contact {
             background: #ffffff;
-            padding: 2.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-            text-align: left;
         }
 
-        .service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        .contact-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
         }
 
-        .service-card h3 {
+        .contact-details {
+            text-align: center;
+            color: #555;
+            line-height: 2;
+        }
+
+        .contact-details a {
             color: #FF6B35;
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
+            text-decoration: none;
             font-weight: 600;
         }
 
-        .service-card p {
-            color: #555;
-            line-height: 1.7;
-            font-size: 0.95rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .cta-section {
-            margin-top: 3rem;
-        }
-
-        .cta-section a {
-            display: inline-block;
-            margin: 0 1rem;
-        }
-
-        /* Footer */
         footer {
             background: #1a1a1a;
             color: white;
@@ -306,128 +327,183 @@
             color: #e0e0e0;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .about-grid {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-            .services-grid {
+        @media (max-width: 900px) {
+            .card-grid,
+            .card-grid-2,
+            .process-grid {
                 grid-template-columns: 1fr;
             }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .nav-container {
+                padding: 0 20px;
+                flex-wrap: wrap;
+            }
+
             .nav-menu {
-                gap: 1.5rem;
+                gap: 1rem;
                 font-size: 0.85rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
     <nav>
         <div class="nav-container">
             <a href="index.html" class="logo">VEXA DIGITAL</a>
             <ul class="nav-menu">
-                <li><a href="#about">About</a></li>
-                <li><a href="services.html">Services</a></li>
+                <li><a href="services.html">What we do</a></li>
+                <li><a href="#how-it-works">How it works</a></li>
+                <li><a href="#pilots">Pilots</a></li>
+                <li><a href="#team">Team</a></li>
                 <li><a href="#contact">Contact</a></li>
+                <li><a href="booking.html" class="book-btn">Book discovery</a></li>
             </ul>
-            <a href="booking.html" class="book-btn">Book Consultation</a>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <h1>VEXA DIGITAL</h1>
-        <h2>Esports Business Architecture</h2>
-        <p>Most esports organizations fail because they chase sponsorship before structure.</p>
-        <a href="booking.html" class="book-btn">Start Your Journey</a>
+    <section class="hero" id="home">
+        <h1>Vexa: gaming strategy for brands who need proof before scale</h1>
+        <h2>Discovery, research, a clear pilot. Then a campaign worth the spend.</h2>
+        <p>We help brand managers who do not live in gaming pick the right association (a tournament, a club, or a creator), prove it with a small live test, then scale only when the evidence says so. The first call is discovery. We do not pitch on it.</p>
+        <div class="hero-actions">
+            <a href="https://calendly.com/partnerships-vexadigital/30min" class="book-btn" target="_blank" rel="noopener noreferrer">Book a free discovery call</a>
+            <a href="#how-it-works" class="book-btn book-btn-secondary">See how it works</a>
+        </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="about-container">
-            <h2>ABOUT VEXA</h2>
-            <div class="about-grid">
-                <div class="about-card">
-                    <h3>MISSION</h3>
-                    <p>To build sustainable revenue systems for esports organizations that reduce dependency on external validation and create owned revenue pathways.</p>
+    <section class="ecosystem" id="ecosystem">
+        <div class="section-inner">
+            <h2>Three ways a brand enters gaming</h2>
+            <p class="section-lead">Most briefs collapse “gaming” into one buy. It is not one buy. You are choosing an association. We help you pick which layer, and why that layer, before anyone spends national money.</p>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Tournament</h3>
+                    <p>A league, event, or series your category can stand next to. Useful when you need a moment, a title, and a defined audience window. Wrong when the event is loud and the buyer fit is thin.</p>
                 </div>
-                <div class="about-card">
-                    <h3>VISION</h3>
-                    <p>An Indian esports ecosystem where organizations operate as businesses, not funded projects—where structure precedes sponsorship, and architecture precedes scale.</p>
+                <div class="card">
+                    <h3>Club</h3>
+                    <p>A team or org with a roster, a fanbase, and match-day attention. Useful when you want repeated presence. Wrong when you are buying a logo and hoping the fans care.</p>
                 </div>
-                <div class="about-card">
-                    <h3>PRINCIPLE</h3>
-                    <p>We believe in building foundations before facades. Structure before scale. Architecture before aesthetics.</p>
-                    <p class="principle" style="margin-top: 1.5rem;">Very Easy is Never Awesome</p>
+                <div class="card">
+                    <h3>Creator</h3>
+                    <p>A voice that already talks to the players you want. Useful when trust and craft matter more than a stadium. Wrong when the follower count is the whole brief.</p>
                 </div>
             </div>
-
-            <div class="about-me-full">
-                <h3>ABOUT ME</h3>
-                <p>VEXA Digital was founded to address a critical gap in the Indian esports ecosystem: the absence of sustainable business architecture. Too many organizations chase sponsorships without building the foundational systems that make them sponsorship-worthy.</p>
-                <p>With experience in business strategy, revenue architecture, and the esports industry, I provide diagnostic, architectural, and supervisory services to organizations seeking to transition from funded projects to self-sustaining businesses.</p>
-                <p>My approach is direct, diagnostic, and focused on reality—not hype. I work with organizations that are ready to build structure, not just chase validation.</p>
-                <p><strong>Operating Principle:</strong> Very Easy is Never Awesome. If building a sustainable esports business were easy, everyone would do it. The difficulty is the filter.</p>
+            <div class="note-box">
+                <p>Vexa is a gaming and esports strategy shop for brands. We are not a generic agency menu, and we are not a consultancy that helps esports organisations chase sponsors. You are the buyer.</p>
+                <p class="principle" style="margin-top: 1.2rem;">Very Easy is Never Awesome</p>
             </div>
         </div>
     </section>
 
-    <!-- Services Section -->
-    <section id="services" class="services">
-        <div class="services-container">
-            <h2>SERVICES</h2>
-            <p class="services-intro">All services are designed to reduce sponsor dependency and build owned revenue pathways. Every engagement starts with consultation.</p>
-            
-            <div class="services-grid">
-                <div class="service-card">
-                    <h3>CONSULTATION</h3>
-                    <p>A diagnostic call where we review your current business state and identify structural failures. Reality check included.</p>
+    <section class="process" id="how-it-works">
+        <div class="section-inner">
+            <h2>How a brand enters gaming with us</h2>
+            <p class="section-lead">Process, not trophies. You will not find a wall of invented wins here. You will find the order of work.</p>
+            <div class="process-grid">
+                <div class="card">
+                    <div class="step-num">STEP 1</div>
+                    <h3>Discovery call</h3>
+                    <p>Free. Kaustubh runs it. You talk about the brand, your role, why gaming is on the table, and what you have already tried. We do not pitch on this call.</p>
                 </div>
-
-                <div class="service-card">
-                    <h3>BUSINESS AUDIT</h3>
-                    <p>Comprehensive review of your existing business plan or pitch deck to identify why it's not working and what needs to change.</p>
+                <div class="card">
+                    <div class="step-num">STEP 2</div>
+                    <h3>Diagnosis and research</h3>
+                    <p>We look at the category, the titles that matter, and the tournament, club, or creator associations that could actually move your buyer.</p>
                 </div>
-
-                <div class="service-card">
-                    <h3>BLUEPRINT CREATION</h3>
-                    <p>Ground-up creation of complete business architecture designed to reduce sponsor dependency and create owned revenue.</p>
+                <div class="card">
+                    <div class="step-num">STEP 3</div>
+                    <h3>Thesis and pilot gates</h3>
+                    <p>We write the recommendation and the gates. One gate means do not scale. The other means the live test earned a full campaign.</p>
                 </div>
-
-                <div class="service-card">
-                    <h3>SPONSORSHIP OUTREACH</h3>
-                    <p>We audit your deck, correct your strategy, and execute outreach to brands on your behalf with proper positioning.</p>
+                <div class="card">
+                    <div class="step-num">STEP 4</div>
+                    <h3>Word outline</h3>
+                    <p>A cross-examination document your team can argue with. If the outline does not survive the room, we do not decorate it.</p>
                 </div>
-
-                <div class="service-card">
-                    <h3>ADVISORY RETAINER</h3>
-                    <p>Ongoing strategic supervision for organizations that have completed an Audit or Blueprint and need execution support.</p>
+                <div class="card">
+                    <div class="step-num">STEP 5</div>
+                    <h3>Design, then run</h3>
+                    <p>Bhaskar designs in Canva from that outline. You buy the plan. We run the pilot or campaign and report what happened.</p>
                 </div>
-            </div>
-
-            <div class="cta-section">
-                <a href="services.html" class="book-btn">View Detailed Services</a>
-                <a href="booking.html" class="book-btn">Book Consultation</a>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer id="contact">
+    <section class="pilots" id="pilots">
+        <div class="section-inner">
+            <h2>A small live test before national money</h2>
+            <p class="section-lead">Gaming looks clean in a slide and messy in market. We start with a control pilot, then a full campaign. A small live test before national spend.</p>
+            <div class="card-grid-2">
+                <div class="card">
+                    <h3>Gate X: do not scale</h3>
+                    <p>The association did not earn the next rupee. The walk-out is still useful: you have evidence, not a hunch. We will say stop.</p>
+                </div>
+                <div class="card">
+                    <h3>Gate Y: scale</h3>
+                    <p>The live test earned a campaign. Same association thesis, larger run, with the proof already in the room.</p>
+                </div>
+            </div>
+            <div class="note-box">
+                <p>You walk out with evidence. We do not publish fabricated case studies. If a brand win is not an independent close, it does not appear on this site.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="team" id="team">
+        <div class="section-inner">
+            <h2>Who you deal with</h2>
+            <p class="section-lead">A short list. These are the people on the work.</p>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Kaustubh</h3>
+                    <p>Founder. Runs discovery and the strategy. If you book the call, you get him, not a closer reading a script.</p>
+                </div>
+                <div class="card">
+                    <h3>Bhaskar</h3>
+                    <p>Design. Turns the Word outline into Canva work your team can take into a review without extra translation.</p>
+                </div>
+                <div class="card">
+                    <h3>Nikhil</h3>
+                    <p>Lead-gen partner. Helps the right brand conversations start. He is not the strategist and not the designer.</p>
+                </div>
+            </div>
+            <p class="team-note">Research and outline support sits behind this team. You deal with the people above.</p>
+        </div>
+    </section>
+
+    <section class="contact" id="contact">
+        <div class="section-inner">
+            <h2>Book a discovery call (we do not pitch on it)</h2>
+            <p class="section-lead">The call is free. Bring the company, your role, why gaming is on the table, and what you have already tried. If a calendar link is the wrong shape, write or call.</p>
+            <div class="contact-actions">
+                <a href="https://calendly.com/partnerships-vexadigital/30min" class="book-btn" target="_blank" rel="noopener noreferrer">Book a free discovery call</a>
+                <a href="booking.html" class="book-btn book-btn-secondary">Talk to us</a>
+            </div>
+            <div class="contact-details">
+                <p><a href="mailto:partnerships@vexadigital.in">partnerships@vexadigital.in</a></p>
+                <p><a href="tel:+919958895505">+91 9958895505</a></p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
         <div class="footer-content">
             <div class="footer-logo">VEXA DIGITAL</div>
-            <p>Esports Business Architecture & Advisory</p>
-            
+            <p>Gaming and esports strategy for brands</p>
+
             <div class="footer-links">
-                <a href="mailto:vexadigital.in@gmail.com">vexadigital.in@gmail.com</a>
+                <a href="mailto:partnerships@vexadigital.in">partnerships@vexadigital.in</a>
                 <a href="tel:+919958895505">+91 9958895505</a>
-                <a href="https://instagram.com/vexadigital.in" target="_blank">Instagram</a>
-                <a href="https://www.linkedin.com/company/vexa-digital-in/" target="_blank">LinkedIn</a>
+                <a href="https://instagram.com/vexadigital.in" target="_blank" rel="noopener noreferrer">Instagram</a>
+                <a href="https://www.linkedin.com/company/vexa-digital-in/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
             </div>
-            
-            <p class="footer-principle">Operating Principle: Very Easy is Never Awesome</p>
+
+            <p class="footer-principle">Operating principle: Very Easy is Never Awesome</p>
             <p style="color: #888; margin-top: 2rem;">VEXA Digital</p>
         </div>
     </footer>
