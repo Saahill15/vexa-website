@@ -1,0 +1,23 @@
+services:
+  site:
+    build: .
+    container_name: vexa-site
+    restart: unless-stopped
+    volumes:
+      - site_data:/app/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=vexa_edge"
+      - "traefik.http.routers.site.rule=Host(`vexadigital.in`) || Host(`www.vexadigital.in`)"
+      - "traefik.http.routers.site.entrypoints=websecure"
+      - "traefik.http.routers.site.tls=true"
+      - "traefik.http.routers.site.tls.certresolver=le"
+      - "traefik.http.services.site.loadbalancer.server.port=3000"
+    networks:
+      - edge
+networks:
+  edge:
+    external: true
+    name: vexa_edge
+volumes:
+  site_data:

@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --vx-ink-900: #14110f;
+  --vx-ink-700: #2a2521;
+  --vx-ink-500: #55483d;
+  --vx-cream-50: #faf8f6;
+  --vx-cream-100: #f2eeea;
+  --vx-neutral-200: #e4ddd5;
+  --vx-neutral-400: #a79c90;
+  --vx-neutral-600: #6e645a;
+  --vx-neutral-800: #332c26;
+  --vx-white: #ffffff;
+  --vx-accent-600: #c94a1c;
+  --vx-accent-500: #e45824;
+  --vx-accent-100: #fde7dc;
+  --vx-band-lowball: #b3261e;
+  --vx-band-lowball-bg: #fbeae9;
+  --vx-band-fair: #1f7a4d;
+  --vx-band-fair-bg: #e7f5ec;
+  --vx-band-premium: #9a5b00;
+  --vx-band-premium-bg: #fbf0dc;
+  --vx-bg: var(--vx-cream-50);
+  --vx-surface: var(--vx-white);
+  --vx-text: var(--vx-ink-900);
+  --vx-text-muted: var(--vx-neutral-600);
+  --vx-border: var(--vx-neutral-200);
+  --vx-dur-fast: 150ms;
+  --vx-dur-base: 250ms;
+  --vx-dur-slow: 400ms;
+  --vx-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --vx-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--vx-bg);
+  color: var(--vx-text);
+  font-family: var(--font-inter), -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--vx-accent-100);
+  color: var(--vx-ink-900);
+}
+
+:focus-visible {
+  outline: 2px solid var(--vx-accent-500);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

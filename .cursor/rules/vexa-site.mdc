@@ -1,0 +1,41 @@
+---
+description: Standing rules for the VEXA website build (vexadigital.in). Applies to every file in this repo.
+alwaysApply: true
+---
+
+# VEXA Website, Standing Rules
+
+Read `00_BRAIN/foundation/VEXA_BRAND_SYSTEM.md` and `04_SITE_BUILDS/vexa-website/SITE_PLAN.md` before writing or changing any page, component, or copy. Those two files are the source of truth for tokens, type, imagery, page structure, and copy. This file does not repeat their content, it enforces it.
+
+## Skills
+
+Apply the three skills at `../.claude/skills/` on every prompt that touches visual output or copy:
+- `taste` (anti slop frontend discipline: design read first, the three dials, anti default type and colour rules, layout diversification).
+- `impeccable-design` (post generation audit, critique, polish, animate, harden pass).
+- `emil-kowalski-design` (animation decision framework, before and after review table format, custom easing).
+
+State the taste skill's one line design read before generating any new page or section that does not already have one recorded in `BUILD_LOG.md`.
+
+## Tokens only
+
+Every colour, font, spacing, radius, and motion value comes from the CSS variables and Tailwind extend block in `VEXA_BRAND_SYSTEM.md` sections 2.2, 2.3, and 3.2. Never hardcode a hex value, a raw pixel spacing value, or a font name directly in a component; reference the token. If a needed value is missing from the brand system, stop and flag it rather than inventing one inline.
+
+## No dashes in copy
+
+No em dash, no en dash, no hyphen used as punctuation, anywhere in visible site copy (headlines, body text, button labels, alt text, meta descriptions). Rephrase with a comma, a colon, parentheses, or a separate sentence. Hyphens inside code identifiers, CSS class names, file names, and URLs are fine and are not covered by this rule. Before marking any prompt from `CURSOR_BUILD_PLAN.md` complete, grep the rendered HTML output for em dash and en dash characters and for any hyphen that is not inside a `class=`, `href=`, `src=`, or code block, and fix every match.
+
+## Mobile first
+
+Build every page mobile first: the 390px layout is the base case, not an afterthought fitted to a desktop design after the fact. Use `min-h-[100dvh]` rather than `h-screen` for any full height section. Use CSS Grid rather than flexbox percentage math for multi column layouts. Test at 390px before testing at 1280px, not the other way round.
+
+## No invented facts
+
+Never write a client name, a number, a testimonial, or a claim of completed work that is not already stated in `SITE_PLAN.md` or `VEXA_BRAND_SYSTEM.md`. If a page needs a fact that is not in either document, leave a visible `CONFIRM WITH SODA` comment in the source at that exact spot and continue, rather than inventing a plausible sounding placeholder that could ship by accident.
+
+## No third party analytics or session replay
+
+Do not add Google Analytics, Meta Pixel, Hotjar, PostHog, or any similar script. The contact form posts to an internal API route only, per `CURSOR_BUILD_PLAN.md` Prompt 5. Fonts are self hosted through `next/font/local`; no runtime request to Google Fonts or any other font CDN.
+
+## Logging
+
+After every Cursor prompt, append an entry to `BUILD_LOG.md`: what was tried, what broke, what came back. Never overwrite a previous entry.
