@@ -1,85 +1,40 @@
 # VEXA brand colours
 
-The VEXA brand stays: the logo and its orange lead. A peacock feather set is added as the signature element, a nod to Lord Krishna. The site now sits on warm charcoal, following the owner's reference reel.
+The site sits on warm paper with black editorial type, one orange action and a small peacock set. The dark charcoal theme is retired. This file follows `DESIGN.md` section 4, which is the source of truth; tokens live in `tailwind.config.ts` under `vx`.
 
-Tokens live in `tailwind.config.ts` (under `vx`) and as CSS variables in `app/globals.css`.
+## Proportions
 
-## The reference, measured
+* Neutral fields (paper and stone) carry about 85 percent of every screen.
+* Ink type and rules carry about 10 percent.
+* All colour together stays at or under 5 percent: orange about 3, the peacock set about 2.
+* There are no dark sections, including the footer. No gradients, glows, shadows or blur.
 
-The owner's reference is a gaming room lit in deep green, burnt orange and warm grey on near black. Measured from the reel:
+## Tokens
 
-* Field: warm charcoal, #050403 to #100E0A (about 60 percent of pixels) and #231F16 to #323728 (about 27 percent).
-* Ambient light: green, #397441 to #6F8C68.
-* Payoff: orange, #A04A1F to #CB7537, held back.
-* Only about 5 percent of pixels are saturated.
-
-## Rules
-
-1. Charcoal carries about 85 percent of every screen. Saturated colour stays under 10 percent. Prefer warm charcoal to cold black.
-2. Peacock teal is the one ambient accent: edge glows, cove lines, dividers and hover halos. It plays the part of the green light in the reference.
-3. Peacock blue goes on borders and edges only, never as a large fill.
-4. The logo orange and feather gold are held back for calls to action and small marks.
-5. Glow sits on the edges of shapes and never fills a surface. Never glow on text.
-6. Grey is the neutral between colours.
-7. The feather eye appears at most twice on a page.
-8. No rainbow gradients, no glassmorphism, no neon glow on body text.
-9. Every text pairing must reach WCAG AA: 4.5:1 for body text, 3:1 for large text.
-
-## Fields: warm charcoal
-
-| Token | Hex | Use |
-| --- | --- | --- |
-| `vx.charcoal.950` | #070605 | Deepest field: the "logo on a jersey" section, the proof card, the footer. Text on orange buttons. |
-| `vx.charcoal.900` | #100E0A | Page background (`--vx-bg`), header, mobile menu. |
-| `vx.charcoal.800` | #1A1711 | Cards and form inputs (`--vx-surface`). |
-| `vx.charcoal.700` | #231F16 | Second card tone (the teams and creators door). |
-| `vx.charcoal.600` | #323728 | Grey neutral for borders and dividers (`--vx-border`). |
-
-## Text and warm greys
-
-| Token | Hex | Use | Contrast on #100E0A / #1A1711 / #231F16 |
+| Token | Hex | Role | Contrast |
 | --- | --- | --- | --- |
-| `vx.cream.50` | #FAF8F6 | Headings and main text. | 18.2 / 16.9 / 15.5 |
-| `vx.neutral.200` | #E4DDD5 | Body text on the deepest fields. | 14.3 / 13.3 / 12.2 |
-| `vx.neutral.400` | #A79C90 | Muted text and small print. | 7.2 / 6.6 / 6.1 |
-| `vx.band.lowball-dark` | #F08A80 | Form error text. | 7.9 / 7.4 / 6.8 |
-| `vx.band.fair-dark` | #5CC48E | Form success text. | 8.9 / 8.3 / 7.6 |
+| `vx.paper` | #F7F4EE | Page field | ink on it 16.7:1 |
+| `vx.stone` | #EDE7DC | Second field: costs, founder, footer, inputs at rest | ink 14.9:1 |
+| `vx.white` | #FFFFFF | Focused form fields and the chosen option only | ink 18.4:1 |
+| `vx.ink` | #17140F | Headings, body, primary rules | |
+| `vx.ink.2` | #3A342C | Secondary body | 11.2:1 on paper |
+| `vx.muted` | #655D52 | Captions, labels, input bottom border | 5.9:1 paper, 5.3:1 stone |
+| `vx.hair` | #D9D0C1 | Decorative hairlines | n/a |
+| `vx.accent.500` | #FF681F | The logo orange. Primary button fill, with ink text | ink on it 6.3:1 |
+| `vx.accent.600` | #F25A10 | Primary button hover, with ink text | 5.5:1 |
+| `vx.accent.deep` | #B83C00 | Orange text on light (active nav), the button's 1px border | 5.2:1 paper |
+| `vx.peacock.blue` | #0B4F6C | Wayfinding: focus ring, link hover, process numerals, brands door rule | 8.1:1 paper |
+| `vx.peacock.teal` | #0F7B6C | Evidence marks: teams door rule, feather ring. Never small text on stone | 4.7:1 paper |
+| `vx.peacock.teal-deep` | #0B6559 | Teal as small text: "Network", form success | 6.3:1 paper |
+| `vx.feather.gold` | #C9A227 | Marks only: feather ring, the one gold underline per page | never text |
+| `vx.feather.gold-deep` | #8A6A10 | Status text "In progress" | 4.6:1 paper |
+| `vx.error` | #B3261E | Form errors | 6.0:1 paper |
 
-## Logo
+## Meaning
 
-Final logo: an orange leaf shaped V (it doubles as a feather or a flame), EXA in a thin black high contrast serif, a rule, and "ESPORTS CONSULTANCY / estd 2025".
+Orange means act. Blue means you are here, go there. Teal means this is evidenced. Gold means this is the one number to look at. Never put white text on orange (2.9:1).
 
-| File | Use |
-| --- | --- |
-| `public/brand/vexa-logo.png` | Light backgrounds (print, partner decks, any future light page). Transparent edges trimmed, 1132 x 590. |
-| `public/brand/vexa-logo-light.png` | Dark backgrounds. Same file with the black letters, rule and tagline turned to near white (#FAF8F6); the orange V is untouched. Used in the header (36px tall on mobile, 44px from the md breakpoint) and the footer (48px tall). |
+## Logo and motif
 
-## Action: the logo orange
-
-Sampled from the logo: #FF681F (RGB 255, 104, 31). It replaces the earlier #E45824 and #C94A1C.
-
-| Token | Hex | Use | Contrast checks |
-| --- | --- | --- | --- |
-| `vx.accent.500` | #FF681F | Primary button fill with charcoal text, orange text links on charcoal, focus ring. | 6.7:1 on #100E0A. Charcoal text on it 7.0:1. White text on it 2.9:1, so never white on this shade. |
-| `vx.accent.600` | #C23F00 | Button hover fill with white text. Orange text on any light background. | White on it 5.2:1. Only 3.7:1 on charcoal, so never text on dark fields. |
-| `vx.accent.100` | #FDE7DC | Text selection tint. | Background only. |
-
-## Peacock set
-
-| Token | Hex | Use | Contrast checks |
-| --- | --- | --- | --- |
-| `vx.peacock.teal` | #0F7B6C | The ambient accent. Dividers (section edges, footer top rule), the edge glow round the closing call to action, the top rule on the teams and creators door, the feather eye. | 3.7:1 on charcoal: rules and marks only, never text. |
-| `vx.peacock.teal-light` | #4FB3A2 | Teal for text: nav hover. | 7.6:1 on #100E0A. |
-| `vx.peacock.blue` | #0B4F6C | Borders and edges only: the top rule on the brands door, the core of the feather eye. | 2.2:1 on charcoal: never text, never a large fill. |
-| `vx.feather.gold` | #C9A227 | Small marks only: the short rule beside the hero feather eye, footer link hover. | 8.0:1 on charcoal. |
-
-## Where the accents sit today
-
-* Edge glow: the closing call to action is a charcoal card with a 1px teal border at 60 percent and a soft teal shadow outside the edge. The surface stays charcoal.
-* Dividers: the "logo on a jersey" section and the footer have teal rules at 50 percent.
-* Door cards: a 2px top edge, peacock blue for brands and peacock teal for teams and creators.
-* Feather eye (`components/FeatherEye.tsx`): concentric leaf shapes in gold, teal and blue that follow the curve of the logo's V (a pointed tip leaning right and a full, rounded base), so it reads as an echo of the V rather than a second mark. Used beside the logo in the header and as the hero accent on the home page.
-
-## Accessibility change
-
-The earlier buttons put white text on #E45824 at 3.7:1. Primary buttons now use charcoal text on the logo orange (7.0:1) and switch to white on #C23F00 (5.2:1) on hover.
+* `public/brand/vexa-logo.png` (black EXA, orange V) is the site logo: 32px tall in the header on phones, 40px from `lg`, 40px in the footer. `vexa-logo-light.png` is kept for dark print backgrounds only.
+* The peacock feather eye (`components/FeatherEye.tsx`) is the one motif, at most twice per page: the hero aside or the footer, plus the quill rule that closes the last section.

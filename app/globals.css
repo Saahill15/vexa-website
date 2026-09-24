@@ -2,70 +2,96 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light paper palette. Values mirror tailwind.config.ts and DESIGN.md section 4. */
 :root {
-  --vx-ink-900: #14110f;
-  --vx-ink-700: #2a2521;
-  --vx-ink-500: #55483d;
-  --vx-cream-50: #faf8f6;
-  --vx-cream-100: #f2eeea;
-  --vx-neutral-200: #e4ddd5;
-  --vx-neutral-400: #a79c90;
-  --vx-neutral-600: #6e645a;
-  --vx-neutral-800: #332c26;
-  --vx-white: #ffffff;
-  --vx-accent-600: #c23f00;
-  --vx-accent-500: #ff681f;
-  --vx-accent-100: #fde7dc;
-  --vx-peacock-blue: #0b4f6c;
-  --vx-peacock-teal: #0f7b6c;
-  --vx-peacock-teal-light: #4fb3a2;
-  --vx-charcoal-950: #070605;
-  --vx-charcoal-900: #100e0a;
-  --vx-charcoal-800: #1a1711;
-  --vx-charcoal-700: #231f16;
-  --vx-charcoal-600: #323728;
-  --vx-feather-gold: #c9a227;
-  --vx-band-lowball: #b3261e;
-  --vx-band-lowball-bg: #fbeae9;
-  --vx-band-fair: #1f7a4d;
-  --vx-band-fair-bg: #e7f5ec;
-  --vx-band-premium: #9a5b00;
-  --vx-band-premium-bg: #fbf0dc;
-  --vx-bg: var(--vx-charcoal-900);
-  --vx-surface: var(--vx-charcoal-800);
-  --vx-text: var(--vx-cream-50);
-  --vx-text-muted: var(--vx-neutral-400);
-  --vx-border: var(--vx-charcoal-600);
-  --vx-dur-fast: 150ms;
-  --vx-dur-base: 250ms;
-  --vx-dur-slow: 400ms;
-  --vx-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --vx-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --vx-paper: #f7f4ee;
+  --vx-ink: #17140f;
+  color-scheme: light;
 }
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--vx-bg);
-  color: var(--vx-text);
-  font-family: var(--font-inter), -apple-system, "Segoe UI", sans-serif;
+  background: var(--vx-paper);
+  color: var(--vx-ink);
   -webkit-font-smoothing: antialiased;
 }
 
-.font-tabular {
-  font-variant-numeric: tabular-nums;
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p,
+li,
+dd {
+  text-wrap: pretty;
+}
+
+.figure-nums {
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 ::selection {
-  background: var(--vx-accent-100);
-  color: var(--vx-ink-900);
+  background: #ede7dc;
+  color: var(--vx-ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--vx-accent-500);
-  outline-offset: 3px;
+  outline: 2px solid #0b4f6c;
+  outline-offset: 2px;
+}
+
+@layer components {
+  /* 16px sides on phones, 32px md, 48px lg, 64px xl; content max 1280px. */
+  .vx-container {
+    @apply mx-auto w-full max-w-[1408px] px-4 md:px-8 lg:px-12 xl:px-16;
+  }
+  .vx-grid {
+    @apply grid grid-cols-4 gap-x-4 md:grid-cols-8 md:gap-x-6 lg:grid-cols-12;
+  }
+  .vx-label {
+    @apply font-text text-label font-semibold uppercase;
+  }
+  .vx-link {
+    @apply rounded-sm underline decoration-1 underline-offset-4 transition-colors duration-fast hover:decoration-vx-peacock-blue hover:decoration-2;
+  }
+  .vx-body > * + * {
+    @apply mt-5;
+  }
+}
+
+/* The quill rule draws from the left once when it enters view. Fully drawn without JavaScript. */
+.quill[data-state="waiting"] .quill-line {
+  transform: scaleX(0);
+}
+.quill[data-state="drawn"] .quill-line {
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scaleX(1);
+}
+
+/* Audience switch. data-audience is set on <html> before first paint, so nothing shifts on load. */
+.doors {
+  display: grid;
+  gap: 3rem;
+}
+@media (min-width: 1024px) {
+  .doors {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+  [data-audience="brands"] .doors,
+  [data-audience="holders"] .doors {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+  }
+}
+[data-audience="holders"] .door-holders,
+[data-audience="holders"] .holders-first {
+  order: -1;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -75,8 +101,26 @@ body {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    animation: none !important;
+    transition: none !important;
   }
+  .quill[data-state] .quill-line {
+    transform: none;
+  }
+}
+
+/* Costs and Valuate swap places for teams and creators; their index numbers swap with them. */
+.idx-holders {
+  display: none;
+}
+[data-audience="holders"] .idx-holders {
+  display: inline;
+}
+[data-audience="holders"] .idx-default {
+  display: none;
+}
+
+/* The feather eye appears at most twice per page: on home the hero aside replaces the footer eye. */
+body:has(.hero-eye) .footer-eye {
+  display: none;
 }

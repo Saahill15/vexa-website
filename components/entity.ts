@@ -8,6 +8,6 @@ export const ENTITY = {
   operatingOffice: "Operating office: 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070",
   registeredOffice: "Registered place of business: 13 Vrundavan, Nava Wadaj, Ahmedabad 380013",
   invoicing: "Invoices are issued by Blue Wings.",
-  agreements:
-    "Agreements for our services are made with Blue Wings. [For counsel to confirm: who signs for Blue Wings]",
+  // COUNSEL TO CONFIRM: who signs for Blue Wings (see LAUNCH_NOTES.md).
+  agreements: "Agreements for our services are made with Blue Wings.",
 } as const;
