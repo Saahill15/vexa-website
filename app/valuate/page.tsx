@@ -1,53 +1,70 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { PageIntro } from "@/components/PageIntro";
+import { QuillRule } from "@/components/QuillRule";
+import { bodyClass, h2Class, Section } from "@/components/Section";
 
 export const metadata: Metadata = {
   title: "Valuate, check if a creator deal is fair",
   description:
     "Valuate is a separate, free product from VEXA. It helps a creator or a brand see a fair price for a paid post before anyone signs.",
+  alternates: { canonical: "/valuate" },
 };
 
-const body = "mt-4 text-base leading-relaxed text-vx-neutral-400 md:text-lg";
+// Set to true once the Valuate subdomain responds, and fill VALUATE_URL.
+const VALUATE_LIVE = false;
+const VALUATE_URL = "";
 
 export default function ValuatePage(): React.ReactElement {
   return (
-    <div className="pb-20">
-      <header data-segment="VAL-01" className="mx-auto max-w-3xl px-5 pb-8 pt-14 md:px-8 md:pt-20">
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-vx-cream-50 md:text-5xl">
-          Valuate checks if a creator deal is fair
-        </h1>
-        <p className="mt-6 text-base leading-relaxed text-vx-neutral-400 md:text-lg">
-          Valuate is a separate, free product from VEXA. It helps a creator or a brand see a fair
-          price for a paid post before anyone signs.
+    <>
+      <PageIntro segment="VAL-01" label="Valuate" title="Valuate checks if a creator deal is fair">
+        <p>
+          Valuate is a separate, free product from VEXA. It helps a creator or a brand see a fair price for a paid post before
+          anyone signs.
         </p>
-        <p className={body}>
-          You enter the creator&apos;s followers, typical views and the offer on the table. Valuate
-          shows a fair price range and where the offer sits in it.
+        <p>
+          You enter the creator&apos;s followers, typical views and the offer on the table. Valuate shows a fair price range and
+          where the offer sits in it.
         </p>
-        <p className={body}>
-          [Soda to confirm: Valuate is free, and these are its inputs and outputs at launch]
-        </p>
-      </header>
+      </PageIntro>
 
-      <div className="mx-auto max-w-3xl space-y-12 px-5 md:px-8">
-        <section data-segment="VAL-03">
-          <h2 className="font-display text-2xl font-semibold tracking-tight text-vx-cream-50">
-            Why we built it
-          </h2>
-          <p className={body}>
-            We work with brands and with creators. Both kept asking us whether an offer was fair
-            before they signed.
-          </p>
-          <p className={body}>
-            Valuate gives a quick answer based on [Soda to confirm: data source, sample size and
-            update date].
-          </p>
-        </section>
-        <div data-segment="VAL-04">
-          <p className="font-display text-lg font-semibold tracking-tight text-vx-cream-50">
-            Valuate opens on [Soda to confirm: launch date]
-          </p>
+      <Section segment="VAL-03" index="01" label="Why">
+        <h2 className={h2Class}>Why we built it</h2>
+        <p className={`mt-6 ${bodyClass}`}>
+          We work with brands and with creators. Both kept asking us whether an offer was fair before they signed.
+        </p>
+      </Section>
+
+      <section data-segment="VAL-04" className="border-t border-vx-hair">
+        <div className="vx-container vx-grid py-16 md:py-24 lg:py-32">
+          <div className="col-span-full lg:col-span-7 lg:col-start-4">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+              {VALUATE_LIVE ? (
+                <a
+                  href={VALUATE_URL}
+                  className="inline-flex min-h-[48px] items-center rounded-sm border border-vx-accent-deep bg-vx-accent-500 px-6 font-text text-body font-medium text-vx-ink hover:bg-vx-accent-600"
+                >
+                  Open Valuate
+                </a>
+              ) : (
+                <span
+                  aria-disabled="true"
+                  className="inline-flex min-h-[48px] cursor-not-allowed items-center rounded-sm border border-vx-muted px-6 font-text text-body font-medium text-vx-muted"
+                >
+                  Opening soon
+                </span>
+              )}
+              <Link href="/contact?for=holders" className="vx-link inline-flex min-h-[44px] items-center font-text text-body font-medium">
+                Ask us about a deal now
+              </Link>
+            </div>
+          </div>
+          <div className="col-span-full mt-16 lg:col-span-9 lg:col-start-4">
+            <QuillRule />
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }

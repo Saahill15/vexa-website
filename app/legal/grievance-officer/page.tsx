@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { LegalBlocks, type LegalBlock } from "@/components/LegalBlocks";
-import { PageIntro } from "@/components/PageIntro";
+import { type LegalBlock } from "@/components/LegalBlocks";
+import { LegalLayout } from "@/components/LegalLayout";
 
 export const metadata: Metadata = {
   title: "Grievance officer",
   description: "How to complain to the VEXA Grievance Officer about this site or about how we handle your personal data.",
+  alternates: { canonical: "/legal/grievance-officer" },
 };
 
 const INTRO: readonly LegalBlock[] = [
@@ -40,11 +41,11 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
           ],
           [
             "Email",
-            "partnerships@vexadigital.in [Soda to confirm: a separate grievance mailbox]"
+            "partnerships@vexadigital.in"
           ],
           [
             "Phone",
-            "+91 9958895505 [Soda to confirm: hours]"
+            "+91 9958895505"
           ],
           [
             "Address",
@@ -91,18 +92,5 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
 ];
 
 export default function GrievanceOfficerPage(): React.ReactElement {
-  return (
-    <div className="pb-20">
-      <PageIntro segment="GRIEV-01" title="Grievance officer">
-        <LegalBlocks blocks={INTRO} />
-      </PageIntro>
-      <div className="mx-auto max-w-3xl space-y-8 px-5 text-base leading-relaxed text-vx-neutral-400 md:px-8">
-        {SECTIONS.map((section) => (
-          <section key={section.id} data-segment={section.id}>
-            <LegalBlocks blocks={section.blocks} />
-          </section>
-        ))}
-      </div>
-    </div>
-  );
+  return <LegalLayout title="Grievance officer" segment="GRIEV-01" intro={INTRO} sections={SECTIONS} />;
 }

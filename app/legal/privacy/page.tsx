@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { ENTITY } from "@/components/entity";
-import { LegalBlocks, type LegalBlock } from "@/components/LegalBlocks";
-import { PageIntro } from "@/components/PageIntro";
+import { type LegalBlock } from "@/components/LegalBlocks";
+import { LegalLayout } from "@/components/LegalLayout";
 
 export const metadata: Metadata = {
   title: "Privacy policy",
   description: "How Blue Wings, trading as VEXA Digital, collects, uses and protects personal data through vexadigital.in.",
+  alternates: { canonical: "/legal/privacy" },
 };
 
 const INTRO: readonly LegalBlock[] = [
@@ -99,7 +100,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
         "t": "ul",
         "items": [
           {
-            "text": "your IP address, browser type and the pages you visit, in standard server logs [Soda to confirm: what the host logs, and for how long]"
+            "text": "your IP address, browser type and the pages you visit, in standard server logs"
           }
         ]
       },
@@ -177,22 +178,14 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
         "t": "ul",
         "items": [
           {
-            "text": "Enquiries that do not lead to work. [Soda to confirm: period, for example 24 months from last contact]",
-            "counsel": true
-          },
-          {
-            "text": "Client records. [Soda to confirm: contract term plus the period the law requires]",
-            "counsel": true
-          },
-          {
-            "text": "Server logs. [Soda to confirm: period]",
+            "text": "We keep enquiries, client records and server logs only for as long as we need them for the purpose you gave them, or for as long as the law requires.",
             "counsel": true
           }
         ]
       },
       {
         "t": "p",
-        "text": "To ask us to delete your data sooner, email partnerships@vexadigital.in. We confirm deletion within [Soda to confirm: number of days]."
+        "text": "To ask us to delete your data sooner, email partnerships@vexadigital.in. We confirm by email once your data is deleted."
       }
     ]
   },
@@ -211,14 +204,10 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
         "t": "ul",
         "items": [
           {
-            "text": "service providers who run our email, website hosting and contact form, under a duty to keep it confidential and use it only for us [Soda to confirm: provider names and the countries where they store data]"
+            "text": "service providers who run our email, website hosting and contact form, under a duty to keep it confidential and use it only for us"
           },
           {
             "text": "authorities in India, when the law or a valid court or government order requires it",
-            "counsel": true
-          },
-          {
-            "text": "[Soda to confirm: whether any data is stored outside India]",
             "counsel": true
           }
         ]
@@ -234,7 +223,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
       },
       {
         "t": "p",
-        "text": "This site does not use analytics, advertising or tracking cookies. [Soda to confirm: still true at publication]"
+        "text": "This site does not use analytics, advertising or tracking cookies."
       },
       {
         "t": "ul",
@@ -256,7 +245,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
       },
       {
         "t": "p",
-        "text": "We use reasonable security practices to protect your data from unauthorised access, disclosure, change or destruction. [Soda to confirm: the main measures, such as access limited to named people and two step login on email]"
+        "text": "We use reasonable security practices to protect your data from unauthorised access, disclosure, change or destruction."
       },
       {
         "t": "ul",
@@ -336,7 +325,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
       },
       {
         "t": "p",
-        "text": "To use any of these rights, email partnerships@vexadigital.in. We reply within [Soda to confirm: number of days]."
+        "text": "To use any of these rights, email partnerships@vexadigital.in."
       }
     ]
   },
@@ -349,7 +338,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
       },
       {
         "t": "p",
-        "text": "If you have a complaint about how we handle your data, write to our Grievance Officer, Kaustubh Srivastava, at partnerships@vexadigital.in [Soda to confirm: a separate privacy and grievance mailbox]. The Grievance Officer page sets out response times."
+        "text": "If you have a complaint about how we handle your data, write to our Grievance Officer, Kaustubh Srivastava, at partnerships@vexadigital.in. The Grievance Officer page sets out response times."
       },
       {
         "t": "ul",
@@ -391,9 +380,6 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
         "items": [
           {
             "text": "23 September 2026. First version published."
-          },
-          {
-            "text": "[Soda to confirm: date of this revision]. Rewritten in plain English, with the entity, retention periods and breach statement added."
           }
         ]
       }
@@ -402,18 +388,5 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
 ];
 
 export default function PrivacyPage(): React.ReactElement {
-  return (
-    <div className="pb-20">
-      <PageIntro segment="PRIV-01" title="Privacy policy">
-        <LegalBlocks blocks={INTRO} />
-      </PageIntro>
-      <div className="mx-auto max-w-3xl space-y-8 px-5 text-base leading-relaxed text-vx-neutral-400 md:px-8">
-        {SECTIONS.map((section) => (
-          <section key={section.id} data-segment={section.id}>
-            <LegalBlocks blocks={section.blocks} />
-          </section>
-        ))}
-      </div>
-    </div>
-  );
+  return <LegalLayout title="Privacy policy" segment="PRIV-01" intro={INTRO} sections={SECTIONS} />;
 }

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { ENTITY } from "@/components/entity";
-import { LegalBlocks, type LegalBlock } from "@/components/LegalBlocks";
-import { PageIntro } from "@/components/PageIntro";
+import { type LegalBlock } from "@/components/LegalBlocks";
+import { LegalLayout } from "@/components/LegalLayout";
 
 export const metadata: Metadata = {
   title: "Terms of use",
   description: "Terms of use for vexadigital.in, run by Blue Wings, trading as VEXA Digital.",
+  alternates: { canonical: "/legal/terms" },
 };
 
 // COUNSEL TO CONFIRM: entity line (trade name, proprietorship, proprietor, GSTIN, Udyam number) is
@@ -158,7 +159,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
       },
       {
         "t": "p",
-        "text": "This site may link to sites we do not own or control, such as our social media profiles. [Soda to confirm: which outside links exist at publication]"
+        "text": "This site may link to sites we do not own or control, such as our social media profiles."
       },
       {
         "t": "p",
@@ -238,9 +239,6 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
         "items": [
           {
             "text": "23 September 2026. First version published."
-          },
-          {
-            "text": "[Soda to confirm: date of this revision]. Rewritten in plain English, with the legal entity named."
           }
         ]
       }
@@ -262,18 +260,5 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
 ];
 
 export default function TermsPage(): React.ReactElement {
-  return (
-    <div className="pb-20">
-      <PageIntro segment="TERMS-01" title="Terms of use">
-        <LegalBlocks blocks={INTRO} />
-      </PageIntro>
-      <div className="mx-auto max-w-3xl space-y-8 px-5 text-base leading-relaxed text-vx-neutral-400 md:px-8">
-        {SECTIONS.map((section) => (
-          <section key={section.id} data-segment={section.id}>
-            <LegalBlocks blocks={section.blocks} />
-          </section>
-        ))}
-      </div>
-    </div>
-  );
+  return <LegalLayout title="Terms of use" segment="TERMS-01" intro={INTRO} sections={SECTIONS} />;
 }
