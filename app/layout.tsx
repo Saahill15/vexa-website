@@ -26,26 +26,26 @@ const inter = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: "VEXA Digital, Brand Partnerships for Gaming in India",
-    template: "%s · VEXA",
+    default: "Gaming and esports sponsorship in India | VEXA",
+    template: "%s | VEXA",
   },
   description:
-    "VEXA sells sponsorship for gaming and youth rights holders, and runs measured pilot campaigns for brands reaching gamers aged 16 to 28.",
+    "VEXA designs gaming and esports sponsorship campaigns for brands reaching India's 16 to 28 audience, and sells sponsorship for esports teams, events and creators.",
   metadataBase: new URL("https://vexadigital.in"),
   openGraph: {
     type: "website",
     locale: "en_IN",
     url: "https://vexadigital.in",
-    siteName: "VEXA Digital",
-    title: "VEXA Digital, Brand Partnerships for Gaming in India",
+    siteName: "VEXA",
+    title: "Gaming and esports sponsorship in India | VEXA",
     description:
-      "VEXA sells sponsorship for gaming and youth rights holders, and runs measured pilot campaigns for brands reaching gamers aged 16 to 28.",
+      "VEXA designs gaming and esports sponsorship campaigns for brands reaching India's 16 to 28 audience, and sells sponsorship for esports teams, events and creators.",
   },
   twitter: {
     card: "summary",
-    title: "VEXA Digital, Brand Partnerships for Gaming in India",
+    title: "Gaming and esports sponsorship in India | VEXA",
     description:
-      "VEXA sells sponsorship for gaming and youth rights holders, and runs measured pilot campaigns for brands reaching gamers aged 16 to 28.",
+      "VEXA designs gaming and esports sponsorship campaigns for brands reaching India's 16 to 28 audience, and sells sponsorship for esports teams, events and creators.",
   },
   robots: {
     index: true,

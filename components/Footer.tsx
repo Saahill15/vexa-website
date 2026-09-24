@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import { NAV } from "@/components/nav";
 
 const linkClass =
   "rounded-sm transition-colors duration-base ease-vx-out hover:text-vx-ink-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500";
 
 export function Footer(): React.ReactElement {
   return (
-    <footer className="border-t border-vx-neutral-200 bg-vx-white">
+    <footer data-segment="FOOTER-01" className="border-t border-vx-neutral-200 bg-vx-white">
       <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12 md:grid-cols-[1fr_auto] md:px-8">
         <div className="space-y-3">
           <Image
@@ -17,8 +18,18 @@ export function Footer(): React.ReactElement {
             className="h-9 w-9"
           />
           <p className="max-w-sm text-sm text-vx-neutral-600">
-            Sponsorship sales for gaming and youth rights holders. Measured pilot campaigns for
-            brands reaching gamers 16 to 28.
+            VEXA designs gaming and esports sponsorship campaigns for brands reaching India&apos;s 16
+            to 28 audience, and sells sponsorship for esports teams, events and creators.
+          </p>
+          <p className="max-w-sm text-sm text-vx-neutral-600">
+            VEXA is a trading name of Blue Wings Esports [Soda to confirm: legal form and proprietor
+            line, as counsel and the accountant advise].
+          </p>
+          <p className="max-w-sm text-sm text-vx-neutral-600">
+            77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070
+          </p>
+          <p className="max-w-sm text-sm text-vx-neutral-600">
+            GSTIN [Soda to confirm: GSTIN, if registered]
           </p>
           <p className="text-sm text-vx-neutral-600">
             <a className={`${linkClass} hover:text-vx-accent-600`} href="tel:+919958895505">
@@ -30,20 +41,29 @@ export function Footer(): React.ReactElement {
             </a>
           </p>
           <p className="max-w-sm text-sm text-vx-neutral-600">
-            77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070
+            [Soda to confirm: LinkedIn, Instagram or other profiles that belong to VEXA or Soda]
           </p>
         </div>
         <div className="flex flex-col gap-2 text-sm text-vx-neutral-600">
-          <Link href="/legal/privacy" className={linkClass}>
-            Privacy
-          </Link>
-          <Link href="/legal/terms" className={linkClass}>
-            Terms
-          </Link>
-          <Link href="/legal/grievance-officer" className={linkClass}>
-            Grievance officer
-          </Link>
-          <p className="pt-4 text-xs text-vx-neutral-400">© {new Date().getFullYear()} VEXA Digital</p>
+          <nav aria-label="Footer" className="flex flex-col gap-2">
+            {NAV.map((item) => (
+              <Link key={item.href} href={item.href} className={linkClass}>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="mt-4 flex flex-col gap-2">
+            <Link href="/legal/privacy" className={linkClass}>
+              Privacy
+            </Link>
+            <Link href="/legal/terms" className={linkClass}>
+              Terms
+            </Link>
+            <Link href="/legal/grievance-officer" className={linkClass}>
+              Grievance officer
+            </Link>
+          </div>
+          <p className="pt-4 text-xs text-vx-neutral-400">© {new Date().getFullYear()} Blue Wings Esports</p>
         </div>
       </div>
     </footer>

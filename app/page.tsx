@@ -7,9 +7,9 @@ import { WhatWeDo } from "@/components/home/WhatWeDo";
 import { WhyHard } from "@/components/home/WhyHard";
 
 export const metadata: Metadata = {
-  title: "VEXA Digital, Brand Partnerships for Gaming in India",
+  title: { absolute: "Gaming and esports sponsorship in India | VEXA" },
   description:
-    "VEXA sells sponsorship for gaming and youth rights holders, and runs measured pilot campaigns for brands reaching gamers aged 16 to 28.",
+    "VEXA designs gaming and esports sponsorship campaigns for brands reaching India's 16 to 28 audience, and sells sponsorship for esports teams, events and creators.",
 };
 
 export default function HomePage(): React.ReactElement {

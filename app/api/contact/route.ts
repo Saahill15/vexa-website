@@ -8,6 +8,10 @@ type ContactBody = {
   company?: string;
   problem?: string;
   source?: string;
+  role?: string;
+  budget?: string;
+  launch?: string;
+  consent?: boolean;
 };
 
 function isEmail(value: string): boolean {
@@ -27,24 +31,38 @@ export async function POST(request: Request): Promise<NextResponse> {
   const company = String(body.company ?? "").trim();
   const problem = String(body.problem ?? "").trim();
   const source = String(body.source ?? "").trim();
+  const role = String(body.role ?? "").trim();
+  const budget = String(body.budget ?? "").trim();
+  const launch = String(body.launch ?? "").trim();
+  const consent = body.consent === true;
 
-  if (!name || !email || !company || !problem) {
+  if (!email || !role || !problem) {
     return NextResponse.json(
-      { ok: false, error: "Name, work email, company, and business problem are required." },
+      { ok: false, error: "Email, who you are and your brief are required." },
+      { status: 400 },
+    );
+  }
+  if (!consent) {
+    return NextResponse.json(
+      { ok: false, error: "Tick the box to let us use these details to reply to your brief." },
       { status: 400 },
     );
   }
   if (!isEmail(email)) {
-    return NextResponse.json({ ok: false, error: "Enter a valid work email." }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "Enter a valid email." }, { status: 400 });
   }
 
   const entry = {
     at: new Date().toISOString(),
-    name,
+    name: name || null,
     email,
-    company,
+    role,
+    company: company || null,
     problem,
+    budget: budget || null,
+    launch: launch || null,
     source: source || null,
+    consent,
   };
 
   const dir = path.join(process.cwd(), "data");

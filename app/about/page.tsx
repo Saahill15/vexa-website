@@ -3,33 +3,46 @@ import { ButtonLink } from "@/components/ButtonLink";
 import { PageIntro } from "@/components/PageIntro";
 
 export const metadata: Metadata = {
-  title: "About VEXA, and Why the Name",
+  title: "About the founder and the company",
   description:
-    "VEXA is a brand partnerships company for gaming. Here is why the name, and who builds the work.",
+    "VEXA designs gaming and esports sponsorship campaigns for brands and sells sponsorship for esports teams, events and creators. Meet the founder and read why the name.",
 };
+
+const h2 = "font-display text-2xl font-semibold tracking-tight text-vx-ink-900";
+const body = "mt-4 text-base leading-relaxed text-vx-neutral-600 md:text-lg";
 
 export default function AboutPage(): React.ReactElement {
   return (
     <div className="pb-20">
-      <PageIntro eyebrow="About" title="Why VEXA">
+      <PageIntro segment="ABOUT-01" title="About VEXA">
         <p>
-          VEXA sells sponsorship for gaming and youth rights holders, and runs measured campaigns
-          for brands who want their audience. It is founded and run by Kaustubh, who goes by Soda.
+          VEXA designs gaming and esports sponsorship campaigns for brands reaching India&apos;s 16
+          to 28 audience, and sells sponsorship for esports teams, events and creators.
+        </p>
+        <p>
+          VEXA is based in Delhi and is a trading name of Blue Wings Esports [Soda to confirm: legal
+          form and proprietor line, as counsel and the accountant advise].
         </p>
       </PageIntro>
 
       <div className="mx-auto max-w-3xl space-y-14 px-5 md:px-8">
-        <section>
-          <h2 className="font-display text-2xl font-semibold tracking-tight text-vx-ink-900">
-            Who is behind VEXA
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-vx-neutral-600 md:text-lg">
-            VEXA is founded and run by Kaustubh, who goes by Soda. He is a law graduate, and he
-            played competitive BGMI for three years, leading a team as an in game leader, a role
-            built on strategy and calling shots rather than raw mechanical skill. He brings both
-            instincts to VEXA: the discipline of reading a deal exactly as written before pricing
-            it, and a player&apos;s instinct for what a gaming audience actually responds to.
+        <section data-segment="ABOUT-02">
+          <h2 className={h2}>Who you work with</h2>
+          <p className={body}>
+            VEXA is founded and run by Kaustubh Srivastava, known as Soda, and you deal with him
+            directly. [Soda to confirm: photo, use of the full name on this page, and one profile
+            link]
           </p>
+          <p className={body} data-counsel="true">
+            He is a law graduate, and he reads your deal exactly as written before he prices it.
+            VEXA does not give legal advice.
+          </p>
+          <p className={body}>
+            He played competitive BGMI for three years as his team&apos;s in game leader, the player
+            who sets strategy and calls the shots. It taught him what gamers respond to, and he
+            brings that to your campaign.
+          </p>
+          <p className={body}>[Soda to confirm: a short dated timeline, such as the year VEXA started]</p>
         </section>
 
         {/* LEAD HOLD 22 Sep 2026: Advocates Act / enrolment / structure copy omitted from public
@@ -37,21 +50,24 @@ export default function AboutPage(): React.ReactElement {
             until he clears it. */}
 
         {/* CONFIRM WITH SODA: see SITE_PLAN.md open question 5 */}
-        <section>
-          <h2 className="font-display text-2xl font-semibold tracking-tight text-vx-ink-900">
-            Why the name
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-vx-neutral-600 md:text-lg">
-            Very easy is never awesome. That is the idea behind the name, and it is the standard the
-            business is actually held to. Sponsorship in gaming looks easy from outside, a logo on a
-            jersey, a shoutout in a stream, and most of what gets sold under that idea is exactly
-            that easy and exactly that forgettable. VEXA exists for the harder, better version: a
-            sponsorship or a campaign designed around a real number, agreed before anyone spends.
+        <section data-segment="ABOUT-03">
+          <h2 className={h2}>Why the name</h2>
+          <p className={body}>
+            VEXA comes from &quot;Very easy is never awesome&quot;. [Soda to confirm: how the letters
+            V, E, X and A map to the words]
           </p>
+          <p className={body}>
+            Gaming sponsorship looks easy from outside. Put a logo on a jersey or buy a shoutout on a
+            stream, and the deal is done. Most of those deals are quickly forgotten.
+          </p>
+          <p className={body}>We design each sponsorship around a number you agree before you spend.</p>
         </section>
 
-        <div>
-          <ButtonLink href="/contact">Talk to us about your deal</ButtonLink>
+        <div data-segment="ABOUT-04">
+          <ButtonLink href="/contact">Send your brief to Soda</ButtonLink>
+          <p className="mt-4 text-sm text-vx-neutral-600">
+            We reply within [Soda to confirm: reply time in working days].
+          </p>
         </div>
       </div>
     </div>

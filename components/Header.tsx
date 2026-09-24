@@ -4,15 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-
-const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/how-we-work", label: "How We Work" },
-  { href: "/proof", label: "Proof" },
-  { href: "/about", label: "About" },
-  { href: "/valuate", label: "Valuate" },
-  { href: "/contact", label: "Contact" },
-] as const;
+import { NAV } from "@/components/nav";
 
 const linkFocus =
   "rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500";
@@ -50,7 +42,7 @@ export function Header(): React.ReactElement {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-vx-neutral-200 bg-vx-cream-50/95 backdrop-blur">
+    <header data-segment="NAV-01" className="sticky top-0 z-40 border-b border-vx-neutral-200 bg-vx-cream-50/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 md:px-8">
         <Link href="/" className={`shrink-0 ${linkFocus}`} onClick={() => setOpen(false)}>
           <span className="inline-flex items-center gap-2">
@@ -67,7 +59,7 @@ export function Header(): React.ReactElement {
             </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-5 lg:flex" aria-label="Primary">
           {NAV.map((item) => {
             const active = pathname === item.href;
             return (
@@ -88,10 +80,17 @@ export function Header(): React.ReactElement {
             href="/contact"
             className="rounded-pill bg-vx-accent-500 px-4 py-2 text-sm font-medium text-white transition-[colors,transform] duration-base ease-vx-out hover:bg-vx-accent-600 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
           >
-            Book a call
+            Send your brief
           </Link>
         </nav>
 
+        <div className="flex items-center gap-3 lg:hidden">
+        <Link
+          href="/contact"
+          className="rounded-pill bg-vx-accent-500 px-4 py-2 text-sm font-medium text-white transition-[colors,transform] duration-base ease-vx-out hover:bg-vx-accent-600 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
+        >
+          Send your brief
+        </Link>
         <button
           type="button"
           className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-vx-neutral-200 transition-colors duration-base ease-vx-out hover:border-vx-neutral-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500 lg:hidden"
@@ -118,6 +117,7 @@ export function Header(): React.ReactElement {
             />
           </span>
         </button>
+        </div>
       </div>
 
       {open ? (
@@ -154,7 +154,7 @@ export function Header(): React.ReactElement {
               className="mt-4 inline-flex w-fit rounded-pill bg-vx-accent-500 px-5 py-3 text-base font-medium text-white transition-[colors,transform] duration-base ease-vx-out hover:bg-vx-accent-600 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
               onClick={() => setOpen(false)}
             >
-              Book a call
+              Send your brief
             </Link>
           </nav>
         </div>

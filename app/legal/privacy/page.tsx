@@ -1,166 +1,413 @@
 import type { Metadata } from "next";
+import { LegalBlocks, type LegalBlock } from "@/components/LegalBlocks";
 import { PageIntro } from "@/components/PageIntro";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description:
-    "How VEXA Digital collects, uses, and protects personal data through vexadigital.in.",
+  title: "Privacy policy",
+  description: "How Blue Wings Esports, trading as VEXA, collects, uses and protects personal data through vexadigital.in.",
 };
 
-const linkClass =
-  "rounded-sm font-medium text-vx-accent-600 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500";
+const INTRO: readonly LegalBlock[] = [
+  {
+    "t": "p",
+    "text": "Effective 23 September 2026."
+  },
+  {
+    "t": "h3",
+    "text": "Summary"
+  },
+  {
+    "t": "p",
+    "text": "We collect only what you send us through the contact form, by email or by phone, plus basic server logs. We use it to reply to you and to discuss working together. We do not sell it, and this site sets no analytics or advertising cookies. You can ask to see, correct or delete your data, and you can complain to us or to the Data Protection Board of India. Write to partnerships@vexadigital.in."
+  }
+];
+
+const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
+  {
+    "id": "PRIV-02",
+    "blocks": [
+      {
+        "t": "h2",
+        "text": "Who is responsible for your data"
+      },
+      {
+        "t": "p",
+        "text": "Blue Wings Esports, trading as VEXA (\"VEXA\", \"we\", \"us\"), is responsible for personal data collected through vexadigital.in. [Soda to confirm: legal form and proprietor line, as counsel and the accountant advise]"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "Under the DPDP Act 2023, this makes us the data fiduciary for that data.",
+            "counsel": true
+          }
+        ]
+      },
+      {
+        "t": "p",
+        "text": "Address: 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070."
+      }
+    ]
+  },
+  {
+    "id": "PRIV-03",
+    "blocks": [
+      {
+        "t": "h2",
+        "text": "What we collect"
+      },
+      {
+        "t": "h3",
+        "text": "Through the contact form"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "your email address, role and brief"
+          },
+          {
+            "text": "your name, company or channel, budget range and launch date, if you give them"
+          },
+          {
+            "text": "how you heard about us, if you tell us"
+          }
+        ]
+      },
+      {
+        "t": "h3",
+        "text": "When you email or call us"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "your name, email address, phone number and what you tell us"
+          }
+        ]
+      },
+      {
+        "t": "h3",
+        "text": "Through our web server"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "your IP address, browser type and the pages you visit, in standard server logs [Soda to confirm: what the host logs, and for how long]"
+          }
+        ]
+      },
+      {
+        "t": "p",
+        "text": "We do not collect payment details or government ID numbers through this site."
+      },
+      {
+        "t": "h3",
+        "text": "Children"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "This site is for business users aged 18 and over. We do not knowingly collect personal data from anyone under 18 through it.",
+            "counsel": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PRIV-04",
+    "blocks": [
+      {
+        "t": "h2",
+        "text": "Why we use it"
+      },
+      {
+        "t": "p",
+        "text": "We use your data to:"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "reply to your enquiry"
+          },
+          {
+            "text": "decide with you whether to work together"
+          },
+          {
+            "text": "arrange calls and tell you about our services"
+          }
+        ]
+      },
+      {
+        "t": "p",
+        "text": "We do not use it for unrelated marketing without your consent, and we do not sell it."
+      },
+      {
+        "t": "h3",
+        "text": "Lawful basis"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "We process enquiry data because you give it to us voluntarily for this purpose, or with your consent where we ask for it.",
+            "counsel": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PRIV-05",
+    "blocks": [
+      {
+        "t": "h2",
+        "text": "How long we keep it"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "Enquiries that do not lead to work. [Soda to confirm: period, for example 24 months from last contact]",
+            "counsel": true
+          },
+          {
+            "text": "Client records. [Soda to confirm: contract term plus the period the law requires]",
+            "counsel": true
+          },
+          {
+            "text": "Server logs. [Soda to confirm: period]",
+            "counsel": true
+          }
+        ]
+      },
+      {
+        "t": "p",
+        "text": "To ask us to delete your data sooner, email partnerships@vexadigital.in. We confirm deletion within [Soda to confirm: number of days]."
+      }
+    ]
+  },
+  {
+    "id": "PRIV-06",
+    "blocks": [
+      {
+        "t": "h2",
+        "text": "Who we share it with"
+      },
+      {
+        "t": "p",
+        "text": "We do not sell your data. We share it only with:"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "service providers who run our email, website hosting and contact form, under a duty to keep it confidential and use it only for us [Soda to confirm: provider names and the countries where they store data]"
+          },
+          {
+            "text": "authorities in India, when the law or a valid court or government order requires it",
+            "counsel": true
+          },
+          {
+            "text": "[Soda to confirm: whether any data is stored outside India]",
+            "counsel": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PRIV-07",
+    "blocks": [
+      {
+        "t": "h2",
+        "text": "Cookies"
+      },
+      {
+        "t": "p",
+        "text": "This site does not use analytics, advertising or tracking cookies. [Soda to confirm: still true at publication]"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "If we add analytics later, we will update this policy first and ask for your consent where the law requires it.",
+            "counsel": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PRIV-08",
+    "blocks": [
+      {
+        "t": "h2",
+        "text": "How we protect it"
+      },
+      {
+        "t": "p",
+        "text": "We use reasonable security practices to protect your data from unauthorised access, disclosure, change or destruction. [Soda to confirm: the main measures, such as access limited to named people and two step login on email]"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "We follow the reasonable security practices duty under the IT Act 2000 and the SPDI Rules 2011.",
+            "counsel": true
+          },
+          {
+            "text": "The DPDP Act 2023 and the DPDP Rules 2025 also require reasonable security safeguards.",
+            "counsel": true
+          }
+        ]
+      },
+      {
+        "t": "p",
+        "text": "No system is completely secure, so we cannot promise absolute security."
+      },
+      {
+        "t": "h3",
+        "text": "If there is a data breach"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "We will tell the Data Protection Board of India and each affected person.",
+            "counsel": true
+          },
+          {
+            "text": "We will tell them without delay, and send the Board a detailed report within 72 hours.",
+            "counsel": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "PRIV-09",
+    "blocks": [
+      {
+        "t": "h2",
+        "text": "Your rights"
+      },
+      {
+        "t": "p",
+        "text": "Under the DPDP Act 2023, as a data principal you can:"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "ask what personal data we hold about you",
+            "counsel": true
+          },
+          {
+            "text": "ask us to correct or update it",
+            "counsel": true
+          },
+          {
+            "text": "ask us to erase data we no longer need",
+            "counsel": true
+          },
+          {
+            "text": "withdraw consent you gave earlier, without affecting what we did before you withdrew it",
+            "counsel": true
+          },
+          {
+            "text": "nominate someone to use these rights for you if you die or cannot act",
+            "counsel": true
+          },
+          {
+            "text": "complain to us, and then to the Data Protection Board of India",
+            "counsel": true
+          }
+        ]
+      },
+      {
+        "t": "p",
+        "text": "To use any of these rights, email partnerships@vexadigital.in. We reply within [Soda to confirm: number of days]."
+      }
+    ]
+  },
+  {
+    "id": "PRIV-10",
+    "blocks": [
+      {
+        "t": "h2",
+        "text": "Complaints"
+      },
+      {
+        "t": "p",
+        "text": "If you have a complaint about how we handle your data, write to our Grievance Officer, Kaustubh Srivastava, at partnerships@vexadigital.in [Soda to confirm: a separate privacy and grievance mailbox]. The Grievance Officer page sets out response times."
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "If you are not satisfied with our answer, you can complain to the Data Protection Board of India.",
+            "counsel": true
+          }
+        ]
+      },
+      {
+        "t": "p",
+        "text": "Postal address: Blue Wings Esports (VEXA), 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070."
+      }
+    ]
+  },
+  {
+    "id": "PRIV-11",
+    "blocks": [
+      {
+        "t": "h2",
+        "text": "Changes to this policy"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "We will post any update here with a new effective date, and tell you directly if a change affects how we use data you have already given us.",
+            "counsel": true
+          }
+        ]
+      },
+      {
+        "t": "h3",
+        "text": "Change log"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "23 September 2026. First version published."
+          },
+          {
+            "text": "[Soda to confirm: date of this revision]. Rewritten in plain English, with the entity, retention periods and breach statement added."
+          }
+        ]
+      }
+    ]
+  }
+];
 
 export default function PrivacyPage(): React.ReactElement {
   return (
     <div className="pb-20">
-      <PageIntro eyebrow="Legal" title="Privacy Policy">
-        <p>
-          Effective 23 September 2026. This policy explains what personal data VEXA Digital
-          collects through vexadigital.in, why we collect it, and the rights you have over it
-          under Indian law.
-        </p>
+      <PageIntro segment="PRIV-01" title="Privacy policy">
+        <LegalBlocks blocks={INTRO} />
       </PageIntro>
       <div className="mx-auto max-w-3xl space-y-8 px-5 text-base leading-relaxed text-vx-neutral-600 md:px-8">
-        <section>
-          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-            Who we are
-          </h2>
-          <p className="mt-3">
-            VEXA Digital (&quot;VEXA&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is a
-            gaming and esports brand campaign business operating in India. This policy applies to
-            personal data collected through vexadigital.in (the &quot;site&quot;).
-          </p>
-        </section>
-        <section>
-          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-            What personal data we collect
-          </h2>
-          <p className="mt-3">
-            We collect the personal data you choose to give us directly, primarily through the
-            contact form on this site and any email or phone contact you initiate with us. This
-            typically includes your name, email address, phone number, company or brand name, and
-            the details of the enquiry or message you send. We do not knowingly collect payment
-            information, government identifiers, or other sensitive personal data through the
-            site.
-          </p>
-        </section>
-        <section>
-          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-            Why we collect it
-          </h2>
-          <p className="mt-3">
-            We use this information to respond to your enquiry, assess whether a partnership makes
-            sense, schedule calls, and otherwise communicate with you about our services. We do
-            not use contact form data for unrelated marketing without your consent, and we do not
-            sell personal data to third parties.
-          </p>
-        </section>
-        <section>
-          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-            How long we keep it
-          </h2>
-          <p className="mt-3">
-            We retain enquiry and contact data for as long as needed to respond to you and to
-            maintain a record of our business communications, and in any event no longer than is
-            reasonably necessary for those purposes or as required by applicable law. You may ask
-            us to delete your data earlier by writing to{" "}
-            <a href="mailto:partnerships@vexadigital.in" className={linkClass}>
-              partnerships@vexadigital.in
-            </a>
-            .
-          </p>
-        </section>
-        <section>
-          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-            Sharing your information
-          </h2>
-          <p className="mt-3">
-            We do not sell your personal data. We may share it with service providers who help us
-            operate the site or run our business (for example, email, hosting, or scheduling
-            providers), under obligations to keep it confidential and use it only to provide that
-            service to us. We may also disclose personal data where required by law, regulation,
-            or a valid order of a court or government authority in India.
-          </p>
-        </section>
-        <section>
-          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-            Cookies and analytics
-          </h2>
-          <p className="mt-3">
-            The site may use essential cookies needed for it to function and standard web
-            analytics tools to understand aggregate traffic and usage, such as pages visited and
-            general location at a country or city level. Analytics data is used to improve the
-            site and is not used to individually identify visitors for marketing without their
-            consent. You can control cookies through your browser settings; blocking them may
-            affect how parts of the site work.
-          </p>
-        </section>
-        <section>
-          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-            How we protect your information
-          </h2>
-          <p className="mt-3">
-            We use reasonable technical and organisational security practices appropriate to the
-            nature of the data we hold, consistent with the reasonable security practices standard
-            under the Information Technology Act, 2000 and the Information Technology (Reasonable
-            Security Practices and Procedures and Sensitive Personal Data or Information) Rules,
-            2011, to protect personal data against unauthorised access, disclosure, alteration, or
-            destruction. No method of transmission or storage is completely secure, and we cannot
-            guarantee absolute security.
-          </p>
-        </section>
-        <section>
-          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-            Your rights as a data principal
-          </h2>
-          <p className="mt-3">
-            Under the Digital Personal Data Protection Act, 2023, you have the right, as a data
-            principal, to request access to the personal data we hold about you, to request
-            correction or updating of inaccurate or incomplete data, to request erasure of data we
-            no longer need to retain, to withdraw any consent you previously gave (without
-            affecting the lawfulness of anything done before withdrawal), and to nominate another
-            individual to exercise these rights on your behalf in the event of your death or
-            incapacity. To exercise any of these rights, write to us at{" "}
-            <a href="mailto:partnerships@vexadigital.in" className={linkClass}>
-              partnerships@vexadigital.in
-            </a>
-            . We will respond within a reasonable time and in line with applicable law.
-          </p>
-        </section>
-        <section>
-          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-            Grievance officer
-          </h2>
-          <p className="mt-3">
-            If you have a complaint or grievance about how we handle your personal data, you may
-            contact us at{" "}
-            <a href="mailto:partnerships@vexadigital.in" className={linkClass}>
-              partnerships@vexadigital.in
-            </a>
-            . We will acknowledge and address grievances in accordance with the Information
-            Technology Act, 2000, the Information Technology (Reasonable Security Practices and
-            Procedures and Sensitive Personal Data or Information) Rules, 2011, and the Digital
-            Personal Data Protection Act, 2023. See our{" "}
-            <a href="/legal/grievance-officer" className={linkClass}>
-              Grievance Officer
-            </a>{" "}
-            page for the officer appointed under India&apos;s IT Rules, 2021.
-          </p>
-          <p className="mt-3">
-            Postal address: 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070.
-          </p>
-        </section>
-        <section>
-          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-            Changes to this policy
-          </h2>
-          <p className="mt-3">
-            We may update this policy from time to time to reflect changes in our practices or in
-            applicable law. We will post the revised policy on this page with an updated effective
-            date. Continued use of the site after a change takes effect means you accept the
-            revised policy.
-          </p>
-        </section>
+        {SECTIONS.map((section) => (
+          <section key={section.id} data-segment={section.id}>
+            <LegalBlocks blocks={section.blocks} />
+          </section>
+        ))}
       </div>
     </div>
   );

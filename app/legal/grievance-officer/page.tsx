@@ -1,64 +1,107 @@
 import type { Metadata } from "next";
+import { LegalBlocks, type LegalBlock } from "@/components/LegalBlocks";
 import { PageIntro } from "@/components/PageIntro";
 
 export const metadata: Metadata = {
-  title: "Grievance Officer",
-  description:
-    "Grievance officer contact details for vexadigital.in under India's IT Rules, 2021.",
+  title: "Grievance officer",
+  description: "How to complain to the VEXA Grievance Officer about this site or about how we handle your personal data.",
 };
+
+const INTRO: readonly LegalBlock[] = [
+  {
+    "t": "p",
+    "text": "If you have a complaint about this site or about how we handle your personal data, write to our Grievance Officer."
+  },
+  {
+    "t": "ul",
+    "items": [
+      {
+        "text": "The Grievance Officer is named under the DPDP Act 2023 and rule 5(9) of the SPDI Rules 2011.",
+        "counsel": true
+      }
+    ]
+  }
+];
+
+const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
+  {
+    "id": "GRIEV-02",
+    "blocks": [
+      {
+        "t": "kv",
+        "rows": [
+          [
+            "Name",
+            "Kaustubh Srivastava"
+          ],
+          [
+            "Role",
+            "Founder, VEXA (Blue Wings Esports)"
+          ],
+          [
+            "Email",
+            "partnerships@vexadigital.in [Soda to confirm: a separate grievance mailbox]"
+          ],
+          [
+            "Phone",
+            "+91 9958895505 [Soda to confirm: hours]"
+          ],
+          [
+            "Address",
+            "77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "GRIEV-03",
+    "blocks": [
+      {
+        "t": "h2",
+        "text": "How to complain"
+      },
+      {
+        "t": "p",
+        "text": "Email the Grievance Officer with \"Grievance\" in the subject line. Tell us who you are, what happened and what you would like us to do."
+      },
+      {
+        "t": "h2",
+        "text": "What happens next"
+      },
+      {
+        "t": "ul",
+        "items": [
+          {
+            "text": "We acknowledge your complaint within 24 hours.",
+            "counsel": true
+          },
+          {
+            "text": "We resolve it within 15 days.",
+            "counsel": true
+          },
+          {
+            "text": "If you are not satisfied with our answer, you can complain to the Data Protection Board of India.",
+            "counsel": true
+          }
+        ]
+      }
+    ]
+  }
+];
 
 export default function GrievanceOfficerPage(): React.ReactElement {
   return (
     <div className="pb-20">
-      <PageIntro eyebrow="Legal" title="Grievance officer">
-        <p>
-          In accordance with the Information Technology (Intermediary Guidelines and Digital Media
-          Ethics Code) Rules, 2021 and the Digital Personal Data Protection Act, 2023, the
-          following Grievance Officer has been appointed for vexadigital.in.
-        </p>
+      <PageIntro segment="GRIEV-01" title="Grievance officer">
+        <LegalBlocks blocks={INTRO} />
       </PageIntro>
       <div className="mx-auto max-w-3xl space-y-8 px-5 text-base leading-relaxed text-vx-neutral-600 md:px-8">
-        <dl className="space-y-4 rounded-lg border border-vx-neutral-200 bg-vx-white p-6">
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-[0.18em] text-vx-neutral-400">
-              Name
-            </dt>
-            <dd className="mt-1 text-vx-ink-900">Kaustubh Srivastava</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-[0.18em] text-vx-neutral-400">
-              Designation
-            </dt>
-            <dd className="mt-1 text-vx-ink-900">Founder, VEXA Digital</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-[0.18em] text-vx-neutral-400">
-              Contact email
-            </dt>
-            <dd className="mt-1 text-vx-ink-900">
-              <a
-                href="mailto:partnerships@vexadigital.in"
-                className="rounded-sm font-medium text-vx-accent-600 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
-              >
-                partnerships@vexadigital.in
-              </a>
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-[0.18em] text-vx-neutral-400">
-              Address
-            </dt>
-            <dd className="mt-1 text-vx-ink-900">
-              77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070
-            </dd>
-          </div>
-        </dl>
-        <p>
-          Complaints and grievances sent to the Grievance Officer are acknowledged within 24
-          hours of receipt and resolved within 15 days, in line with the Information Technology
-          (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021 and the Digital
-          Personal Data Protection Act, 2023.
-        </p>
+        {SECTIONS.map((section) => (
+          <section key={section.id} data-segment={section.id}>
+            <LegalBlocks blocks={section.blocks} />
+          </section>
+        ))}
       </div>
     </div>
   );

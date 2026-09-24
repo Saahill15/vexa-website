@@ -3,24 +3,26 @@ import { ContactForm } from "@/components/ContactForm";
 import { PageIntro } from "@/components/PageIntro";
 
 export const metadata: Metadata = {
-  title: "Book a Call with VEXA",
+  title: "Send a sponsorship brief",
   description:
-    "Tell us the business problem you are trying to solve. We will tell you honestly whether gaming is the right spend for it right now.",
+    "Send VEXA your brief. Tell us if you are a brand that wants to reach gamers, or a team, event or creator looking for sponsors.",
 };
 
 export default function ContactPage(): React.ReactElement {
   return (
     <div className="pb-20">
-      <PageIntro eyebrow="Contact" title="Book a call">
+      <PageIntro segment="CONTACT-01" title="Send your brief">
         <p>
-          No pitch on the first call. We spend three to four days understanding your business before
-          we propose anything, because a proposal written faster than that is a template, and it
-          reads like one.
+          No pitch on the first call. We spend three to four days on your business before we
+          propose anything.
         </p>
         <p>
-          Tell us if you run a gaming or youth rights holder looking to sell sponsorship, or a
-          brand looking to reach gamers. We work both sides, and we will tell you which one you
-          are.
+          Tell us if you are a brand that wants to reach gamers, or a team, event or creator looking
+          for sponsors. We reply within [Soda to confirm: reply time in working days].
+        </p>
+        <p>
+          If your launch date is close, say so in your brief. [Soda to confirm: whether a fast track
+          exists, and what it is]
         </p>
       </PageIntro>
 
@@ -28,9 +30,9 @@ export default function ContactPage(): React.ReactElement {
         <div className="rounded-lg border border-vx-neutral-200 bg-vx-white p-6 md:p-8">
           <ContactForm />
         </div>
-        <aside className="space-y-4">
+        <aside data-segment="CONTACT-03" className="space-y-4">
           <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-            Direct contact
+            Or contact us directly
           </h2>
           <p className="text-base text-vx-neutral-600">
             Phone:{" "}
@@ -39,7 +41,8 @@ export default function ContactPage(): React.ReactElement {
               href="tel:+919958895505"
             >
               +91 9958895505
-            </a>
+            </a>{" "}
+            [Soda to confirm: hours when calls are answered]
           </p>
           <p className="text-base text-vx-neutral-600">
             Email:{" "}
@@ -49,6 +52,10 @@ export default function ContactPage(): React.ReactElement {
             >
               partnerships@vexadigital.in
             </a>
+          </p>
+          <p className="text-base text-vx-neutral-600">
+            VEXA, a trading name of Blue Wings Esports, 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi
+            110070
           </p>
         </aside>
       </div>
