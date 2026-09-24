@@ -2,14 +2,14 @@ import { Reveal } from "@/components/Reveal";
 
 export function WhyHard(): React.ReactElement {
   return (
-    <section data-segment="HOME-04" className="border-y border-vx-neutral-200 bg-vx-white">
+    <section data-segment="HOME-04" className="border-y border-vx-peacock-teal/50 bg-vx-charcoal-950">
       <div className="mx-auto max-w-6xl px-5 py-14 md:px-8 md:py-20">
         <Reveal>
           <div className="grid gap-8 md:grid-cols-[minmax(0,0.4fr)_minmax(0,0.6fr)] md:gap-16">
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-vx-ink-900 md:text-3xl">
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-vx-cream-50 md:text-3xl">
               Your logo on a jersey is not a campaign
             </h2>
-            <div className="space-y-4 text-base leading-relaxed text-vx-neutral-600 md:text-lg">
+            <div className="space-y-4 text-base leading-relaxed text-vx-neutral-200 md:text-lg">
               <p>
                 Most gaming pitches lead with reach, meaning views, followers and community size.
                 None of those numbers tells you whether people signed up, bought or even noticed

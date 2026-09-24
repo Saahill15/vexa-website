@@ -8,8 +8,8 @@ export const metadata: Metadata = {
     "VEXA Digital is an esports and brand partnerships consultancy for brands new to gaming and for gaming teams and creators. Meet the founder and read why the name.",
 };
 
-const h2 = "font-display text-2xl font-semibold tracking-tight text-vx-ink-900";
-const body = "mt-4 text-base leading-relaxed text-vx-neutral-600 md:text-lg";
+const h2 = "font-display text-2xl font-semibold tracking-tight text-vx-cream-50";
+const body = "mt-4 text-base leading-relaxed text-vx-neutral-400 md:text-lg";
 
 export default function AboutPage(): React.ReactElement {
   return (
@@ -74,7 +74,7 @@ export default function AboutPage(): React.ReactElement {
 
         <div data-segment="ABOUT-04">
           <ButtonLink href="/contact">Send your brief to Soda</ButtonLink>
-          <p className="mt-4 text-sm text-vx-neutral-600">
+          <p className="mt-4 text-sm text-vx-neutral-400">
             We reply within [Soda to confirm: reply time in working days].
           </p>
         </div>

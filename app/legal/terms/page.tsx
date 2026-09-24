@@ -260,7 +260,7 @@ export default function TermsPage(): React.ReactElement {
       <PageIntro segment="TERMS-01" title="Terms of use">
         <LegalBlocks blocks={INTRO} />
       </PageIntro>
-      <div className="mx-auto max-w-3xl space-y-8 px-5 text-base leading-relaxed text-vx-neutral-600 md:px-8">
+      <div className="mx-auto max-w-3xl space-y-8 px-5 text-base leading-relaxed text-vx-neutral-400 md:px-8">
         {SECTIONS.map((section) => (
           <section key={section.id} data-segment={section.id}>
             <LegalBlocks blocks={section.blocks} />

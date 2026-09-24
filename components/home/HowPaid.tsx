@@ -21,14 +21,14 @@ export function HowPaid(): React.ReactElement {
       className="mx-auto max-w-6xl scroll-mt-24 px-5 pb-14 md:px-8 md:pb-20"
     >
       <Reveal>
-        <div className="rounded-lg border border-vx-neutral-200 bg-vx-white p-6 md:p-10">
-          <h2 className="font-display text-2xl font-semibold tracking-tight text-vx-ink-900">
+        <div className="rounded-lg border border-vx-charcoal-600 bg-vx-charcoal-800 p-6 md:p-10">
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-vx-cream-50">
             What it costs
           </h2>
           <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[32rem] text-left text-base leading-relaxed text-vx-neutral-600">
+            <table className="w-full min-w-[32rem] text-left text-base leading-relaxed text-vx-neutral-400">
               <thead>
-                <tr className="border-b border-vx-neutral-200 text-sm text-vx-ink-900">
+                <tr className="border-b border-vx-charcoal-600 text-sm text-vx-cream-50">
                   <th scope="col" className="py-2 pr-4 font-medium">You are</th>
                   <th scope="col" className="py-2 pr-4 font-medium">You pay</th>
                   <th scope="col" className="py-2 font-medium">When</th>
@@ -36,8 +36,8 @@ export function HowPaid(): React.ReactElement {
               </thead>
               <tbody>
                 {ROWS.map((row) => (
-                  <tr key={row.who} className="border-b border-vx-neutral-200 align-top last:border-0">
-                    <th scope="row" className="py-3 pr-4 font-medium text-vx-ink-900">{row.who}</th>
+                  <tr key={row.who} className="border-b border-vx-charcoal-600 align-top last:border-0">
+                    <th scope="row" className="py-3 pr-4 font-medium text-vx-cream-50">{row.who}</th>
                     <td className="py-3 pr-4">{row.pay}</td>
                     <td className="py-3">{row.when}</td>
                   </tr>
@@ -45,7 +45,7 @@ export function HowPaid(): React.ReactElement {
               </tbody>
             </table>
           </div>
-          <p className="mt-6 text-base leading-relaxed text-vx-neutral-600 md:text-lg">
+          <p className="mt-6 text-base leading-relaxed text-vx-neutral-400 md:text-lg">
             On the first call we show you the full breakdown, line by line, so you get a number you
             can defend upward.
           </p>

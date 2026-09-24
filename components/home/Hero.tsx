@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ButtonLink } from "@/components/ButtonLink";
+import { FeatherEye } from "@/components/FeatherEye";
 import { Reveal } from "@/components/Reveal";
 
 export function Hero(): React.ReactElement {
@@ -10,17 +11,21 @@ export function Hero(): React.ReactElement {
     >
       <Reveal>
         <div className="max-w-3xl">
-          <h1 className="font-display text-4xl font-semibold tracking-tighter leading-none text-vx-ink-900 md:text-6xl">
+          <div className="mb-6 flex items-center gap-3">
+            <FeatherEye className="h-9 w-6" />
+            <span className="h-px w-16 bg-vx-feather-gold" aria-hidden="true" />
+          </div>
+          <h1 className="font-display text-4xl font-semibold tracking-tighter leading-none text-vx-cream-50 md:text-6xl">
             Brands and gaming, matched for results you can measure.
           </h1>
-          <p className="mt-6 max-w-2xl text-base leading-relaxed text-vx-neutral-600 md:text-lg">
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-vx-neutral-400 md:text-lg">
             VEXA Digital is an esports and brand partnerships consultancy. We help brands that are new
             to gaming find where they fit, and we help teams, creators and organisers find the brand
             partners that suit where they are today.
           </p>
           <p
             data-segment="HOME-03"
-            className="mt-6 max-w-2xl font-display text-lg font-semibold tracking-tight text-vx-ink-900"
+            className="mt-6 max-w-2xl font-display text-lg font-semibold tracking-tight text-vx-cream-50"
           >
             We promise only what we can count, and we agree the count with you before you spend.
           </p>
@@ -31,11 +36,11 @@ export function Hero(): React.ReactElement {
                 For gaming teams and creators
               </ButtonLink>
             </div>
-            <p className="mt-4 text-sm text-vx-neutral-600">
+            <p className="mt-4 text-sm text-vx-neutral-400">
               Or{" "}
               <Link
                 href="/contact"
-                className="font-medium text-vx-accent-600 underline-offset-4 hover:underline"
+                className="font-medium text-vx-accent-500 underline-offset-4 hover:underline"
               >
                 send your brief now
               </Link>

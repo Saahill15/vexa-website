@@ -60,7 +60,7 @@ export default function RootLayout({
 }>): React.ReactElement {
   return (
     <html lang="en" data-theme="light" className={`${generalSans.variable} ${inter.variable}`}>
-      <body className="min-h-[100dvh] bg-vx-cream-50 font-body text-vx-ink-900 antialiased">
+      <body className="min-h-[100dvh] bg-vx-charcoal-900 font-body text-vx-cream-50 antialiased">
         <SkipToContent />
         <Header />
         <main id="main">{children}</main>

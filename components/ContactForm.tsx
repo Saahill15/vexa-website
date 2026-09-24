@@ -72,9 +72,9 @@ export function ContactForm(): React.ReactElement {
   }
 
   const inputClass =
-    "mt-2 w-full rounded-md border border-vx-neutral-200 bg-vx-white px-3 py-2.5 text-sm text-vx-ink-900 transition-[border-color,box-shadow] duration-base ease-vx-out focus-visible:border-vx-accent-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vx-accent-500";
-  const labelClass = "text-sm font-medium text-vx-ink-900";
-  const errorClass = "mt-1 text-sm text-vx-band-lowball";
+    "mt-2 w-full rounded-md border border-vx-charcoal-600 bg-vx-charcoal-800 px-3 py-2.5 text-sm text-vx-cream-50 transition-[border-color,box-shadow] duration-base ease-vx-out focus-visible:border-vx-accent-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-vx-accent-500";
+  const labelClass = "text-sm font-medium text-vx-cream-50";
+  const errorClass = "mt-1 text-sm text-vx-band-lowball-dark";
 
   return (
     <form data-segment="CONTACT-02" onSubmit={onSubmit} className="space-y-5" noValidate>
@@ -103,7 +103,7 @@ export function ContactForm(): React.ReactElement {
         <label htmlFor="problem" className={labelClass}>
           Your brief{REQUIRED}
         </label>
-        <p id="problem-hint" className="mt-1 text-sm text-vx-neutral-600">
+        <p id="problem-hint" className="mt-1 text-sm text-vx-neutral-400">
           What result do you need from gaming?
         </p>
         <textarea id="problem" name="problem" rows={5} required aria-required="true" aria-describedby="problem-hint" className={inputClass} />
@@ -139,7 +139,7 @@ export function ContactForm(): React.ReactElement {
         </label>
         <input id="source" name="source" type="text" className={inputClass} />
       </div>
-      <ul className="list-disc space-y-1 pl-5 text-sm leading-relaxed text-vx-neutral-600">
+      <ul className="list-disc space-y-1 pl-5 text-sm leading-relaxed text-vx-neutral-400">
         <li data-counsel="true">What we collect. The details in this form.</li>
         <li data-counsel="true">Why. To reply to your brief and discuss working together.</li>
         <li data-counsel="true">
@@ -148,14 +148,14 @@ export function ContactForm(): React.ReactElement {
         </li>
         <li data-counsel="true">
           Complaints. Our{" "}
-          <Link href="/legal/privacy" className="font-medium text-vx-accent-600 underline-offset-4 hover:underline">
+          <Link href="/legal/privacy" className="font-medium text-vx-accent-500 underline-offset-4 hover:underline">
             Privacy Policy
           </Link>{" "}
           explains how to complain to us or to the Data Protection Board of India.
         </li>
       </ul>
       <div data-counsel="true">
-        <label className="flex items-start gap-3 text-sm text-vx-ink-900">
+        <label className="flex items-start gap-3 text-sm text-vx-cream-50">
           <input
             name="consent"
             type="checkbox"
@@ -171,13 +171,13 @@ export function ContactForm(): React.ReactElement {
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="inline-flex items-center justify-center rounded-pill bg-vx-accent-500 px-5 py-3 text-sm font-medium text-white transition-[colors,transform] duration-base ease-vx-out hover:bg-vx-accent-600 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500 disabled:opacity-60"
+        className="inline-flex items-center justify-center rounded-pill bg-vx-accent-500 px-5 py-3 text-sm font-medium text-vx-charcoal-950 transition-[colors,transform] duration-base ease-vx-out hover:bg-vx-accent-600 hover:text-white active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500 disabled:opacity-60"
       >
         {status === "submitting" ? "Sending..." : "Send brief"}
       </button>
       {message ? (
         <p
-          className={`text-sm ${status === "success" ? "text-vx-band-fair" : "text-vx-band-lowball"}`}
+          className={`text-sm ${status === "success" ? "text-vx-band-fair-dark" : "text-vx-band-lowball-dark"}`}
           role="status"
         >
           {message}

@@ -8,7 +8,7 @@ export type LegalBlock =
 const EMAIL = "partnerships@vexadigital.in";
 
 const linkClass =
-  "rounded-sm font-medium text-vx-accent-600 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500";
+  "rounded-sm font-medium text-vx-accent-500 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500";
 
 function Text({ text }: { text: string }): React.ReactElement {
   const parts = text.split(EMAIL);
@@ -37,14 +37,14 @@ export function LegalBlocks({ blocks }: { blocks: readonly LegalBlock[] }): Reac
             return (
               <h2
                 key={index}
-                className="mt-8 font-display text-xl font-semibold tracking-tight text-vx-ink-900 first:mt-0"
+                className="mt-8 font-display text-xl font-semibold tracking-tight text-vx-cream-50 first:mt-0"
               >
                 {block.text}
               </h2>
             );
           case "h3":
             return (
-              <h3 key={index} className="mt-5 font-display text-lg font-semibold tracking-tight text-vx-ink-900">
+              <h3 key={index} className="mt-5 font-display text-lg font-semibold tracking-tight text-vx-cream-50">
                 {block.text}
               </h3>
             );
@@ -66,13 +66,13 @@ export function LegalBlocks({ blocks }: { blocks: readonly LegalBlock[] }): Reac
             );
           case "kv":
             return (
-              <dl key={index} className="space-y-4 rounded-lg border border-vx-neutral-200 bg-vx-white p-6">
+              <dl key={index} className="space-y-4 rounded-lg border border-vx-charcoal-600 bg-vx-charcoal-800 p-6">
                 {block.rows.map(([label, value]) => (
                   <div key={label}>
                     <dt className="text-xs font-medium uppercase tracking-[0.18em] text-vx-neutral-400">
                       {label}
                     </dt>
-                    <dd className="mt-1 text-vx-ink-900">
+                    <dd className="mt-1 text-vx-cream-50">
                       <Text text={value} />
                     </dd>
                   </div>

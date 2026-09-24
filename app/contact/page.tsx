@@ -27,33 +27,33 @@ export default function ContactPage(): React.ReactElement {
       </PageIntro>
 
       <div className="mx-auto grid max-w-6xl gap-12 px-5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:px-8">
-        <div className="rounded-lg border border-vx-neutral-200 bg-vx-white p-6 md:p-8">
+        <div className="rounded-lg border border-vx-charcoal-600 bg-vx-charcoal-800 p-6 md:p-8">
           <ContactForm />
         </div>
         <aside data-segment="CONTACT-03" className="space-y-4">
-          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
+          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-cream-50">
             Or contact us directly
           </h2>
-          <p className="text-base text-vx-neutral-600">
+          <p className="text-base text-vx-neutral-400">
             Phone:{" "}
             <a
-              className="rounded-sm font-medium text-vx-accent-600 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
+              className="rounded-sm font-medium text-vx-accent-500 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
               href="tel:+919958895505"
             >
               +91 9958895505
             </a>{" "}
             [Soda to confirm: hours when calls are answered]
           </p>
-          <p className="text-base text-vx-neutral-600">
+          <p className="text-base text-vx-neutral-400">
             Email:{" "}
             <a
-              className="rounded-sm font-medium text-vx-accent-600 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
+              className="rounded-sm font-medium text-vx-accent-500 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
               href="mailto:partnerships@vexadigital.in"
             >
               partnerships@vexadigital.in
             </a>
           </p>
-          <p className="text-base text-vx-neutral-600">
+          <p className="text-base text-vx-neutral-400">
             VEXA Digital, a trade name of Blue Wings, 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi
             110070
           </p>

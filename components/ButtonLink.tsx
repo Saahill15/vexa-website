@@ -17,7 +17,7 @@ export function ButtonLink({
   external = false,
 }: Props): React.ReactElement {
   if (variant === "secondary") {
-    const className = `rounded-sm text-sm font-medium text-vx-accent-600 underline-offset-4 transition-colors duration-base ease-vx-out hover:text-vx-accent-500 hover:underline ${focus}`;
+    const className = `rounded-sm text-sm font-medium text-vx-accent-500 underline-offset-4 transition-colors duration-base ease-vx-out hover:text-vx-cream-50 hover:underline ${focus}`;
     if (external) {
       return (
         <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
@@ -32,7 +32,7 @@ export function ButtonLink({
     );
   }
 
-  const className = `inline-flex items-center justify-center rounded-pill bg-vx-accent-500 px-5 py-3 text-sm font-medium text-white transition-[colors,transform] duration-base ease-vx-out hover:bg-vx-accent-600 active:scale-[0.97] ${focus}`;
+  const className = `inline-flex items-center justify-center rounded-pill bg-vx-accent-500 px-5 py-3 text-sm font-medium text-vx-charcoal-950 transition-[colors,transform] duration-base ease-vx-out hover:bg-vx-accent-600 hover:text-white active:scale-[0.97] ${focus}`;
   if (external) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" className={className}>

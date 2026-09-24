@@ -41,9 +41,9 @@ const UNDER_18 = [
   "an age gate wherever a campaign asks people to sign up",
 ] as const;
 
-const h2 = "font-display text-2xl font-semibold tracking-tight text-vx-ink-900";
-const h3 = "font-display text-lg font-semibold tracking-tight text-vx-ink-900";
-const body = "mt-4 text-base leading-relaxed text-vx-neutral-600 md:text-lg";
+const h2 = "font-display text-2xl font-semibold tracking-tight text-vx-cream-50";
+const h3 = "font-display text-lg font-semibold tracking-tight text-vx-cream-50";
+const body = "mt-4 text-base leading-relaxed text-vx-neutral-400 md:text-lg";
 
 export default function HowWeWorkPage(): React.ReactElement {
   return (
@@ -58,14 +58,14 @@ export default function HowWeWorkPage(): React.ReactElement {
 
       <section data-segment="HOW-02" className="mx-auto max-w-3xl px-5 md:px-8">
         <h2 className={h2}>What happens, step by step</h2>
-        <ol className="relative mt-8 space-y-0 border-l border-vx-neutral-200 pl-8">
+        <ol className="relative mt-8 space-y-0 border-l border-vx-charcoal-600 pl-8">
           {STEPS.map((step, index) => (
             <li key={step.title} className="relative pb-8 last:pb-0">
-              <span className="absolute -left-[2.55rem] flex h-7 w-7 items-center justify-center rounded-full border border-vx-neutral-200 bg-vx-cream-50 font-display text-xs font-semibold text-vx-accent-600">
+              <span className="absolute -left-[2.55rem] flex h-7 w-7 items-center justify-center rounded-full border border-vx-charcoal-600 bg-vx-charcoal-900 font-display text-xs font-semibold text-vx-accent-500">
                 {index + 1}
               </span>
               <h3 className={`pt-0.5 ${h3}`}>{step.title}</h3>
-              <p className="mt-2 text-base leading-relaxed text-vx-neutral-600">{step.body}</p>
+              <p className="mt-2 text-base leading-relaxed text-vx-neutral-400">{step.body}</p>
             </li>
           ))}
         </ol>
@@ -96,7 +96,7 @@ export default function HowWeWorkPage(): React.ReactElement {
           <p className={body}>
             Our audience includes 16 and 17 year olds. For any campaign that could reach them:
           </p>
-          <ul className="mt-3 list-disc space-y-2 pl-6 text-base leading-relaxed text-vx-neutral-600 md:text-lg">
+          <ul className="mt-3 list-disc space-y-2 pl-6 text-base leading-relaxed text-vx-neutral-400 md:text-lg">
             {UNDER_18.map((item) => (
               <li key={item} data-counsel="true">
                 {item}
@@ -144,7 +144,7 @@ export default function HowWeWorkPage(): React.ReactElement {
 
         <div data-segment="HOW-07" className="pt-4">
           <ButtonLink href="/contact">Send your brief</ButtonLink>
-          <p className="mt-4 text-sm text-vx-neutral-600">
+          <p className="mt-4 text-sm text-vx-neutral-400">
             We reply within [Soda to confirm: reply time in working days]. The first call is not a
             pitch, and we propose nothing until we have spent three to four days on your business.
           </p>

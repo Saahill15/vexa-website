@@ -38,7 +38,7 @@ export function ValuateSample({ compact = false }: Props): React.ReactElement {
           <div className="relative h-8">
             <div className="absolute left-[78%] top-1 flex -translate-x-1/2 flex-col items-center">
               <span className="h-2 w-0.5 bg-vx-accent-500" />
-              <span className="whitespace-nowrap rounded-sm bg-vx-accent-500 px-2 py-0.5 text-[11px] font-semibold text-white tabular-nums">
+              <span className="whitespace-nowrap rounded-sm bg-vx-accent-500 px-2 py-0.5 text-[11px] font-semibold text-vx-charcoal-950 tabular-nums">
                 Offer ₹3,500
               </span>
             </div>

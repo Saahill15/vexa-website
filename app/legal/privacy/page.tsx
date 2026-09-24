@@ -405,7 +405,7 @@ export default function PrivacyPage(): React.ReactElement {
       <PageIntro segment="PRIV-01" title="Privacy policy">
         <LegalBlocks blocks={INTRO} />
       </PageIntro>
-      <div className="mx-auto max-w-3xl space-y-8 px-5 text-base leading-relaxed text-vx-neutral-600 md:px-8">
+      <div className="mx-auto max-w-3xl space-y-8 px-5 text-base leading-relaxed text-vx-neutral-400 md:px-8">
         {SECTIONS.map((section) => (
           <section key={section.id} data-segment={section.id}>
             <LegalBlocks blocks={section.blocks} />
