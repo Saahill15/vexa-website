@@ -54,7 +54,7 @@ export default function ContactPage(): React.ReactElement {
             </a>
           </p>
           <p className="text-base text-vx-neutral-600">
-            VEXA, a trading name of Blue Wings Esports, 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi
+            VEXA Digital, a trade name of Blue Wings, 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi
             110070
           </p>
         </aside>

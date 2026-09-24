@@ -9,7 +9,7 @@ import { WhyHard } from "@/components/home/WhyHard";
 export const metadata: Metadata = {
   title: { absolute: "Gaming and esports sponsorship in India | VEXA" },
   description:
-    "VEXA designs gaming and esports sponsorship campaigns for brands reaching India's 16 to 28 audience, and sells sponsorship for esports teams, events and creators.",
+    "VEXA Digital is an esports and brand partnerships consultancy. We help brands find their fit in gaming, and help teams and creators find the right brand partners.",
 };
 
 export default function HomePage(): React.ReactElement {

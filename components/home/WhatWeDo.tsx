@@ -13,11 +13,12 @@ export function WhatWeDo(): React.ReactElement {
             className="scroll-mt-24 rounded-lg border border-vx-neutral-200 bg-vx-white p-6 md:p-8"
           >
             <h3 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-              Sponsorship campaigns for brands
+              For brands
             </h3>
             <p className="mt-3 text-base leading-relaxed text-vx-neutral-600">
-              For brands reaching gamers aged 16 to 28. We plan the campaign, choose the teams,
-              events or creators, and report against the KPI. Pilots run [Soda to confirm: typical
+              For brands that want to reach gamers but do not yet know the space. We find where your
+              brand fits, choose the teams, events or creators, and report against the KPI you
+              agreed. Pilots run [Soda to confirm: typical
               length] and start from [Soda to confirm: starting fee]. Example KPI: app installs.
             </p>
           </article>
@@ -26,11 +27,12 @@ export function WhatWeDo(): React.ReactElement {
             className="scroll-mt-24 rounded-lg border border-vx-neutral-200 bg-vx-cream-100 p-6 md:p-8"
           >
             <h3 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-              Sponsorship sales for teams, events and creators
+              For gaming teams and creators
             </h3>
             <p className="mt-3 text-base leading-relaxed text-vx-neutral-600">
-              For esports teams, tournaments and gaming creators. We find brands that fit, sell them
-              your sponsorship and negotiate the deal. You pay a fee of [Soda to confirm: amount]
+              For esports teams, creators and organisers who want brand partners. We look at where
+              you are now, connect you with brands that suit that stage and show you how to start.
+              When you are ready, we sell your sponsorship and negotiate the deal. You pay a fee of [Soda to confirm: amount]
               plus a commission of [Soda to confirm: range] when the deal closes.
             </p>
           </article>

@@ -18,18 +18,18 @@ export function Footer(): React.ReactElement {
             className="h-9 w-9"
           />
           <p className="max-w-sm text-sm text-vx-neutral-600">
-            VEXA designs gaming and esports sponsorship campaigns for brands reaching India&apos;s 16
-            to 28 audience, and sells sponsorship for esports teams, events and creators.
+            VEXA Digital is an esports and brand partnerships consultancy. We help brands find their
+            fit in gaming, and help teams and creators find the right brand partners.
           </p>
           <p className="max-w-sm text-sm text-vx-neutral-600">
-            VEXA is a trading name of Blue Wings Esports [Soda to confirm: legal form and proprietor
-            line, as counsel and the accountant advise].
+            VEXA Digital is a trade name of Blue Wings, a proprietorship. Proprietor: Asknani Pratham
+            Kishorkumar.
           </p>
           <p className="max-w-sm text-sm text-vx-neutral-600">
             77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070
           </p>
           <p className="max-w-sm text-sm text-vx-neutral-600">
-            GSTIN [Soda to confirm: GSTIN, if registered]
+            GSTIN 24FKBPA4989L1ZT. Udyam registration number UDYAM-GJ-01-0537468.
           </p>
           <p className="text-sm text-vx-neutral-600">
             <a className={`${linkClass} hover:text-vx-accent-600`} href="tel:+919958895505">
@@ -63,7 +63,7 @@ export function Footer(): React.ReactElement {
               Grievance officer
             </Link>
           </div>
-          <p className="pt-4 text-xs text-vx-neutral-400">© {new Date().getFullYear()} Blue Wings Esports</p>
+          <p className="pt-4 text-xs text-vx-neutral-400">© {new Date().getFullYear()} Blue Wings</p>
         </div>
       </div>
     </footer>

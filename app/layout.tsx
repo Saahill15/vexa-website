@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     template: "%s | VEXA",
   },
   description:
-    "VEXA designs gaming and esports sponsorship campaigns for brands reaching India's 16 to 28 audience, and sells sponsorship for esports teams, events and creators.",
+    "VEXA Digital is an esports and brand partnerships consultancy. We help brands find their fit in gaming, and help teams and creators find the right brand partners.",
   metadataBase: new URL("https://vexadigital.in"),
   openGraph: {
     type: "website",
@@ -39,13 +39,13 @@ export const metadata: Metadata = {
     siteName: "VEXA",
     title: "Gaming and esports sponsorship in India | VEXA",
     description:
-      "VEXA designs gaming and esports sponsorship campaigns for brands reaching India's 16 to 28 audience, and sells sponsorship for esports teams, events and creators.",
+      "VEXA Digital is an esports and brand partnerships consultancy. We help brands find their fit in gaming, and help teams and creators find the right brand partners.",
   },
   twitter: {
     card: "summary",
     title: "Gaming and esports sponsorship in India | VEXA",
     description:
-      "VEXA designs gaming and esports sponsorship campaigns for brands reaching India's 16 to 28 audience, and sells sponsorship for esports teams, events and creators.",
+      "VEXA Digital is an esports and brand partnerships consultancy. We help brands find their fit in gaming, and help teams and creators find the right brand partners.",
   },
   robots: {
     index: true,

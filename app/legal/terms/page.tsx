@@ -4,9 +4,12 @@ import { PageIntro } from "@/components/PageIntro";
 
 export const metadata: Metadata = {
   title: "Terms of use",
-  description: "Terms of use for vexadigital.in, run by Blue Wings Esports, trading as VEXA.",
+  description: "Terms of use for vexadigital.in, run by Blue Wings, trading as VEXA Digital.",
 };
 
+// COUNSEL TO CONFIRM: entity line (trade name, proprietorship, proprietor, GSTIN, Udyam number) is
+// copied from the GST REG-06 and Udyam certificates. The registered address on both certificates is in
+// Ahmedabad; this page keeps the Delhi Bhawani Kunj address as instructed. Confirm before publication.
 const INTRO: readonly LegalBlock[] = [
   {
     "t": "p",
@@ -22,7 +25,7 @@ const INTRO: readonly LegalBlock[] = [
   },
   {
     "t": "p",
-    "text": "These terms cover your use of vexadigital.in, run by Blue Wings Esports, trading as VEXA [Soda to confirm: legal form and proprietor line, as counsel and the accountant advise]. By using this site, you agree to them."
+    "text": "These terms cover your use of vexadigital.in, run by Blue Wings, trading as VEXA Digital. VEXA Digital is a trade name of Blue Wings. Blue Wings is a proprietorship. Proprietor: Asknani Pratham Kishorkumar. GSTIN 24FKBPA4989L1ZT. Udyam registration number UDYAM-GJ-01-0537468. By using this site, you agree to them."
   }
 ];
 
@@ -36,7 +39,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
       },
       {
         "t": "p",
-        "text": "Blue Wings Esports, trading as VEXA (\"VEXA\", \"we\", \"us\"), designs gaming and esports sponsorship campaigns in India. This site describes our services and lets you contact us. It has no user accounts."
+        "text": "Blue Wings, trading as VEXA Digital (\"VEXA\", \"we\", \"us\"), is an esports and brand partnerships consultancy in India. This site describes our services and lets you contact us. It has no user accounts."
       },
       {
         "t": "ul",
@@ -94,7 +97,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
         "t": "ul",
         "items": [
           {
-            "text": "The VEXA name and logo, and the text, design and layout of this site, belong to Blue Wings Esports or its licensors.",
+            "text": "The VEXA name and logo, and the text, design and layout of this site, belong to Blue Wings or its licensors.",
             "counsel": true
           }
         ]
@@ -171,7 +174,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
             "counsel": true
           },
           {
-            "text": "As far as Indian law allows, Blue Wings Esports is not liable for any indirect, incidental, special or consequential loss that comes from using, or being unable to use, this site.",
+            "text": "As far as Indian law allows, Blue Wings is not liable for any indirect, incidental, special or consequential loss that comes from using, or being unable to use, this site.",
             "counsel": true
           },
           {
@@ -245,7 +248,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
       },
       {
         "t": "p",
-        "text": "For questions about these terms, email partnerships@vexadigital.in or write to Blue Wings Esports (VEXA), 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070."
+        "text": "For questions about these terms, email partnerships@vexadigital.in or write to Blue Wings (VEXA Digital), 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070."
       }
     ]
   }

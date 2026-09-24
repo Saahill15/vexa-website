@@ -36,7 +36,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
           ],
           [
             "Role",
-            "Founder, VEXA (Blue Wings Esports)"
+            "Founder, VEXA Digital (a trade name of Blue Wings)"
           ],
           [
             "Email",

@@ -5,7 +5,7 @@ import { PageIntro } from "@/components/PageIntro";
 export const metadata: Metadata = {
   title: "About the founder and the company",
   description:
-    "VEXA designs gaming and esports sponsorship campaigns for brands and sells sponsorship for esports teams, events and creators. Meet the founder and read why the name.",
+    "VEXA Digital is an esports and brand partnerships consultancy for brands new to gaming and for gaming teams and creators. Meet the founder and read why the name.",
 };
 
 const h2 = "font-display text-2xl font-semibold tracking-tight text-vx-ink-900";
@@ -16,12 +16,21 @@ export default function AboutPage(): React.ReactElement {
     <div className="pb-20">
       <PageIntro segment="ABOUT-01" title="About VEXA">
         <p>
-          VEXA designs gaming and esports sponsorship campaigns for brands reaching India&apos;s 16
-          to 28 audience, and sells sponsorship for esports teams, events and creators.
+          VEXA Digital is an esports and brand partnerships consultancy. We work with two kinds of
+          client.
         </p>
         <p>
-          VEXA is based in Delhi and is a trading name of Blue Wings Esports [Soda to confirm: legal
-          form and proprietor line, as counsel and the accountant advise].
+          The first is a brand that does not yet understand gaming. We help it find where it fits,
+          and we sell results it can measure, with the numbers agreed before it spends.
+        </p>
+        <p>
+          The second is a gaming team, creator or organiser that wants brand partners. We look at
+          where it stands today, connect it with brands that suit that stage, and show it how to
+          start.
+        </p>
+        <p>
+          VEXA Digital is based in Delhi and is a trade name of Blue Wings, a proprietorship.
+          Proprietor: Asknani Pratham Kishorkumar. GSTIN 24FKBPA4989L1ZT.
         </p>
       </PageIntro>
 

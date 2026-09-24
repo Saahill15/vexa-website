@@ -4,7 +4,7 @@ import { PageIntro } from "@/components/PageIntro";
 
 export const metadata: Metadata = {
   title: "Privacy policy",
-  description: "How Blue Wings Esports, trading as VEXA, collects, uses and protects personal data through vexadigital.in.",
+  description: "How Blue Wings, trading as VEXA Digital, collects, uses and protects personal data through vexadigital.in.",
 };
 
 const INTRO: readonly LegalBlock[] = [
@@ -22,6 +22,9 @@ const INTRO: readonly LegalBlock[] = [
   }
 ];
 
+// COUNSEL TO CONFIRM: entity line (trade name, proprietorship, proprietor, GSTIN, Udyam number) is
+// copied from the GST REG-06 and Udyam certificates. The registered address on both certificates is in
+// Ahmedabad; this page keeps the Delhi Bhawani Kunj address as instructed. Confirm before publication.
 const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
   {
     "id": "PRIV-02",
@@ -32,7 +35,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
       },
       {
         "t": "p",
-        "text": "Blue Wings Esports, trading as VEXA (\"VEXA\", \"we\", \"us\"), is responsible for personal data collected through vexadigital.in. [Soda to confirm: legal form and proprietor line, as counsel and the accountant advise]"
+        "text": "Blue Wings, trading as VEXA Digital (\"VEXA\", \"we\", \"us\"), is responsible for personal data collected through vexadigital.in. VEXA Digital is a trade name of Blue Wings. Blue Wings is a proprietorship. Proprietor: Asknani Pratham Kishorkumar. GSTIN 24FKBPA4989L1ZT. Udyam registration number UDYAM-GJ-01-0537468."
       },
       {
         "t": "ul",
@@ -357,7 +360,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
       },
       {
         "t": "p",
-        "text": "Postal address: Blue Wings Esports (VEXA), 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070."
+        "text": "Postal address: Blue Wings (VEXA Digital), 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070."
       }
     ]
   },
