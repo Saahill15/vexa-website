@@ -1,41 +1,43 @@
+import { AudienceSwitch } from "@/components/AudienceSwitch";
 import { ButtonLink } from "@/components/ButtonLink";
-import { Reveal } from "@/components/Reveal";
+import { BriefLink } from "@/components/BriefLink";
+import { FeatherEye } from "@/components/FeatherEye";
+import { leadClass } from "@/components/Section";
 
 export function Hero(): React.ReactElement {
   return (
-    <section className="mx-auto max-w-6xl px-5 pb-16 pt-14 md:px-8 md:pb-24 md:pt-20">
-      <Reveal>
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.6fr)] lg:items-end lg:gap-16">
-          <div className="max-w-3xl">
-            <p className="mb-4 text-xs font-medium uppercase tracking-[0.2em] text-vx-accent-600">
-              Brand partnerships for gaming
-            </p>
-            <h1 className="font-display text-4xl font-semibold tracking-tighter leading-none text-vx-ink-900 md:text-6xl">
-              We sell sponsorship for gaming and youth rights holders. We run measured pilot
-              campaigns for brands who want their audience.
-            </h1>
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-vx-neutral-600 md:text-lg">
-              If you run a team, an event, a creator business or a film, we sell your sponsorship
-              and take a fee plus a commission when a partner closes. If you are a brand chasing
-              gamers aged 16 to 28, we build a pilot with the KPI agreed before you spend.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-6">
-              <ButtonLink href="/contact">Book a call</ButtonLink>
-              <ButtonLink href="/how-we-work" variant="secondary">
-                See how we work
-              </ButtonLink>
-            </div>
+    <section data-segment="HOME-01" className="vx-container vx-grid pb-16 pt-8 md:pb-24 md:pt-16 lg:pb-28 lg:pt-24">
+      <div className="col-span-full mb-5 lg:col-span-3 lg:mb-0">
+        <p className="vx-label pt-1 text-vx-muted lg:pt-4">Brand partnerships for gaming</p>
+      </div>
+      <div className="col-span-full lg:col-span-7 lg:col-start-4">
+        <h1 className="max-w-[24ch] font-display text-display-xl font-normal text-vx-ink">
+          Brands and gaming, matched for results you can measure.
+        </h1>
+        <p className={`mt-6 md:mt-8 ${leadClass}`}>
+          VEXA Digital is an esports and brand partnerships consultancy. We help brands that are new to gaming find where
+          they fit, and we help teams, creators and organisers find the brand partners that suit where they are today.
+        </p>
+        <div data-segment="HOME-02" className="mt-8 md:mt-10">
+          <AudienceSwitch />
+          <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-3">
+            <BriefLink>Send your brief</BriefLink>
+            <ButtonLink href="/how-we-work" variant="text">
+              See how we work
+            </ButtonLink>
           </div>
-          <aside className="hidden max-w-xs border-l border-vx-neutral-200 pl-6 lg:block">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-vx-neutral-400">
-              How we work
-            </p>
-            <p className="mt-3 font-display text-lg font-semibold tracking-tight text-vx-ink-900">
-              Commission only when you close. KPI agreed before a brand spends.
-            </p>
-          </aside>
         </div>
-      </Reveal>
+      </div>
+      <aside
+        aria-label="How we work"
+        className="col-span-full mt-14 border-t border-vx-hair pt-6 lg:col-span-2 lg:col-start-11 lg:mt-2 lg:border-t-0 lg:pt-0"
+      >
+        <FeatherEye className="hero-eye hidden w-10 lg:block" />
+        <p className="vx-label text-vx-muted lg:mt-6">How we work</p>
+        <p data-segment="HOME-03" className="mt-3 border-t border-vx-hair pt-3 font-text text-small font-medium text-vx-ink lg:max-w-[16ch]">
+          We promise only what we can count, and we agree the count with you before you spend.
+        </p>
+      </aside>
     </section>
   );
 }

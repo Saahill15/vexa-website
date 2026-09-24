@@ -1,0 +1,76 @@
+name: Deploy site
+
+on:
+  push:
+    branches: [live-site]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+env:
+  # Where the source is synced. The site service builds from this folder.
+  SERVER_PATH: /opt/vexa/site
+  # Where the live compose file lives. Per PASTE_DEPLOY.md the site service was added to the
+  # existing Traefik, n8n and brain stack in /opt/vexa/n8n/docker-compose.yml.
+  COMPOSE_DIR: /opt/vexa/n8n
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check deploy secrets
+        id: secrets
+        env:
+          VEXA_SSH_KEY: ${{ secrets.VEXA_SSH_KEY }}
+        run: |
+          if [ -z "$VEXA_SSH_KEY" ]; then
+            echo "::notice title=Deploy skipped::VEXA_SSH_KEY is not set. Add the deploy secrets (see DEPLOY.md) to enable deploys."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: steps.secrets.outputs.ready == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up SSH key and pinned known hosts
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          VEXA_SSH_KEY: ${{ secrets.VEXA_SSH_KEY }}
+          VEXA_SSH_HOST: ${{ secrets.VEXA_SSH_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VEXA_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -T 15 -t ed25519,ecdsa,rsa "$VEXA_SSH_HOST" > ~/.ssh/known_hosts
+          test -s ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Sync files to the server
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          VEXA_SSH_HOST: ${{ secrets.VEXA_SSH_HOST }}
+          VEXA_SSH_USER: ${{ secrets.VEXA_SSH_USER }}
+        run: |
+          rsync -az --delete \
+            --exclude '.git' --exclude 'node_modules' --exclude '.next' --exclude '.env*' --exclude '/data' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts" \
+            ./ "$VEXA_SSH_USER@$VEXA_SSH_HOST:$SERVER_PATH/"
+
+      - name: Rebuild and restart the site container
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          VEXA_SSH_HOST: ${{ secrets.VEXA_SSH_HOST }}
+          VEXA_SSH_USER: ${{ secrets.VEXA_SSH_USER }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "$VEXA_SSH_USER@$VEXA_SSH_HOST" \
+            "cd $COMPOSE_DIR && docker compose up -d --build --no-deps site"
+
+      - name: Remove the key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

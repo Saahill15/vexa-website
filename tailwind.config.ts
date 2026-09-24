@@ -1,53 +1,44 @@
 import type { Config } from "tailwindcss";
 
+// Every colour here is defined in DESIGN.md section 4 and BRAND_COLOURS.md. Do not add others.
 const config: Config = {
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./lib/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
         vx: {
-          ink: { 900: "#14110F", 700: "#2A2521", 500: "#55483D" },
-          cream: { 50: "#FAF8F6", 100: "#F2EEEA" },
-          neutral: {
-            200: "#E4DDD5",
-            400: "#A79C90",
-            600: "#6E645A",
-            800: "#332C26",
-          },
-          accent: { 600: "#C94A1C", 500: "#E45824", 100: "#FDE7DC" },
-          band: {
-            lowball: "#B3261E",
-            lowballBg: "#FBEAE9",
-            fair: "#1F7A4D",
-            fairBg: "#E7F5EC",
-            premium: "#9A5B00",
-            premiumBg: "#FBF0DC",
-          },
+          paper: "#F7F4EE",
+          stone: "#EDE7DC",
+          white: "#FFFFFF",
+          ink: { DEFAULT: "#17140F", 2: "#3A342C" },
+          muted: "#655D52",
+          hair: "#D9D0C1",
+          accent: { 500: "#FF681F", 600: "#F25A10", deep: "#B83C00" },
+          peacock: { blue: "#0B4F6C", teal: "#0F7B6C", "teal-deep": "#0B6559" },
+          feather: { gold: "#C9A227", "gold-deep": "#8A6A10" },
+          error: "#B3261E",
         },
       },
       fontFamily: {
-        display: ["var(--font-general-sans)", "-apple-system", "Segoe UI", "sans-serif"],
-        body: ["var(--font-inter)", "-apple-system", "Segoe UI", "sans-serif"],
+        // Plex sits second in the display stack so glyphs Bodoni lacks (the rupee sign) render in Plex.
+        display: ["var(--font-display)", "var(--font-text)", "Georgia", "serif"],
+        text: ["var(--font-text)", "-apple-system", "Segoe UI", "sans-serif"],
       },
-      borderRadius: {
-        sm: "8px",
-        md: "14px",
-        lg: "20px",
-        pill: "999px",
+      fontSize: {
+        "display-xl": ["clamp(2.25rem, 1.4rem + 3.6vw, 4rem)", { lineHeight: "1.04", letterSpacing: "-0.01em" }],
+        "display-l": ["clamp(1.75rem, 1.3rem + 1.9vw, 2.75rem)", { lineHeight: "1.1", letterSpacing: "-0.005em" }],
+        figure: ["clamp(2.75rem, 2rem + 3vw, 4.5rem)", { lineHeight: "1" }],
+        quote: ["clamp(1.5rem, 1.2rem + 1.3vw, 2.125rem)", { lineHeight: "1.25" }],
+        h3: ["clamp(1.1875rem, 1.1rem + 0.3vw, 1.3125rem)", { lineHeight: "1.3", letterSpacing: "-0.005em" }],
+        lead: ["clamp(1.125rem, 1rem + 0.5vw, 1.3125rem)", { lineHeight: "1.55" }],
+        body: ["1.0625rem", { lineHeight: "1.65" }],
+        small: ["0.875rem", { lineHeight: "1.5", letterSpacing: "0.005em" }],
+        label: ["0.75rem", { lineHeight: "1.3", letterSpacing: "0.08em" }],
       },
-      transitionDuration: {
-        fast: "150ms",
-        base: "250ms",
-        slow: "400ms",
-      },
-      transitionTimingFunction: {
-        "vx-out": "cubic-bezier(0.16, 1, 0.3, 1)",
-        "vx-inout": "cubic-bezier(0.65, 0, 0.35, 1)",
-      },
+      maxWidth: { body: "38rem" },
+      borderRadius: { DEFAULT: "2px", sm: "2px" },
+      transitionDuration: { fast: "150ms", base: "250ms" },
+      transitionTimingFunction: { "vx-out": "cubic-bezier(0.16, 1, 0.3, 1)" },
     },
   },
   plugins: [],

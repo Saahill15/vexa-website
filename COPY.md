@@ -1,5 +1,10 @@
 # VEXA website copy, rewritten in Soda's voice
 
+Update, 24 September 2026, branch claude/copy-rewrite: the live pages now carry the
+approved for preview copy rewrite (59 segments, NAV-01 to FOOTER-01) from the copy review
+page. The page files under app/ and components/ are the source for current wording. The
+text below records the 23 September pass and is kept for history.
+
 Date: 23 September 2026. Applied to vexa-website and mirrored to vexa-website-v2.
 Positioning locked for this pass: VEXA does two things. (1) Sponsorship and brand
 partnership sales for gaming and youth rights holders, teams, events, creators, films,

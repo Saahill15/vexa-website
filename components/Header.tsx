@@ -3,158 +3,154 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-
-const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/how-we-work", label: "How We Work" },
-  { href: "/proof", label: "Proof" },
-  { href: "/about", label: "About" },
-  { href: "/valuate", label: "Valuate" },
-  { href: "/contact", label: "Contact" },
-] as const;
-
-const linkFocus =
-  "rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500";
+import { useEffect, useRef, useState } from "react";
+import { NAV } from "@/components/nav";
 
 export function Header(): React.ReactElement {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const sheet = useRef<HTMLDivElement>(null);
+
+  useEffect(() => setOpen(false), [pathname]);
 
   useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+    const onScroll = (): void => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
-    if (!open) {
-      document.body.style.overflow = "";
-      return;
-    }
+    if (!open) return;
     document.body.style.overflow = "hidden";
+    sheet.current?.querySelector<HTMLElement>("a")?.focus();
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        menuButton.current?.focus();
+      }
+      if (event.key === "Tab" && sheet.current) {
+        const items = Array.from(sheet.current.querySelectorAll<HTMLElement>("a, button"));
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
     };
   }, [open]);
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-    function onKey(event: KeyboardEvent): void {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  const isActive = (href: string): boolean => !href.startsWith("/#") && pathname.startsWith(href);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-vx-neutral-200 bg-vx-cream-50/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 md:px-8">
-        <Link href="/" className={`shrink-0 ${linkFocus}`} onClick={() => setOpen(false)}>
-          <span className="inline-flex items-center gap-2">
-              <Image
-                src="/brand/vexa-vmark.png"
-                alt=""
-                width={28}
-                height={28}
-                className="h-7 w-7"
-              />
-              <span className="font-display text-lg font-semibold tracking-tight text-vx-ink-900">
-                VEXA
-              </span>
-            </span>
+    <header
+      data-segment="NAV-01"
+      className={`sticky top-0 z-40 border-b bg-vx-paper/[0.96] transition-colors duration-fast ${scrolled ? "border-vx-hair" : "border-transparent"}`}
+    >
+      <div className="vx-container flex h-16 items-center justify-between gap-6 lg:h-[72px]">
+        <Link href="/" className="-m-1 shrink-0 rounded-sm p-1" aria-label="VEXA Digital, home">
+          <Image src="/brand/vexa-logo-compact-ink.png" alt="" width={236} height={144} priority className="h-9 w-auto lg:h-10" />
         </Link>
-
-        <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
           {NAV.map((item) => {
-            const active = pathname === item.href;
+            const active = isActive(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${linkFocus} text-sm transition-colors duration-base ease-vx-out ${
-                  active
-                    ? "font-medium text-vx-accent-600"
-                    : "text-vx-neutral-600 hover:text-vx-ink-900"
+                aria-current={active ? "page" : undefined}
+                className={`rounded-sm py-2 font-text text-small font-medium underline-offset-[10px] transition-colors duration-fast ${
+                  active ? "text-vx-accent-deep underline decoration-2" : "text-vx-ink hover:underline hover:decoration-vx-peacock-blue hover:decoration-1"
                 }`}
               >
                 {item.label}
               </Link>
             );
           })}
+        </nav>
+        <div className="flex items-center gap-2">
           <Link
             href="/contact"
-            className="rounded-pill bg-vx-accent-500 px-4 py-2 text-sm font-medium text-white transition-[colors,transform] duration-base ease-vx-out hover:bg-vx-accent-600 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
+            className="hidden min-h-[44px] items-center rounded-sm border border-vx-accent-deep bg-vx-accent-500 px-5 font-text text-small font-medium text-vx-ink transition-colors duration-fast hover:bg-vx-accent-600 active:translate-y-px lg:inline-flex"
           >
-            Book a call
+            Send your brief
           </Link>
-        </nav>
-
-        <button
-          type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-vx-neutral-200 transition-colors duration-base ease-vx-out hover:border-vx-neutral-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500 lg:hidden"
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          onClick={() => setOpen((value) => !value)}
-        >
-          <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
-          <span className="flex flex-col gap-1.5" aria-hidden="true">
-            <span
-              className={`block h-0.5 w-5 bg-vx-ink-900 transition duration-base ease-vx-out ${
-                open ? "translate-y-2 rotate-45" : ""
-              }`}
-            />
-            <span
-              className={`block h-0.5 w-5 bg-vx-ink-900 transition duration-base ease-vx-out ${
-                open ? "opacity-0" : ""
-              }`}
-            />
-            <span
-              className={`block h-0.5 w-5 bg-vx-ink-900 transition duration-base ease-vx-out ${
-                open ? "-translate-y-2 -rotate-45" : ""
-              }`}
-            />
-          </span>
-        </button>
+          <Link
+            href="/contact"
+            className="inline-flex min-h-[44px] items-center rounded-sm px-2 font-text text-small font-semibold text-vx-accent-deep underline decoration-1 underline-offset-4 lg:hidden"
+          >
+            Send your brief
+          </Link>
+          <button
+            ref={menuButton}
+            type="button"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-sm lg:hidden"
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            onClick={() => setOpen(true)}
+          >
+            <span className="sr-only">Open menu</span>
+            <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden="true">
+              <path d="M3 7h18M3 12h18M3 17h18" stroke="#17140F" strokeWidth="1.5" />
+            </svg>
+          </button>
+        </div>
       </div>
-
       {open ? (
         <div
+          ref={sheet}
           id="mobile-nav"
           role="dialog"
           aria-modal="true"
-          aria-label="Mobile navigation"
-          className="fixed inset-0 z-50 flex min-h-[100dvh] flex-col bg-vx-cream-50 px-5 pb-8 pt-6 lg:hidden"
+          aria-label="Menu"
+          className="fixed inset-0 z-50 flex min-h-[100dvh] flex-col overflow-y-auto bg-vx-paper lg:hidden"
         >
-          <div className="mb-10 flex items-center justify-between">
-            <span className="font-display text-lg font-semibold">VEXA</span>
+          <div className="vx-container flex h-16 items-center justify-between">
+            <Link href="/" className="-m-1 rounded-sm p-1" aria-label="VEXA Digital, home" onClick={() => setOpen(false)}>
+              <Image src="/brand/vexa-logo-compact-ink.png" alt="" width={236} height={144} className="h-9 w-auto" />
+            </Link>
             <button
               type="button"
-              className="rounded-md border border-vx-neutral-200 px-3 py-2 text-sm transition-colors duration-base ease-vx-out hover:border-vx-neutral-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
-              onClick={() => setOpen(false)}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-sm px-2 font-text text-small font-medium"
+              onClick={() => {
+                setOpen(false);
+                menuButton.current?.focus();
+              }}
             >
               Close
+              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+                <path d="M6 6l12 12M18 6L6 18" stroke="#17140F" strokeWidth="1.5" />
+              </svg>
             </button>
           </div>
-          <nav className="flex flex-col gap-5" aria-label="Mobile">
+          <nav className="vx-container mt-6 flex flex-col" aria-label="Menu">
             {NAV.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${linkFocus} font-display text-3xl font-semibold tracking-tight text-vx-ink-900`}
                 onClick={() => setOpen(false)}
+                className="border-b border-vx-hair py-4 font-display text-[28px] leading-tight text-vx-ink"
               >
                 {item.label}
               </Link>
             ))}
             <Link
               href="/contact"
-              className="mt-4 inline-flex w-fit rounded-pill bg-vx-accent-500 px-5 py-3 text-base font-medium text-white transition-[colors,transform] duration-base ease-vx-out hover:bg-vx-accent-600 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
               onClick={() => setOpen(false)}
+              className="mt-10 inline-flex min-h-[48px] items-center justify-center rounded-sm border border-vx-accent-deep bg-vx-accent-500 px-6 font-text text-body font-medium text-vx-ink"
             >
-              Book a call
+              Send your brief
             </Link>
           </nav>
         </div>

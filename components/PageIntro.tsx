@@ -1,21 +1,25 @@
+import { leadClass } from "@/components/Section";
+
 type Props = {
-  eyebrow?: string;
+  label: string;
   title: string;
   children?: React.ReactNode;
+  segment?: string;
+  after?: React.ReactNode;
 };
 
-export function PageIntro({ eyebrow, title, children }: Props): React.ReactElement {
+/** Page opening: rail label, the one H1, and the lead paragraphs in the text span. */
+export function PageIntro({ label, title, children, segment, after }: Props): React.ReactElement {
   return (
-    <header className="mx-auto max-w-3xl px-5 pb-10 pt-14 md:px-8 md:pt-20">
-      {eyebrow ? (
-        <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-vx-accent-600">
-          {eyebrow}
-        </p>
-      ) : null}
-      <h1 className="font-display text-4xl font-semibold tracking-tighter text-vx-ink-900 md:text-5xl">
-        {title}
-      </h1>
-      {children ? <div className="mt-5 space-y-4 text-base leading-relaxed text-vx-neutral-600 md:text-lg">{children}</div> : null}
+    <header data-segment={segment} className="vx-container vx-grid pb-16 pt-12 md:pb-24 md:pt-20 lg:pt-28">
+      <div className="col-span-full mb-6 lg:col-span-3 lg:mb-0">
+        <p className="vx-label pt-1 text-vx-muted lg:pt-4">{label}</p>
+      </div>
+      <div className="col-span-full lg:col-span-7 lg:col-start-4">
+        <h1 className="max-w-[24ch] font-display text-display-xl font-normal text-vx-ink">{title}</h1>
+        {children ? <div className={`mt-8 space-y-5 ${leadClass}`}>{children}</div> : null}
+        {after}
+      </div>
     </header>
   );
 }

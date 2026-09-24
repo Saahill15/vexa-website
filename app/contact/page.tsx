@@ -1,57 +1,50 @@
 import type { Metadata } from "next";
+import { withShare } from "@/lib/meta";
 import { ContactForm } from "@/components/ContactForm";
 import { PageIntro } from "@/components/PageIntro";
+import { SITE } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Book a Call with VEXA",
+export const metadata: Metadata = withShare({
+  title: "Send a sponsorship brief",
   description:
-    "Tell us the business problem you are trying to solve. We will tell you honestly whether gaming is the right spend for it right now.",
-};
+    "Send VEXA your brief. Tell us if you are a brand that wants to reach gamers, or a team, event or creator looking for sponsors.",
+  alternates: { canonical: "/contact" },
+});
 
 export default function ContactPage(): React.ReactElement {
   return (
-    <div className="pb-20">
-      <PageIntro eyebrow="Contact" title="Book a call">
-        <p>
-          No pitch on the first call. We spend three to four days understanding your business before
-          we propose anything, because a proposal written faster than that is a template, and it
-          reads like one.
-        </p>
-        <p>
-          Tell us if you run a gaming or youth rights holder looking to sell sponsorship, or a
-          brand looking to reach gamers. We work both sides, and we will tell you which one you
-          are.
-        </p>
+    <>
+      <PageIntro segment="CONTACT-01" label="Contact" title="Send your brief">
+        <p>No pitch on the first call. We spend three to four days on your business before we propose anything.</p>
+        <p>Tell us if you are a brand that wants to reach gamers, or a team, event or creator looking for sponsors.</p>
+        <p>If your launch date is close, say so in your brief.</p>
       </PageIntro>
 
-      <div className="mx-auto grid max-w-6xl gap-12 px-5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:px-8">
-        <div className="rounded-lg border border-vx-neutral-200 bg-vx-white p-6 md:p-8">
-          <ContactForm />
+      <section className="border-t border-vx-hair">
+        <div className="vx-container vx-grid gap-y-16 pb-24 pt-12 md:pt-16 lg:pb-32">
+          <div className="col-span-full lg:col-span-6 lg:col-start-4">
+            <ContactForm />
+          </div>
+          <aside data-segment="CONTACT-03" className="col-span-full lg:col-span-3 lg:col-start-10">
+            <div className="border-t border-vx-ink pt-5 lg:sticky lg:top-24">
+              <h2 className="vx-label text-vx-muted">Or contact us directly</h2>
+              <p className="mt-4 font-text text-body">
+                <a className="vx-link break-all font-medium" href={`mailto:${SITE.email}`}>
+                  {SITE.email}
+                </a>
+              </p>
+              <p className="mt-2 font-text text-body">
+                <a className="vx-link font-medium" href={SITE.phoneHref}>
+                  {SITE.phone}
+                </a>
+              </p>
+              <p className="mt-6 font-text text-small text-vx-muted" data-counsel="true">
+                VEXA Digital, a trade name of Blue Wings. Operating office: 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070
+              </p>
+            </div>
+          </aside>
         </div>
-        <aside className="space-y-4">
-          <h2 className="font-display text-xl font-semibold tracking-tight text-vx-ink-900">
-            Direct contact
-          </h2>
-          <p className="text-base text-vx-neutral-600">
-            Phone:{" "}
-            <a
-              className="rounded-sm font-medium text-vx-accent-600 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
-              href="tel:+919958895505"
-            >
-              +91 9958895505
-            </a>
-          </p>
-          <p className="text-base text-vx-neutral-600">
-            Email:{" "}
-            <a
-              className="rounded-sm font-medium text-vx-accent-600 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500"
-              href="mailto:partnerships@vexadigital.in"
-            >
-              partnerships@vexadigital.in
-            </a>
-          </p>
-        </aside>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }

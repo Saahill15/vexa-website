@@ -1,59 +1,101 @@
 import type { Metadata } from "next";
-import { ButtonLink } from "@/components/ButtonLink";
+import { withShare } from "@/lib/meta";
+import { BriefLink } from "@/components/BriefLink";
+import { ENTITY } from "@/components/entity";
 import { PageIntro } from "@/components/PageIntro";
+import { QuillRule } from "@/components/QuillRule";
+import { bodyClass, h2Class, h3Class, Section } from "@/components/Section";
 
-export const metadata: Metadata = {
-  title: "About VEXA, and Why the Name",
+export const metadata: Metadata = withShare({
+  title: "About the founder and the company",
   description:
-    "VEXA is a brand partnerships company for gaming. Here is why the name, and who builds the work.",
-};
+    "VEXA Digital is an esports and brand partnerships consultancy for brands new to gaming and for gaming teams and creators. Meet the founder and read why the name.",
+  alternates: { canonical: "/about" },
+});
 
 export default function AboutPage(): React.ReactElement {
   return (
-    <div className="pb-20">
-      <PageIntro eyebrow="About" title="Why VEXA">
+    <>
+      <PageIntro
+        segment="ABOUT-01"
+        label="Why VEXA"
+        title="About VEXA"
+        after={
+          <div className="mt-12 max-w-body border-y border-vx-ink py-6">
+            <p className="vx-label text-vx-muted">Who we are</p>
+            <div className="mt-4 space-y-2 font-text text-small text-vx-ink-2">
+              <p>VEXA Digital is run from Delhi.</p>
+              <p data-counsel="true">{ENTITY.licence}</p>
+              <p data-counsel="true">{ENTITY.registrations}</p>
+            </div>
+          </div>
+        }
+      >
+        <p>VEXA Digital is an esports and brand partnerships consultancy. We work with two kinds of client.</p>
         <p>
-          VEXA sells sponsorship for gaming and youth rights holders, and runs measured campaigns
-          for brands who want their audience. It is founded and run by Kaustubh, who goes by Soda.
+          The first is a brand that does not yet understand gaming. We help it find where it fits, and we sell results it can
+          measure, with the numbers agreed before it spends.
+        </p>
+        <p>
+          The second is a gaming team, creator or organiser that wants brand partners. We look at where it stands today,
+          connect it with brands that suit that stage, and show it how to start.
         </p>
       </PageIntro>
 
-      <div className="mx-auto max-w-3xl space-y-14 px-5 md:px-8">
-        <section>
-          <h2 className="font-display text-2xl font-semibold tracking-tight text-vx-ink-900">
-            Who is behind VEXA
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-vx-neutral-600 md:text-lg">
-            VEXA is founded and run by Kaustubh, who goes by Soda. He is a law graduate, and he
-            played competitive BGMI for three years, leading a team as an in game leader, a role
-            built on strategy and calling shots rather than raw mechanical skill. He brings both
-            instincts to VEXA: the discipline of reading a deal exactly as written before pricing
-            it, and a player&apos;s instinct for what a gaming audience actually responds to.
-          </p>
-        </section>
-
-        {/* LEAD HOLD 22 Sep 2026: Advocates Act / enrolment / structure copy omitted from public
-            render pending Soda review. SITE_PLAN.md open question 4. Do not publish that section
-            until he clears it. */}
-
-        {/* CONFIRM WITH SODA: see SITE_PLAN.md open question 5 */}
-        <section>
-          <h2 className="font-display text-2xl font-semibold tracking-tight text-vx-ink-900">
-            Why the name
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-vx-neutral-600 md:text-lg">
-            Very easy is never awesome. That is the idea behind the name, and it is the standard the
-            business is actually held to. Sponsorship in gaming looks easy from outside, a logo on a
-            jersey, a shoutout in a stream, and most of what gets sold under that idea is exactly
-            that easy and exactly that forgettable. VEXA exists for the harder, better version: a
-            sponsorship or a campaign designed around a real number, agreed before anyone spends.
-          </p>
-        </section>
-
-        <div>
-          <ButtonLink href="/contact">Talk to us about your deal</ButtonLink>
+      <Section segment="ABOUT-02" index="01" label="The team" tone="stone">
+        <h2 className={h2Class}>The founding team</h2>
+        <div className="mt-10 border-t border-vx-ink pt-6">
+          <h3 className={h3Class}>Soda (Kaustubh), founder</h3>
+          <div className={`mt-4 vx-body ${bodyClass}`}>
+            <p>Soda founded VEXA and runs it day to day, and you deal with him directly.</p>
+            <p data-counsel="true">
+              He is a law graduate, and he reads your deal exactly as written before he prices it. VEXA does not give legal
+              advice.
+            </p>
+            <p>
+              He played competitive BGMI for three years as his team&apos;s in game leader, the player who sets strategy and
+              calls the shots. It taught him what gamers respond to, and he brings that to your campaign.
+            </p>
+          </div>
         </div>
-      </div>
-    </div>
+        <div className="mt-12 border-t border-vx-ink pt-6">
+          <h3 className={h3Class}>Pratham Kishorkumar Asknani, cofounder</h3>
+          {/* COUNSEL TO CONFIRM: certificate spelling "Asknani"; the owner spells it "Asnani". */}
+          <p className={`mt-4 ${bodyClass}`} data-counsel="true">
+            Pratham is VEXA&apos;s cofounder and the proprietor of Blue Wings, the business that trades as VEXA Digital.
+          </p>
+        </div>
+      </Section>
+
+      {/* LEAD HOLD 22 Sep 2026: Advocates Act / enrolment / structure copy omitted from public
+          render pending Soda review. SITE_PLAN.md open question 4. Do not publish that section
+          until he clears it. */}
+
+      <Section segment="ABOUT-03" index="02" label="The name">
+        <h2 className={h2Class}>Why the name</h2>
+        <p className={`mt-6 ${bodyClass}`}>VEXA comes from</p>
+        <blockquote className="mt-4 max-w-[32ch] font-display text-quote italic text-vx-ink">
+          &ldquo;Very easy is never awesome.&rdquo;
+        </blockquote>
+        <div className={`mt-8 vx-body ${bodyClass}`}>
+          <p>
+            Gaming sponsorship looks easy from outside. Put a logo on a jersey or buy a shoutout on a stream, and the deal is
+            done. Most of those deals are quickly forgotten.
+          </p>
+          <p>We design each sponsorship around a number you agree before you spend.</p>
+        </div>
+      </Section>
+
+      <section data-segment="ABOUT-04" className="border-t border-vx-hair">
+        <div className="vx-container vx-grid py-16 md:py-24 lg:py-32">
+          <div className="col-span-full lg:col-span-7 lg:col-start-4">
+            <BriefLink>Send your brief to Soda</BriefLink>
+          </div>
+          <div className="col-span-full mt-12 lg:col-span-7 lg:col-start-4">
+            <QuillRule />
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

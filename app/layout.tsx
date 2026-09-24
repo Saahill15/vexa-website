@@ -1,66 +1,67 @@
-import type { Metadata } from "next";
-import localFont from "next/font/local";
+import type { Metadata, Viewport } from "next";
+import { display, text } from "@/app/fonts";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { SkipToContent } from "@/components/SkipToContent";
+import { AUDIENCE_BOOT_SCRIPT } from "@/lib/audience";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
-const generalSans = localFont({
-  src: [
-    { path: "../public/fonts/GeneralSans-Medium.ttf", weight: "500", style: "normal" },
-    { path: "../public/fonts/GeneralSans-Semibold.ttf", weight: "600", style: "normal" },
-    { path: "../public/fonts/GeneralSans-Bold.ttf", weight: "700", style: "normal" },
-  ],
-  variable: "--font-general-sans",
-  display: "swap",
-});
-
-const inter = localFont({
-  src: [
-    { path: "../public/fonts/Inter-Regular.ttf", weight: "400", style: "normal" },
-    { path: "../public/fonts/Inter-Medium.ttf", weight: "500", style: "normal" },
-  ],
-  variable: "--font-inter",
-  display: "swap",
-});
+const DESCRIPTION =
+  "VEXA Digital is an esports and brand partnerships consultancy. We help brands find their fit in gaming, and help teams and creators find the right brand partners.";
+const TITLE = "Gaming and esports sponsorship in India | VEXA";
 
 export const metadata: Metadata = {
-  title: {
-    default: "VEXA Digital, Brand Partnerships for Gaming in India",
-    template: "%s · VEXA",
-  },
-  description:
-    "VEXA sells sponsorship for gaming and youth rights holders, and runs measured pilot campaigns for brands reaching gamers aged 16 to 28.",
-  metadataBase: new URL("https://vexadigital.in"),
+  metadataBase: new URL(SITE.url),
+  title: { default: TITLE, template: "%s | VEXA" },
+  description: DESCRIPTION,
+  applicationName: "VEXA Digital",
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://vexadigital.in",
+    url: SITE.url,
     siteName: "VEXA Digital",
-    title: "VEXA Digital, Brand Partnerships for Gaming in India",
-    description:
-      "VEXA sells sponsorship for gaming and youth rights holders, and runs measured pilot campaigns for brands reaching gamers aged 16 to 28.",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "VEXA Digital, esports and brand partnerships consultancy" }],
   },
-  twitter: {
-    card: "summary",
-    title: "VEXA Digital, Brand Partnerships for Gaming in India",
-    description:
-      "VEXA sells sponsorship for gaming and youth rights holders, and runs measured pilot campaigns for brands reaching gamers aged 16 to 28.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/og.png"] },
+  robots: { index: true, follow: true },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>): React.ReactElement {
+export const viewport: Viewport = { themeColor: "#F7F4EE" };
+
+// COUNSEL TO CONFIRM: legal name and address follow components/entity.ts.
+const ORGANIZATION = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "VEXA Digital",
+  alternateName: "VEXA",
+  legalName: "Blue Wings",
+  url: SITE.url,
+  logo: `${SITE.url}/brand/vexa-logo.png`,
+  email: SITE.email,
+  telephone: "+919958895505",
+  description: DESCRIPTION,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "77A, LGF, Bhawani Kunj, Sector D-2",
+    addressLocality: "New Delhi",
+    addressRegion: "Delhi",
+    postalCode: "110070",
+    addressCountry: "IN",
+  },
+  areaServed: "IN",
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>): React.ReactElement {
   return (
-    <html lang="en" data-theme="light" className={`${generalSans.variable} ${inter.variable}`}>
-      <body className="min-h-[100dvh] bg-vx-cream-50 font-body text-vx-ink-900 antialiased">
+    <html lang="en-IN" className={`${display.variable} ${text.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: AUDIENCE_BOOT_SCRIPT }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION) }} />
+      </head>
+      <body className="min-h-[100dvh] bg-vx-paper font-text text-body text-vx-ink">
         <SkipToContent />
         <Header />
         <main id="main">{children}</main>
