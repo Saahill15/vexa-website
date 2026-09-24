@@ -33,8 +33,8 @@ export function QuillRule(): React.ReactElement {
 
   return (
     <div ref={ref} className="quill flex items-center gap-2" data-state={state} aria-hidden="true">
-      <span className="quill-line block h-px flex-1 origin-left bg-vx-hair" />
-      <FeatherEye className="w-4 shrink-0" />
+      <span className="quill-line block h-px flex-1 origin-left bg-vx-feather-gold" />
+      <FeatherEye className="w-6 shrink-0" />
     </div>
   );
 }

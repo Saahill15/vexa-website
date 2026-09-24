@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
+import { withShare } from "@/lib/meta";
 import { ENTITY } from "@/components/entity";
 import { type LegalBlock } from "@/components/LegalBlocks";
 import { LegalLayout } from "@/components/LegalLayout";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withShare({
   title: "Privacy policy",
   description: "How Blue Wings, trading as VEXA Digital, collects, uses and protects personal data through vexadigital.in.",
   alternates: { canonical: "/legal/privacy" },
-};
+});
 
 const INTRO: readonly LegalBlock[] = [
   {

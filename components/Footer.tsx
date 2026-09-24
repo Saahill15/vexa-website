@@ -12,7 +12,7 @@ export function Footer(): React.ReactElement {
     <footer data-segment="FOOTER-01" className="border-t border-vx-ink bg-vx-stone">
       <div className="vx-container vx-grid gap-y-12 py-16 md:py-20">
         <div className="col-span-full md:col-span-8 lg:col-span-4">
-          <Image src="/brand/vexa-logo.png" alt="VEXA Digital" width={1132} height={590} className="h-10 w-auto" />
+          <Image src="/brand/vexa-logo-compact-ink.png" alt="VEXA Digital" width={236} height={144} className="h-11 w-auto" />
           <p className="mt-6 max-w-sm font-text text-small text-vx-ink-2">
             VEXA Digital is an esports and brand partnerships consultancy. We help brands find their fit in gaming, and help
             teams and creators find the right brand partners.

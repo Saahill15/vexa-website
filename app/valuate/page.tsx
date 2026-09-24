@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
+import { withShare } from "@/lib/meta";
 import Link from "next/link";
 import { PageIntro } from "@/components/PageIntro";
 import { QuillRule } from "@/components/QuillRule";
 import { bodyClass, h2Class, Section } from "@/components/Section";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withShare({
   title: "Valuate, check if a creator deal is fair",
   description:
     "Valuate is a separate, free product from VEXA. It helps a creator or a brand see a fair price for a paid post before anyone signs.",
   alternates: { canonical: "/valuate" },
-};
+});
 
 // Set to true once the Valuate subdomain responds, and fill VALUATE_URL.
 const VALUATE_LIVE = false;
@@ -60,7 +61,7 @@ export default function ValuatePage(): React.ReactElement {
               </Link>
             </div>
           </div>
-          <div className="col-span-full mt-16 lg:col-span-9 lg:col-start-4">
+          <div className="col-span-full mt-12 lg:col-span-7 lg:col-start-4">
             <QuillRule />
           </div>
         </div>

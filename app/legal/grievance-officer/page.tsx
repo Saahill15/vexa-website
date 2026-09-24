@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
+import { withShare } from "@/lib/meta";
 import { type LegalBlock } from "@/components/LegalBlocks";
 import { LegalLayout } from "@/components/LegalLayout";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withShare({
   title: "Grievance officer",
   description: "How to complain to the VEXA Grievance Officer about this site or about how we handle your personal data.",
   alternates: { canonical: "/legal/grievance-officer" },
-};
+});
 
 const INTRO: readonly LegalBlock[] = [
   {

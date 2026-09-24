@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withShare } from "@/lib/meta";
 import { BriefLink } from "@/components/BriefLink";
 import { PageIntro } from "@/components/PageIntro";
 import { ProcessAccordion } from "@/components/ProcessAccordion";
@@ -6,12 +7,12 @@ import { QuillRule } from "@/components/QuillRule";
 import { bodyClass, h2Class, h3Class, Section } from "@/components/Section";
 import { STEPS } from "@/lib/process";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withShare({
   title: "How a gaming sponsorship campaign works",
   description:
     "What happens, step by step, when VEXA runs a gaming sponsorship campaign: brief, audience fit, partners and price, negotiation, contract and payment, campaign and report.",
   alternates: { canonical: "/how-we-work" },
-};
+});
 
 const UNDER_18 = [
   "no tracking, behavioural monitoring or targeted advertising aimed at them",
@@ -113,11 +114,11 @@ export default function HowWeWorkPage(): React.ReactElement {
         <h2 className={h2Class}>If a campaign tracks below the benchmark</h2>
         <div className="mt-10 grid grid-cols-1 border-y border-vx-ink sm:grid-cols-2">
           <div className="py-6 sm:border-r sm:border-vx-hair sm:pr-6">
-            <p className="figure-nums font-display text-figure font-medium text-vx-ink">Same day</p>
+            <p className="figure-nums font-display text-[clamp(2.5rem,1.6rem+2.4vw,3.75rem)] leading-none font-medium whitespace-nowrap text-vx-ink">Same day</p>
             <p className={`mt-4 ${bodyClass}`}>We tell you the same day we see it. We advise you not to add spend.</p>
           </div>
           <div className="border-t border-vx-hair py-6 sm:border-t-0 sm:pl-6">
-            <p className="figure-nums font-display text-figure font-medium text-vx-ink">
+            <p className="figure-nums font-display text-[clamp(2.5rem,1.6rem+2.4vw,3.75rem)] leading-none font-medium text-vx-ink">
               <span className="border-b-2 border-vx-feather-gold">2 days</span>
             </p>
             <p className={`mt-4 ${bodyClass}`}>Within two days, we bring you a plan to fix it.</p>
@@ -135,7 +136,7 @@ export default function HowWeWorkPage(): React.ReactElement {
               <BriefLink>Send your brief</BriefLink>
             </div>
           </div>
-          <div className="col-span-full mt-16 lg:col-span-9 lg:col-start-4">
+          <div className="col-span-full mt-12 lg:col-span-7 lg:col-start-4">
             <QuillRule />
           </div>
         </div>

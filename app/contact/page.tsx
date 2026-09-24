@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
+import { withShare } from "@/lib/meta";
 import { ContactForm } from "@/components/ContactForm";
 import { PageIntro } from "@/components/PageIntro";
 import { SITE } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withShare({
   title: "Send a sponsorship brief",
   description:
     "Send VEXA your brief. Tell us if you are a brand that wants to reach gamers, or a team, event or creator looking for sponsors.",
   alternates: { canonical: "/contact" },
-};
+});
 
 export default function ContactPage(): React.ReactElement {
   return (

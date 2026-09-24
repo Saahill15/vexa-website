@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
+import { withShare } from "@/lib/meta";
 import { BriefLink } from "@/components/BriefLink";
 import { ENTITY } from "@/components/entity";
 import { PageIntro } from "@/components/PageIntro";
 import { QuillRule } from "@/components/QuillRule";
 import { bodyClass, h2Class, h3Class, Section } from "@/components/Section";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withShare({
   title: "About the founder and the company",
   description:
     "VEXA Digital is an esports and brand partnerships consultancy for brands new to gaming and for gaming teams and creators. Meet the founder and read why the name.",
   alternates: { canonical: "/about" },
-};
+});
 
 export default function AboutPage(): React.ReactElement {
   return (
@@ -90,7 +91,7 @@ export default function AboutPage(): React.ReactElement {
           <div className="col-span-full lg:col-span-7 lg:col-start-4">
             <BriefLink>Send your brief to Soda</BriefLink>
           </div>
-          <div className="col-span-full mt-16 lg:col-span-9 lg:col-start-4">
+          <div className="col-span-full mt-12 lg:col-span-7 lg:col-start-4">
             <QuillRule />
           </div>
         </div>

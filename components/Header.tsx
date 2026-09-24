@@ -60,7 +60,7 @@ export function Header(): React.ReactElement {
     >
       <div className="vx-container flex h-16 items-center justify-between gap-6 lg:h-[72px]">
         <Link href="/" className="-m-1 shrink-0 rounded-sm p-1" aria-label="VEXA Digital, home">
-          <Image src="/brand/vexa-logo.png" alt="" width={1132} height={590} priority className="h-8 w-auto lg:h-10" />
+          <Image src="/brand/vexa-logo-compact-ink.png" alt="" width={236} height={144} priority className="h-9 w-auto lg:h-10" />
         </Link>
         <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
           {NAV.map((item) => {
@@ -118,7 +118,7 @@ export function Header(): React.ReactElement {
         >
           <div className="vx-container flex h-16 items-center justify-between">
             <Link href="/" className="-m-1 rounded-sm p-1" aria-label="VEXA Digital, home" onClick={() => setOpen(false)}>
-              <Image src="/brand/vexa-logo.png" alt="" width={1132} height={590} className="h-8 w-auto" />
+              <Image src="/brand/vexa-logo-compact-ink.png" alt="" width={236} height={144} className="h-9 w-auto" />
             </Link>
             <button
               type="button"

@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
+import { withShare } from "@/lib/meta";
 import { BriefLink } from "@/components/BriefLink";
 import { PageIntro } from "@/components/PageIntro";
 import { ProofLedger } from "@/components/ProofLedger";
 import { QuillRule } from "@/components/QuillRule";
 import { bodyClass, h2Class, Section } from "@/components/Section";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withShare({
   title: "Track record and current work",
   description: "What VEXA has in progress, the partners it works with, and what its founder did before VEXA.",
   alternates: { canonical: "/proof" },
-};
+});
 
 export default function ProofPage(): React.ReactElement {
   return (
@@ -43,7 +44,7 @@ export default function ProofPage(): React.ReactElement {
               <BriefLink>Send your brief</BriefLink>
             </div>
           </div>
-          <div className="col-span-full mt-16 lg:col-span-9 lg:col-start-4">
+          <div className="col-span-full mt-12 lg:col-span-7 lg:col-start-4">
             <QuillRule />
           </div>
         </div>

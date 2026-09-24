@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
+import { withShare } from "@/lib/meta";
 import { ENTITY } from "@/components/entity";
 import { type LegalBlock } from "@/components/LegalBlocks";
 import { LegalLayout } from "@/components/LegalLayout";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = withShare({
   title: "Terms of use",
   description: "Terms of use for vexadigital.in, run by Blue Wings, trading as VEXA Digital.",
   alternates: { canonical: "/legal/terms" },
-};
+});
 
 // COUNSEL TO CONFIRM: entity line (trade name, proprietorship, proprietor, GSTIN, Udyam number) is
 // copied from the GST REG-06 and Udyam certificates. The registered address on both certificates is in

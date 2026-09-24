@@ -10,7 +10,11 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # Where the source is synced. The site service builds from this folder.
   SERVER_PATH: /opt/vexa/site
+  # Where the live compose file lives. Per PASTE_DEPLOY.md the site service was added to the
+  # existing Traefik, n8n and brain stack in /opt/vexa/n8n/docker-compose.yml.
+  COMPOSE_DIR: /opt/vexa/n8n
 
 jobs:
   deploy:
@@ -53,7 +57,7 @@ jobs:
           VEXA_SSH_USER: ${{ secrets.VEXA_SSH_USER }}
         run: |
           rsync -az --delete \
-            --exclude '.git' --exclude 'node_modules' --exclude '.next' --exclude '.env*' --exclude 'data' \
+            --exclude '.git' --exclude 'node_modules' --exclude '.next' --exclude '.env*' --exclude '/data' \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts" \
             ./ "$VEXA_SSH_USER@$VEXA_SSH_HOST:$SERVER_PATH/"
 
@@ -65,7 +69,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
             "$VEXA_SSH_USER@$VEXA_SSH_HOST" \
-            "cd $SERVER_PATH && docker compose -f docker-compose.site.yml up -d --build site"
+            "cd $COMPOSE_DIR && docker compose up -d --build --no-deps site"
 
       - name: Remove the key
         if: always()

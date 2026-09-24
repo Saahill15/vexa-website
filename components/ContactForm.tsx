@@ -160,7 +160,7 @@ export function ContactForm(): React.ReactElement {
           {REPLY_PROMISE} We spend three to four days on your business before we propose anything.
         </p>
         <p className="mx-auto mt-4 max-w-[44ch] font-text text-small text-vx-muted">
-          If it is urgent, email{" "}
+          You can also email{" "}
           <a className="vx-link" href={`mailto:${SITE.email}`}>
             {SITE.email}
           </a>
@@ -221,9 +221,10 @@ export function ContactForm(): React.ReactElement {
           {INTERESTS.map((item) => (
             <label key={item} className="relative">
               <input type="checkbox" name="interest" value={item} className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0" />
-              <span className="flex min-h-[44px] items-center gap-2 rounded-sm border border-vx-muted px-4 font-text text-small text-vx-ink transition-colors duration-fast peer-checked:border-vx-peacock-blue peer-checked:bg-vx-white peer-checked:font-medium peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-vx-peacock-blue [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100">
-                <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 text-vx-peacock-blue" aria-hidden="true">
-                  <path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" strokeWidth="1.75" />
+              <span className="flex min-h-[44px] items-center gap-2 rounded-sm border border-vx-muted px-4 font-text text-small text-vx-ink transition-colors duration-fast peer-checked:border-vx-peacock-blue peer-checked:bg-vx-white peer-checked:font-medium peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-vx-peacock-blue [&_path]:opacity-0 peer-checked:[&_path]:opacity-100">
+                <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0 text-vx-peacock-blue" aria-hidden="true">
+                  <rect x="0.5" y="0.5" width="15" height="15" rx="1.5" fill="none" stroke="#655D52" />
+                  <path d="M3.5 8.5l3 3 6-6.5" fill="none" stroke="currentColor" strokeWidth="1.75" />
                 </svg>
                 {item}
               </span>
@@ -369,6 +370,13 @@ export function ContactForm(): React.ReactElement {
         </button>
         <p className="font-text text-small text-vx-ink-2">{REPLY_PROMISE}</p>
       </div>
+      <p className="mt-4 font-text text-small text-vx-ink-2">
+        You can also email{" "}
+        <a className="vx-link" href={`mailto:${SITE.email}`}>
+          {SITE.email}
+        </a>
+        .
+      </p>
 
       {summary.length > 0 ? (
         <div ref={summaryRef} tabIndex={-1} role="alert" className="mt-8 border-l-2 border-vx-error pl-4">

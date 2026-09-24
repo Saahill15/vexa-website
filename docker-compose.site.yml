@@ -1,8 +1,18 @@
+# Reference block for the live site service. It is not run on its own in production.
+# Per PASTE_DEPLOY.md the live site service sits in /opt/vexa/n8n/docker-compose.yml, next to
+# traefik, n8n and brain, and builds from /opt/vexa/site. Copy the site service and the
+# site_data volume from here into that file, with `build: /opt/vexa/site` in place of `build: .`.
+# Check the network name and certresolver against the traefik service in that file before use.
+# Local test: docker compose -f docker-compose.site.yml up -d --build site
 services:
   site:
     build: .
     container_name: vexa-site
     restart: unless-stopped
+    environment:
+      # Optional: a webhook (for example n8n) told about each brief. Empty means disk only.
+      - CONTACT_WEBHOOK_URL=${CONTACT_WEBHOOK_URL:-}
+      - CONTACT_WEBHOOK_TOKEN=${CONTACT_WEBHOOK_TOKEN:-}
     volumes:
       - site_data:/app/data
     labels:
