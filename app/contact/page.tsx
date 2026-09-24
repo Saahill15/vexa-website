@@ -53,9 +53,8 @@ export default function ContactPage(): React.ReactElement {
               partnerships@vexadigital.in
             </a>
           </p>
-          <p className="text-base text-vx-neutral-400">
-            VEXA Digital, a trade name of Blue Wings, 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi
-            110070
+          <p className="text-base text-vx-neutral-400" data-counsel="true">
+            VEXA Digital, a trade name of Blue Wings. Operating office: 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070
           </p>
         </aside>
       </div>

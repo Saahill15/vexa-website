@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ButtonLink } from "@/components/ButtonLink";
+import { ENTITY } from "@/components/entity";
 import { PageIntro } from "@/components/PageIntro";
 
 export const metadata: Metadata = {
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 const h2 = "font-display text-2xl font-semibold tracking-tight text-vx-cream-50";
+const h3 = "mt-8 font-display text-lg font-semibold tracking-tight text-vx-cream-50";
 const body = "mt-4 text-base leading-relaxed text-vx-neutral-400 md:text-lg";
 
 export default function AboutPage(): React.ReactElement {
@@ -28,18 +30,18 @@ export default function AboutPage(): React.ReactElement {
           where it stands today, connect it with brands that suit that stage, and show it how to
           start.
         </p>
-        <p>
-          VEXA Digital is based in Delhi and is a trade name of Blue Wings, a proprietorship.
-          Proprietor: Asknani Pratham Kishorkumar. GSTIN 24FKBPA4989L1ZT.
-        </p>
+        <p>VEXA Digital is run from Delhi.</p>
+        <p data-counsel="true">{ENTITY.licence}</p>
+        <p data-counsel="true">{ENTITY.registrations}</p>
       </PageIntro>
 
       <div className="mx-auto max-w-3xl space-y-14 px-5 md:px-8">
         <section data-segment="ABOUT-02">
-          <h2 className={h2}>Who you work with</h2>
+          <h2 className={h2}>The founding team</h2>
+          <h3 className={h3}>Soda (Kaustubh), founder</h3>
           <p className={body}>
-            VEXA is founded and run by Kaustubh Srivastava, known as Soda, and you deal with him
-            directly. [Soda to confirm: photo, use of the full name on this page, and one profile
+            Soda founded VEXA and runs it day to day, and you deal with him directly. [Soda to
+            confirm: photo, use of the full name Kaustubh Srivastava on this page, and one profile
             link]
           </p>
           <p className={body} data-counsel="true">
@@ -52,6 +54,16 @@ export default function AboutPage(): React.ReactElement {
             brings that to your campaign.
           </p>
           <p className={body}>[Soda to confirm: a short dated timeline, such as the year VEXA started]</p>
+          <h3 className={h3}>Pratham Kishorkumar Asknani, cofounder</h3>
+          {/* COUNSEL TO CONFIRM: certificate spelling "Asknani"; the owner spells it "Asnani". */}
+          <p className={body} data-counsel="true">
+            Pratham is VEXA&apos;s cofounder and the proprietor of Blue Wings, the business that
+            trades as VEXA Digital.
+          </p>
+          <p className={body}>
+            [Soda to confirm: Pratham&apos;s role in VEXA, a short line on his background, and a
+            photo]
+          </p>
         </section>
 
         {/* LEAD HOLD 22 Sep 2026: Advocates Act / enrolment / structure copy omitted from public

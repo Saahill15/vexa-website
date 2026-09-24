@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ENTITY } from "@/components/entity";
 import { LegalBlocks, type LegalBlock } from "@/components/LegalBlocks";
 import { PageIntro } from "@/components/PageIntro";
 
@@ -24,7 +25,7 @@ const INTRO: readonly LegalBlock[] = [
 
 // COUNSEL TO CONFIRM: entity line (trade name, proprietorship, proprietor, GSTIN, Udyam number) is
 // copied from the GST REG-06 and Udyam certificates. The registered address on both certificates is in
-// Ahmedabad; this page keeps the Delhi Bhawani Kunj address as instructed. Confirm before publication.
+// Ahmedabad and is shown as the registered place of business; Delhi is the operating office. Confirm before publication.
 const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
   {
     "id": "PRIV-02",
@@ -35,8 +36,13 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
       },
       {
         "t": "p",
-        "text": "Blue Wings, trading as VEXA Digital (\"VEXA\", \"we\", \"us\"), is responsible for personal data collected through vexadigital.in. VEXA Digital is a trade name of Blue Wings. Blue Wings is a proprietorship. Proprietor: Asknani Pratham Kishorkumar. GSTIN 24FKBPA4989L1ZT. Udyam registration number UDYAM-GJ-01-0537468."
+        "text": "Blue Wings, trading as VEXA Digital (\"VEXA\", \"we\", \"us\"), is responsible for personal data collected through vexadigital.in."
       },
+      { "t": "p", "text": ENTITY.licence, "counsel": true },
+      { "t": "p", "text": ENTITY.registrations, "counsel": true },
+      { "t": "p", "text": ENTITY.operatingOffice, "counsel": true },
+      { "t": "p", "text": ENTITY.registeredOffice, "counsel": true },
+      { "t": "p", "text": ENTITY.invoicing, "counsel": true },
       {
         "t": "ul",
         "items": [
@@ -45,10 +51,6 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
             "counsel": true
           }
         ]
-      },
-      {
-        "t": "p",
-        "text": "Address: 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070."
       }
     ]
   },

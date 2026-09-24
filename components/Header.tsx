@@ -48,10 +48,10 @@ export function Header(): React.ReactElement {
         <Link href="/" className={`shrink-0 ${linkFocus}`} onClick={() => setOpen(false)}>
           <span className="inline-flex items-center gap-2">
             <Image
-              src="/brand/vexa-logo-light.png"
+              src="/brand/vexa-logo-light-compact.png"
               alt="VEXA Digital"
-              width={1132}
-              height={590}
+              width={938}
+              height={572}
               priority
               className="h-9 w-auto md:h-11"
             />
@@ -93,7 +93,7 @@ export function Header(): React.ReactElement {
         </Link>
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-vx-charcoal-600 transition-colors duration-base ease-vx-out hover:border-vx-neutral-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500 lg:hidden"
+          className="group inline-flex h-11 w-11 items-center justify-center rounded-md border border-vx-charcoal-600 transition-colors duration-base ease-vx-out hover:border-vx-neutral-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-vx-accent-500 lg:hidden"
           aria-expanded={open}
           aria-controls="mobile-nav"
           onClick={() => setOpen((value) => !value)}
@@ -101,17 +101,17 @@ export function Header(): React.ReactElement {
           <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
           <span className="flex flex-col gap-1.5" aria-hidden="true">
             <span
-              className={`block h-0.5 w-5 bg-vx-charcoal-900 transition duration-base ease-vx-out ${
+              className={`block h-0.5 w-5 bg-vx-cream-50 transition duration-base ease-vx-out group-hover:bg-vx-peacock-teal-light ${
                 open ? "translate-y-2 rotate-45" : ""
               }`}
             />
             <span
-              className={`block h-0.5 w-5 bg-vx-charcoal-900 transition duration-base ease-vx-out ${
+              className={`block h-0.5 w-5 bg-vx-cream-50 transition duration-base ease-vx-out group-hover:bg-vx-peacock-teal-light ${
                 open ? "opacity-0" : ""
               }`}
             />
             <span
-              className={`block h-0.5 w-5 bg-vx-charcoal-900 transition duration-base ease-vx-out ${
+              className={`block h-0.5 w-5 bg-vx-cream-50 transition duration-base ease-vx-out group-hover:bg-vx-peacock-teal-light ${
                 open ? "-translate-y-2 -rotate-45" : ""
               }`}
             />

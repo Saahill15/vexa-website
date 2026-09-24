@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ENTITY } from "@/components/entity";
 import { LegalBlocks, type LegalBlock } from "@/components/LegalBlocks";
 import { PageIntro } from "@/components/PageIntro";
 
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 
 // COUNSEL TO CONFIRM: entity line (trade name, proprietorship, proprietor, GSTIN, Udyam number) is
 // copied from the GST REG-06 and Udyam certificates. The registered address on both certificates is in
-// Ahmedabad; this page keeps the Delhi Bhawani Kunj address as instructed. Confirm before publication.
+// Ahmedabad and is shown as the registered place of business; Delhi is the operating office. Confirm before publication.
 const INTRO: readonly LegalBlock[] = [
   {
     "t": "p",
@@ -21,12 +22,18 @@ const INTRO: readonly LegalBlock[] = [
   },
   {
     "t": "p",
-    "text": "This site describes VEXA's services and lets you send us an enquiry. Use it lawfully and for genuine business purposes. Our content belongs to us. Nothing here is legal, tax or financial advice. Any service we provide runs under a separate written agreement. Indian law applies, and the courts at Delhi decide disputes."
+    "text": "This site describes VEXA's services and lets you send us an enquiry. Use it lawfully and for genuine business purposes. Our content belongs to us. Nothing here is legal, tax or financial advice. Any service we provide runs under a separate written agreement with Blue Wings. Indian law applies, and the courts at Delhi decide disputes."
   },
   {
     "t": "p",
-    "text": "These terms cover your use of vexadigital.in, run by Blue Wings, trading as VEXA Digital. VEXA Digital is a trade name of Blue Wings. Blue Wings is a proprietorship. Proprietor: Asknani Pratham Kishorkumar. GSTIN 24FKBPA4989L1ZT. Udyam registration number UDYAM-GJ-01-0537468. By using this site, you agree to them."
-  }
+    "text": "These terms cover your use of vexadigital.in, run by Blue Wings, trading as VEXA Digital. By using this site, you agree to them."
+  },
+  { "t": "p", "text": ENTITY.licence, "counsel": true },
+  { "t": "p", "text": ENTITY.registrations, "counsel": true },
+  { "t": "p", "text": ENTITY.operatingOffice, "counsel": true },
+  { "t": "p", "text": ENTITY.registeredOffice, "counsel": true },
+  { "t": "p", "text": ENTITY.invoicing, "counsel": true },
+  { "t": "p", "text": ENTITY.agreements, "counsel": true }
 ];
 
 const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [

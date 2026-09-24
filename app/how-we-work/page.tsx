@@ -27,7 +27,7 @@ const STEPS = [
   },
   {
     title: "Contract and payment",
-    body: "The contracts are signed and payments follow an agreed schedule. [Soda to confirm: which party signs each contract, and the payment schedule]",
+    body: "Agreements for our services are made with Blue Wings, and invoices are issued by Blue Wings. Payments follow an agreed schedule. [For counsel to confirm: who signs for Blue Wings] [Soda to confirm: the payment schedule]",
   },
   {
     title: "Campaign and report",

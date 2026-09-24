@@ -1,7 +1,8 @@
 import { Fragment } from "react";
 
 export type LegalBlock =
-  | { t: "h2" | "h3" | "p"; text: string }
+  | { t: "h2" | "h3"; text: string }
+  | { t: "p"; text: string; counsel?: boolean }
   | { t: "ul"; items: { text: string; counsel?: boolean }[] }
   | { t: "kv"; rows: [string, string][] };
 
@@ -50,7 +51,7 @@ export function LegalBlocks({ blocks }: { blocks: readonly LegalBlock[] }): Reac
             );
           case "p":
             return (
-              <p key={index} className="mt-3">
+              <p key={index} className="mt-3" data-counsel={block.counsel ? "true" : undefined}>
                 <Text text={block.text} />
               </p>
             );

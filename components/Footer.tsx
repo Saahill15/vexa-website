@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ENTITY } from "@/components/entity";
 import { NAV } from "@/components/nav";
 
 const linkClass =
@@ -21,16 +22,17 @@ export function Footer(): React.ReactElement {
             VEXA Digital is an esports and brand partnerships consultancy. We help brands find their
             fit in gaming, and help teams and creators find the right brand partners.
           </p>
-          <p className="max-w-sm text-sm text-vx-neutral-200">
-            VEXA Digital is a trade name of Blue Wings, a proprietorship. Proprietor: Asknani Pratham
-            Kishorkumar.
-          </p>
-          <p className="max-w-sm text-sm text-vx-neutral-200">
-            77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070
-          </p>
-          <p className="max-w-sm text-sm text-vx-neutral-200">
-            GSTIN 24FKBPA4989L1ZT. Udyam registration number UDYAM-GJ-01-0537468.
-          </p>
+          {[
+            ENTITY.licence,
+            ENTITY.registrations,
+            ENTITY.operatingOffice,
+            ENTITY.registeredOffice,
+            ENTITY.invoicing,
+          ].map((line) => (
+            <p key={line} data-counsel="true" className="max-w-sm text-sm text-vx-neutral-200">
+              {line}
+            </p>
+          ))}
           <p className="text-sm text-vx-neutral-200">
             <a className={`${linkClass} hover:text-vx-feather-gold`} href="tel:+919958895505">
               +91 9958895505
