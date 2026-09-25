@@ -6,7 +6,7 @@ import { LegalLayout } from "@/components/LegalLayout";
 
 export const metadata: Metadata = withShare({
   title: "Terms of use",
-  description: "Terms of use for vexadigital.in, run by Blue Wings, trading as VEXA Digital.",
+  description: "Terms of use for www.vexadigital.in, run by Blue Wings, trading as VEXA Digital.",
   alternates: { canonical: "/legal/terms" },
 });
 
@@ -28,7 +28,7 @@ const INTRO: readonly LegalBlock[] = [
   },
   {
     "t": "p",
-    "text": "These terms cover your use of vexadigital.in, run by Blue Wings, trading as VEXA Digital. By using this site, you agree to them."
+    "text": "These terms cover your use of www.vexadigital.in, run by Blue Wings, trading as VEXA Digital. By using this site, you agree to them."
   },
   { "t": "p", "text": ENTITY.licence, "counsel": true },
   { "t": "p", "text": ENTITY.registrations, "counsel": true },
