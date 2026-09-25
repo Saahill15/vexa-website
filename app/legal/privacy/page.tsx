@@ -6,7 +6,7 @@ import { LegalLayout } from "@/components/LegalLayout";
 
 export const metadata: Metadata = withShare({
   title: "Privacy policy",
-  description: "How Blue Wings, trading as VEXA Digital, collects, uses and protects personal data through vexadigital.in.",
+  description: "How Blue Wings, trading as VEXA Digital, collects, uses and protects personal data through www.vexadigital.in.",
   alternates: { canonical: "/legal/privacy" },
 });
 
@@ -38,7 +38,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
       },
       {
         "t": "p",
-        "text": "Blue Wings, trading as VEXA Digital (\"VEXA\", \"we\", \"us\"), is responsible for personal data collected through vexadigital.in."
+        "text": "Blue Wings, trading as VEXA Digital (\"VEXA\", \"we\", \"us\"), is responsible for personal data collected through www.vexadigital.in."
       },
       { "t": "p", "text": ENTITY.licence, "counsel": true },
       { "t": "p", "text": ENTITY.registrations, "counsel": true },
