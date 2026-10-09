@@ -31,11 +31,9 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    ".next-launch-check/types/**/*.ts",
-    ".next-review/types/**/*.ts",
-    ".next-website-refinement/types/**/*.ts",
     ".next/types/**/*.ts",
-    "next-env.d.ts"
+    "next-env.d.ts",
+    ".next-review-dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
