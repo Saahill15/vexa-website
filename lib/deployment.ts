@@ -1,0 +1,1 @@
+export function accountConfigured():boolean {if(!process.env.NEXTAUTH_SECRET)return false;if(process.env.NODE_ENV!=="production" || process.env.VEXA_PREVIEW==="1")return true;try{const url=new URL(process.env.NEXTAUTH_URL || "");return process.env.NEXTAUTH_SECRET.length>=32 && url.origin==="https://www.vexadigital.in";}catch{return false;}}

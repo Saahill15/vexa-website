@@ -1,0 +1,8 @@
+export const dynamic="force-dynamic";
+import { NextResponse } from "next/server";
+import { getDb } from "@/lib/db";
+import { allowAttempt, completeReader } from "@/lib/accounts";
+import { currentReader, error, mutationGuard, readBody } from "@/lib/account-security";
+type Context={params:Promise<{id:string}>};
+export async function PATCH(request:Request,{params: routeParams}:Context){const params=await routeParams;const blocked=mutationGuard(request);if(blocked)return blocked;const reader=await currentReader();if(!reader||!completeReader(reader))return error("Sign in first.",401);if(!allowAttempt(`comment-edit:${reader.id}`,20,60_000))return error("Please wait a minute.",429);try{const body=await readBody(request);if(typeof body.body!=="string"||body.body.trim().length<3||body.body.length>2000||/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(body.body))return error("Write a comment of 3 to 2,000 characters.");const result=getDb().prepare("UPDATE reader_comments SET body=?,status='pending',updated_at=? WHERE id=? AND reader_id=?").run(body.body.trim(),new Date().toISOString(),params.id,reader.id);return result.changes?NextResponse.json({ok:true}):error("Comment not found.",404);}catch{return error("Check the comment and try again.");}}
+export async function DELETE(request:Request,{params: routeParams}:Context){const params=await routeParams;const blocked=mutationGuard(request);if(blocked)return blocked;const reader=await currentReader();if(!reader)return error("Sign in first.",401);const result=getDb().prepare("DELETE FROM reader_comments WHERE id=? AND reader_id=?").run(params.id,reader.id);return result.changes?NextResponse.json({ok:true}):error("Comment not found.",404);}

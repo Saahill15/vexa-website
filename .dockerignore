@@ -1,0 +1,12 @@
+node_modules
+.next*
+*.md
+.cursor
+.env
+.env.*
+data
+.git
+work
+outputs
+*.log
+*.tsbuildinfo
