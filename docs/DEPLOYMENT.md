@@ -4,7 +4,9 @@ The live application is https://www.vexadigital.in. The apex redirects to the ca
 
 The production Compose project is `site` in `/opt/vexa/site`, using `docker-compose.site.yml`. It is independent of OS, Valuate and n8n. Traefik uses `vexa_edge` and certificate resolver `le`. The private mail relay is on `vexa_account_mail`.
 
-Only the owner performs a release. CI checks ordinary branches and pull requests without production credentials. The release workflow is manually dispatched from `main`; a feature-branch push is not a release. Its existing SSH secrets remain in GitHub Actions, not source. See [GitHub's secret storage guidance](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).
+Only the owner performs a release. CI checks ordinary branches and pull requests without production credentials. The production SSH key was removed from this repository's Actions secrets before collaborator access was accepted. The retained manual release workflow cannot authenticate to production without it. Do not restore production credentials to this shared repository: repository write access can allow workflow changes, and the current plan does not enforce private branch protection. Feature branches and PR review are the contribution workflow, not a technical permission boundary.
+
+Use the owner's existing private SSH access for an audited release. GitHub collaboration does not grant server access; do not share the owner's private key, production environment or database. Any future automated deployment needs a separate owner-controlled credential and approval boundary.
 
 Before releasing, compare intended source with production, save source and SQLite backups, retain the previous image, and check free disk space. Production `.env` and `/app/data` remain separate. Do not sync build caches, local databases, filled environment files or company documents.
 
