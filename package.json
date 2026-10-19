@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test:admin": "node --test --test-reporter=spec scripts/check-admin.mjs",
     "preview": "node scripts/local-preview.mjs",
     "check:preview": "python3 scripts/check-preview.py",
     "check:production": "python3 scripts/check-production-access.py"

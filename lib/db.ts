@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import fs from "fs";
 import path from "path";
+import { runMigrations } from "@/lib/migrations";
 
 // One small SQLite file in the Docker volume (/app/data), so leads and briefs survive a rebuild.
 let db: Database.Database | null = null;
@@ -9,7 +10,9 @@ export function getDb(): Database.Database {
   if (db) return db;
   const dir = process.env.VEXA_DATA_DIR ?? path.join(process.cwd(), "data");
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-  const opened = new Database(path.join(dir, "vexa.db"));
+  const file = path.join(dir, "vexa.db");
+  const existed = fs.existsSync(file) && fs.statSync(file).size > 0;
+  const opened = new Database(file);
   fs.chmodSync(path.join(dir,"vexa.db"),0o600);
   opened.pragma("journal_mode = WAL");
   opened.exec(`
@@ -64,6 +67,8 @@ export function getDb(): Database.Database {
     CREATE TABLE IF NOT EXISTS account_limits (key TEXT PRIMARY KEY, count INTEGER NOT NULL, reset_at INTEGER NOT NULL);
   `);
   if(!(opened.prepare("PRAGMA table_info(readers)").all() as {name:string}[]).some(column=>column.name==="email_verified"))opened.exec("ALTER TABLE readers ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0");
+  const migrated = runMigrations(opened, dir, existed);
+  if (migrated.applied.length) console.info(`database migrations applied: ${migrated.applied.join(", ")}${migrated.backup ? "; pre-migration snapshot saved in the data directory's backups folder" : ""}`);
   db = opened;
   return opened;
 }
@@ -125,16 +130,19 @@ export type BriefInput = {
   launch: string | null;
   source: string | null;
   consent: boolean;
+  submissionId: string;
+  createdAt?: string;
+  origin?: "form" | "fallback-file";
 };
 
-export function insertBrief(entry: BriefInput): void {
-  getDb()
+export function insertBrief(entry: BriefInput): number {
+  const result = getDb()
     .prepare(
-      `INSERT INTO briefs (created_at, name, email, role, interest, company, problem, budget, launch, source, consent)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO briefs (created_at, name, email, role, interest, company, problem, budget, launch, source, consent, submission_id, origin, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
-      new Date().toISOString(),
+      entry.createdAt ?? new Date().toISOString(),
       entry.name,
       entry.email,
       entry.role,
@@ -145,5 +153,9 @@ export function insertBrief(entry: BriefInput): void {
       entry.launch,
       entry.source,
       entry.consent ? 1 : 0,
+      entry.submissionId,
+      entry.origin ?? "form",
+      new Date().toISOString(),
     );
+  return Number(result.lastInsertRowid);
 }

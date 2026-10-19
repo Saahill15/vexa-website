@@ -4,7 +4,7 @@ import { isEmail } from "@/lib/roles";
 
 const derive=(password:string,salt:string,keylen:number,options:{N:number;r:number;p:number;maxmem:number}):Promise<Buffer>=>new Promise((resolve,reject)=>scrypt(password,salt,keylen,options,(error,key)=>error?reject(error):resolve(key)));
 export const READER_ROLES = [{value:"brand",label:"Brand professional"},{value:"esports",label:"Esports professional"},{value:"enthusiast",label:"Gaming enthusiast"}] as const;
-export type Reader = {id:string;email:string;password_hash:string|null;google_sub:string|null;email_verified:number;name:string;role:string;industry:string;job:string;organisation:string;public_details:number;moderator:number;contributor:number;created_at:string};
+export type Reader = {id:string;email:string;password_hash:string|null;google_sub:string|null;email_verified:number;name:string;role:string;industry:string;job:string;organisation:string;public_details:number;moderator:number;contributor:number;created_at:string;admin:number;disabled_at:string|null};
 export function readerById(id:string):Reader|null { return (getDb().prepare("SELECT * FROM readers WHERE id=?").get(id) as Reader|undefined) ?? null; }
 export function readerByEmail(email:string):Reader|null { return (getDb().prepare("SELECT * FROM readers WHERE email=?").get(email) as Reader|undefined) ?? null; }
 export function readerByGoogleSub(sub:string):Reader|null {return (getDb().prepare("SELECT * FROM readers WHERE google_sub=?").get(sub) as Reader|undefined) ?? null;}
@@ -40,7 +40,20 @@ export function allowAttempt(key:string,max:number,windowMs:number):boolean {
   getDb().prepare("UPDATE account_limits SET count=count+1 WHERE key=?").run(hashed);return row.count<max;
  })();
 }
-export function startReaderSession(readerId:string):string {const id=randomBytes(32).toString("hex");getDb().prepare("DELETE FROM reader_sessions WHERE expires_at<?").run(Date.now());getDb().prepare("INSERT INTO reader_sessions VALUES(?,?,?)").run(id,readerId,Date.now()+30*24*3600*1000);return id;}
+/**
+ * Rate limit keyed by client address. The address is only known when VEXA_TRUST_PROXY=1 (lib/request-security.ts);
+ * forwarded headers are never read otherwise. Without it every visitor is "unknown", so a per-address limit would
+ * become one tiny site-wide limit that a single person could exhaust for everybody. In that case one shared
+ * ceiling, sized for all visitors together, caps total volume; per-account and per-email limits stay the main
+ * protection against guessing.
+ */
+export function allowClient(ip:string,scope:string,perClient:number,shared:number,windowMs:number):boolean {return ip==="unknown"?allowAttempt(`${scope}:shared`,shared,windowMs):allowAttempt(`${scope}:${ip}`,perClient,windowMs);}
+/** Checks a counter without adding to it, for limits that should only count failures. */
+export function limitReached(key:string,max:number):boolean {const row=getDb().prepare("SELECT count FROM account_limits WHERE key=? AND reset_at>?").get(createHash("sha256").update(key).digest("hex"),Date.now()) as {count:number}|undefined;return Boolean(row && row.count>=max);}
+export function startReaderSession(readerId:string):string {const id=randomBytes(32).toString("hex"),now=Date.now();getDb().prepare("DELETE FROM reader_sessions WHERE expires_at<?").run(now);getDb().prepare("INSERT INTO reader_sessions(id,reader_id,expires_at,created_at) VALUES(?,?,?,?)").run(id,readerId,now+30*24*3600*1000,now);return id;}
+/** When the session was created by a real sign-in; null for sessions older than the admin migration. */
+export function readerSessionCreatedAt(id:string):number|null {const row=getDb().prepare("SELECT created_at FROM reader_sessions WHERE id=? AND expires_at>?").get(id,Date.now()) as {created_at:number|null}|undefined;return row?.created_at ?? null;}
+export function endAllReaderSessions(readerId:string):number {return getDb().prepare("DELETE FROM reader_sessions WHERE reader_id=?").run(readerId).changes;}
 export function validReaderSession(id:string,readerId:string):boolean {return Boolean(getDb().prepare("SELECT id FROM reader_sessions WHERE id=? AND reader_id=? AND expires_at>?").get(id,readerId,Date.now()));}
 export function endReaderSession(id:string):void {getDb().prepare("DELETE FROM reader_sessions WHERE id=?").run(id);}
 export function safeReturnTo(value:unknown):string {return typeof value==="string" && /^\/learn\/[a-z0-9-]+(?:#continue)?$/.test(value)?value:"/learn";}

@@ -12,6 +12,9 @@ services:
       # Sign in and leads. The real values live in /opt/vexa/site/.env on the server, never in this repo.
       - NEXTAUTH_URL=${NEXTAUTH_URL:-https://www.vexadigital.in}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-}
+      - STAFF_TOTP_REQUIRED=${STAFF_TOTP_REQUIRED:-true}
+      - STAFF_TOTP_KEY=${STAFF_TOTP_KEY:-}
+      - STAFF_TOTP_KEY_PREVIOUS=${STAFF_TOTP_KEY_PREVIOUS:-}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
       - GOOGLE_IDENTITY_ENABLED=${GOOGLE_IDENTITY_ENABLED:-false}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}

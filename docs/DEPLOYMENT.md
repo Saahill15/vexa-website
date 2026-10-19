@@ -18,6 +18,6 @@ docker compose -p site -f docker-compose.site.yml build site
 docker compose -p site -f docker-compose.site.yml up -d --no-deps site
 ```
 
-Then check HTTPS home, mobile navigation, article checkpoint, account API boundary and enquiry validation. Restore a retained previous image for an application rollback; replacing the live database can lose later legitimate records.
+Releases that add database migrations snapshot the database automatically on start-up; still take a manual backup first with `docker exec vexa-site node scripts/backup-db.mjs` (see `docs/admin/ADMIN.md`). Then check HTTPS home, mobile navigation, article checkpoint, account API boundary and enquiry validation. Restore a retained previous image for an application rollback; replacing the live database can lose later legitimate records.
 
 The historical `live-site` branch is retained for provenance. Current development starts from `main`.

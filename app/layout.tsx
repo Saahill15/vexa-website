@@ -3,6 +3,7 @@ import { text } from "@/app/fonts";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { SkipToContent } from "@/components/SkipToContent";
+import { PublicOnly } from "@/components/SiteChrome";
 import { SITE } from "@/lib/site";
 import "./globals.css";
 
@@ -61,10 +62,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className="min-h-[100dvh] bg-vx-paper font-text text-body text-vx-ink">
         <SkipToContent />
-        {process.env.VEXA_PREVIEW === "1" ? <div className="preview-notice">Website preview for review. Test submissions stay on this Mac.</div> : null}
-        <Header />
+        <PublicOnly>
+          {process.env.VEXA_PREVIEW === "1" ? <div className="preview-notice">Website preview for review. Test submissions stay on this Mac.</div> : null}
+          <Header />
+        </PublicOnly>
         <main id="main">{children}</main>
-        <Footer />
+        <PublicOnly>
+          <Footer />
+        </PublicOnly>
       </body>
     </html>
   );

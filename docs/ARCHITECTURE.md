@@ -11,3 +11,5 @@ In production, Docker runs the standalone Next output behind Traefik HTTPS. The 
 Security controls include server-side account/ownership checks, same-origin mutation checks, password hashing, expiring sessions, private profile fields, moderation, validated inputs, rate limits and response security headers. See the actual implementations and account checks before changing these boundaries. Presentation-only work needs none of the production account or infrastructure access.
 
 Product and design references are under `docs/product/` and `docs/design/`. Older references are historical, not current release instructions. The source and this deployment guide take precedence for paths and runtime facts.
+
+The staff admin area is `/admin` (enquiries, leads, accounts, article visibility, comment moderation, audit log). Roles, migrations, provisioning and operations are in [docs/admin/ADMIN.md](admin/ADMIN.md); the pre-implementation audit is [docs/admin/AUDIT.md](admin/AUDIT.md). Schema changes are versioned in `lib/migrations.ts` and applied at start-up after an automatic snapshot.

@@ -15,7 +15,7 @@ const INTRO: readonly LegalBlock[] = [
 
   {
     "t": "p",
-    "text": "Last updated 8 October 2026."
+    "text": "Last updated 17 October 2026."
   },
   {
     "t": "h3",
@@ -208,7 +208,7 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
         "t": "ul",
         "items": [
           {
-            "text": "We keep enquiries, account and profile records, comments and server logs for the purpose they were provided, subject to applicable retention requirements. A comment removed through your account is hidden from readers; limited records may remain for review and security. You can ask us to delete your account and related personal data by email.",
+            "text": "We keep enquiries, account and profile records, comments and server logs for the purpose they were provided, subject to applicable retention requirements. A comment you delete through your account is permanently erased, and deleting your account erases all of your comments. A comment removed by a moderator is hidden from readers; that record, with who removed it and when, is kept for review and security until you ask us to delete it. You can ask us to delete your account and related personal data by email.",
             "counsel": true
           }
         ]
@@ -412,6 +412,9 @@ const SECTIONS: readonly { id: string; blocks: readonly LegalBlock[] }[] = [
       {
         "t": "ul",
         "items": [
+          {
+            "text": "17 October 2026. Clarified what happens when you delete a comment and when a moderator removes one."
+          },
           {
             "text": "8 October 2026. Updated the reader account, public profile, comment and essential cookie descriptions."
           }

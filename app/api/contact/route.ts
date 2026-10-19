@@ -1,9 +1,8 @@
-import { allowAttempt } from "@/lib/accounts";
+import { allowClient } from "@/lib/accounts";
 import { mutationGuard, readBody, requestIp } from "@/lib/account-security";
-import { mkdir, appendFile } from "fs/promises";
-import path from "path";
 import { NextResponse } from "next/server";
-import { insertBrief } from "@/lib/db";
+import { acceptEnquiry } from "@/lib/enquiries";
+import { SITE } from "@/lib/site";
 
 type ContactBody = {
   name?: string;
@@ -25,7 +24,7 @@ function isEmail(value: string): boolean {
 
 export async function POST(request: Request): Promise<NextResponse> {
   const blocked=mutationGuard(request);if(blocked)return blocked;
-  if(!allowAttempt(`contact:${requestIp(request)}`,10,3600_000))return NextResponse.json({ok:false,error:"Please wait an hour before sending another brief."},{status:429});
+  if(!allowClient(requestIp(request),"contact",10,200,3600_000))return NextResponse.json({ok:false,error:"Please wait an hour before sending another brief."},{status:429});
   let body: ContactBody;
   try {
     body = (await readBody(request)) as ContactBody;
@@ -83,44 +82,12 @@ export async function POST(request: Request): Promise<NextResponse> {
     consent,
   };
 
-  try {
-    insertBrief({
-      name: entry.name,
-      email: entry.email,
-      role: entry.role,
-      interest: entry.interest,
-      company: entry.company,
-      problem: entry.problem,
-      budget: entry.budget,
-      launch: entry.launch,
-      source: entry.source,
-      consent: entry.consent,
-    });
-  } catch {
-    // The database is the home for briefs; if it fails for any reason the file still keeps the brief.
-    console.error("brief database write failed");
-    const dir = process.env.VEXA_DATA_DIR ?? path.join(process.cwd(), "data");
-    await mkdir(dir, { recursive: true });
-    await appendFile(path.join(dir, "contact-submissions.jsonl"), `${JSON.stringify(entry)}\n`, "utf8");
-  }
-
-  // Optional notification, for example an n8n webhook that emails Soda. See LAUNCH_NOTES.md.
-  const webhook = process.env.CONTACT_WEBHOOK_URL;
-  if (webhook) {
-    try {
-      await fetch(webhook, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(process.env.CONTACT_WEBHOOK_TOKEN ? { Authorization: `Bearer ${process.env.CONTACT_WEBHOOK_TOKEN}` } : {}),
-        },
-        body: JSON.stringify(entry),
-        signal: AbortSignal.timeout(5000),
-      });
-    } catch {
-      // The brief is already saved to disk; a failed notification must not fail the visitor.
-      console.error("contact webhook failed");
-    }
+  const result = await acceptEnquiry(entry);
+  if (!result.ok) {
+    return NextResponse.json(
+      { ok: false, error: `We could not save your message. Please try again in a few minutes, or email ${SITE.email}.` },
+      { status: 503 },
+    );
   }
 
   return NextResponse.json({ ok: true });

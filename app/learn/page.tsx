@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Arrow } from "@/components/ButtonLink";
-import { ARTICLES, SERIES, articleDate, articleReadTime, type SeriesKey } from "@/lib/learn";
+import { SERIES, articleDate, articleReadTime, type SeriesKey } from "@/lib/learn";
+import { visibleArticles } from "@/lib/article-state";
 import { withShare } from "@/lib/meta";
 
 export const metadata: Metadata = withShare({ title: "Articles on the business of gaming", description: "Researched writing by Kaustubh Srivastava on gaming partnerships, audience evidence and running an esports team.", alternates: { canonical: "/learn" } });
@@ -9,6 +10,7 @@ type Props = { searchParams: Promise<{ series?: string; q?: string }> };
 
 export default async function LearnPage({ searchParams: queryParams }: Props): Promise<React.ReactElement> {
   const searchParams=await queryParams;
+  const ARTICLES = visibleArticles();
   const liveSeries = (Object.keys(SERIES) as SeriesKey[]).filter(key => ARTICLES.some(article => article.series === key));
   const chosen = liveSeries.find(key => key === searchParams.series);
   const query = searchParams.q?.trim() || "";

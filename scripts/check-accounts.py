@@ -46,10 +46,10 @@ check('register reader A',register(a,'reader-a@example.invalid','Reader A')[0]==
 check('register reader B',register(b,'reader-b@example.invalid','Reader B')[0]==201)
 code,body,_=login(a,'reader-a@example.invalid','wrong-password');check('wrong password cannot create identity',json.loads(req(a,'/api/auth/session')[1]).get('user') is None)
 def mail_token(email):
- messages=json.loads(Path(os.environ['VEXA_ACCOUNT_TEST_MAIL']).read_text());return re.search(r'token=([a-f0-9]{64})',next(m['text'] for m in reversed(messages) if m['to']==email)).group(1)
+ messages=json.loads(Path(os.environ['VEXA_ACCOUNT_TEST_MAIL']).read_text(encoding='utf-8'));return re.search(r'token=([a-f0-9]{64})',next(m['text'] for m in reversed(messages) if m['to']==email)).group(1)
 login(a,'reader-a@example.invalid');check('unverified password reader denied before inbox confirmation',req(a,'/api/account/profile')[0]==401)
 verify_a=mail_token('reader-a@example.invalid');verify_b=mail_token('reader-b@example.invalid')
-check('verification email uses canonical site link',BASE+'/account/verify?token=' in json.loads(Path(os.environ['VEXA_ACCOUNT_TEST_MAIL']).read_text())[0]['text'])
+check('verification email uses canonical site link',BASE+'/account/verify?token=' in json.loads(Path(os.environ['VEXA_ACCOUNT_TEST_MAIL']).read_text(encoding='utf-8'))[0]['text'])
 check('mail scanner GET does not consume verification',req(anon,'/account/verify?token='+verify_a)[0]==200 and con.execute("SELECT email_verified FROM readers WHERE email='reader-a@example.invalid'").fetchone()[0]==0)
 check('forged verification rejected',req(anon,'/api/account/email','POST',{'action':'verify','token':'0'*64})[0]==400)
 for token in [verify_a,verify_b]:check('inbox verification token consumed',req(anon,'/api/account/email','POST',{'action':'verify','token':token})[0]==200)
@@ -85,7 +85,7 @@ check('editing approved comment resets moderation',req(a,'/api/comments/'+commen
 check('own comment delete succeeds',req(a,'/api/comments/'+comment,'DELETE',{})[0]==200)
 check('overlong comment denied',req(a,'/api/comments','POST',{'slug':slug,'body':'x'*2001})[0]==400)
 # Obtain any distinctive full-section sentence from source rather than assert UI wording.
-source=(Path(__file__).resolve().parents[1]/'content/learn'/ (slug+'.ts')).read_text();full=source.split('"full":',1)[1];marker=re.search(r'"body":\s*\[\s*"([^"\n]+)',full).group(1);needle=html.escape(marker,quote=False)
+source=(Path(__file__).resolve().parents[1]/'content/learn'/ (slug+'.ts')).read_text(encoding='utf-8');full=source.split('"full":',1)[1];marker=re.search(r'"body":\s*\[\s*"([^"\n]+)',full).group(1);needle=html.escape(marker,quote=False)
 anon_html=req(anon,'/learn/'+slug)[1];auth_html=req(a,'/learn/'+slug)[1]
 check('full sentence absent from anonymous HTML/RSC',marker not in anon_html and needle not in anon_html)
 check('full sentence present after real sign-in',marker in auth_html or needle in auth_html)
@@ -112,8 +112,9 @@ csrf=json.loads(req(b,'/api/auth/csrf')[1])['csrfToken'];req(b,'/api/auth/signou
 check('logout ends persisted session and account access',req(b,'/api/account/profile')[0]==401 and con.execute('SELECT count(*) FROM reader_sessions WHERE reader_id=?',(pb['id'],)).fetchone()[0]==0)
 rsc=urllib.request.Request(BASE+'/learn/'+slug,headers={'RSC':'1'});rsc_body=anon.open(rsc).read().decode();check('direct unauthenticated RSC request excludes full article',marker not in rsc_body)
 check('noJS article has account-link fallback','<noscript>' in anon_html and '/account?returnTo=' in anon_html)
-# Rate limit is persistent in isolated SQLite.
-for i in range(6):last=req(anon,'/api/account/register','POST',{'email':'invalid','password':'short'},origin=BASE)[0]
+# Rate limit is persistent in isolated SQLite. Without a trusted proxy the per-address limit is a shared site-wide
+# ceiling (lib/accounts.ts allowClient), so the per-email limit is what stops one person repeating registrations.
+for i in range(4):last=req(anon,'/api/account/register','POST',{'email':'rate-limit@example.invalid','password':'Synthetic-test-password-7781','consent':True},origin=BASE)[0]
 check('registration rate limit enforced',last==429)
 # Concurrent registration creates exactly one identity, with duplicate rejected safely.
 con.execute('DELETE FROM account_limits');con.commit()
@@ -156,5 +157,5 @@ alias=BASE.replace('localhost','127.0.0.1')
 for route in ['/account?returnTo=%2Flearn%2Fteam-or-tournament%23continue','/learn/'+slug]:
  response=anon.open(alias+route);check('loopback alias redirects to canonical '+route.split('?')[0],response.geturl().startswith(BASE) and response.status==200)
 
-Path(os.environ.get('VEXA_ACCOUNT_TEST_RESULTS', str(Path(DB) / 'account-http-results.json'))).write_text(json.dumps({'base':BASE,'isolated_db':DB,'checks':results},indent=2))
+Path(os.environ.get('VEXA_ACCOUNT_TEST_RESULTS', str(Path(DB).parent / 'account-http-results.json'))).write_text(encoding='utf-8',data=json.dumps({'base':BASE,'isolated_db':DB,'checks':results},indent=2))
 print(str(len(results))+' checks passed')

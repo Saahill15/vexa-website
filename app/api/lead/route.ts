@@ -1,4 +1,4 @@
-import { allowAttempt } from "@/lib/accounts";
+import { allowClient } from "@/lib/accounts";
 import { mutationGuard, readBody, requestIp } from "@/lib/account-security";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -21,7 +21,7 @@ type LeadBody = {
 
 export async function POST(request: Request): Promise<NextResponse> {
   const blocked=mutationGuard(request);if(blocked)return blocked;
-  if(!allowAttempt(`lead:${requestIp(request)}`,20,60_000))return NextResponse.json({ok:false,error:"Please wait a minute before trying again."},{status:429});
+  if(!allowClient(requestIp(request),"lead",20,300,60_000))return NextResponse.json({ok:false,error:"Please wait a minute before trying again."},{status:429});
 
   let body: LeadBody;
   try {

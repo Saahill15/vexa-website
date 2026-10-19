@@ -11,3 +11,14 @@ export async function deliverAccountLink(reader:{id:string;email:string},purpose
  try {const response=await fetch(process.env.ACCOUNT_MAIL_WEBHOOK_URL!,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${process.env.ACCOUNT_MAIL_WEBHOOK_TOKEN}`},body:JSON.stringify({to:reader.email,purpose,link:url.toString()}),signal:AbortSignal.timeout(20_000),redirect:"error"});if(!response.ok)throw Error("Mail service rejected delivery");}catch{db.prepare("DELETE FROM reader_tokens WHERE hash=?").run(hash);throw Error("Account email could not be sent");}
 }
 export function consumeAccountToken(token:unknown,purpose:Purpose,passwordHash?:string):boolean {if(typeof token!=="string"||!/^([a-f0-9]{64})$/.test(token))return false;const db=getDb();return db.transaction(()=>{const row=db.prepare("SELECT reader_id FROM reader_tokens WHERE hash=? AND purpose=? AND expires_at>?").get(digest(token),purpose,Date.now()) as {reader_id:string}|undefined;if(!row)return false;if(purpose==="verify")db.prepare("UPDATE readers SET email_verified=1 WHERE id=?").run(row.reader_id);else{if(!passwordHash)return false;db.prepare("UPDATE readers SET password_hash=?,email_verified=1 WHERE id=? AND password_hash IS NOT NULL").run(passwordHash,row.reader_id);db.prepare("DELETE FROM reader_sessions WHERE reader_id=?").run(row.reader_id);}db.prepare("DELETE FROM reader_tokens WHERE reader_id=?").run(row.reader_id);return true;})();}
+
+export type StaffSecurityEvent="totp_enrolled"|"totp_replaced";
+/**
+ * Tells a staff member, at their own address, that two-step sign-in was set up or replaced on their account, so an
+ * enrolment by someone else holding the password does not go unnoticed. The message carries only the event and the
+ * time: never a code, key or link. Best effort: returns false (and the caller audits that) instead of throwing.
+ */
+export async function notifyStaffSecurity(reader:{email:string},event:StaffSecurityEvent):Promise<boolean>{
+ if(!mailEnabled)return false;
+ try {const response=await fetch(process.env.ACCOUNT_MAIL_WEBHOOK_URL!,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${process.env.ACCOUNT_MAIL_WEBHOOK_TOKEN}`},body:JSON.stringify({to:reader.email,purpose:"staff-security",event,at:new Date().toISOString()}),signal:AbortSignal.timeout(10_000),redirect:"error"});return response.ok;}catch{return false;}
+}
