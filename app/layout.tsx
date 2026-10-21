@@ -1,75 +1,45 @@
 import type { Metadata, Viewport } from "next";
-import { text } from "@/app/fonts";
+import localFont from "next/font/local";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { SkipToContent } from "@/components/SkipToContent";
-import { PublicOnly } from "@/components/SiteChrome";
-import { SITE } from "@/lib/site";
+import { Pointer } from "@/components/Pointer";
 import "./globals.css";
 
-const DESCRIPTION =
-  "VEXA develops brand campaigns with gaming creators, esports teams and tournaments, and helps esports organisations build their commercial offer.";
-const TITLE = "Gaming campaigns and esports business advisory | VEXA";
+const display = localFont({
+  src: "./fonts/unbounded-latin.woff2",
+  weight: "500 700",
+  variable: "--font-display",
+  display: "swap",
+});
+
+const body = localFont({
+  src: "./fonts/manrope-latin.woff2",
+  weight: "400 700",
+  variable: "--font-body",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE.url),
-  title: { default: TITLE, template: "%s | VEXA" },
-  description: DESCRIPTION,
-  applicationName: "VEXA Digital",
-  icons: { icon: "/brand/open-feather-favicon.svg" },
-  openGraph: {
-    type: "website",
-    locale: "en_IN",
-    url: SITE.url,
-    siteName: "VEXA Digital",
-    title: TITLE,
-    description: DESCRIPTION,
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "VEXA, gaming campaigns and esports business advisory" }],
-  },
-  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: ["/opengraph-image"] },
-  robots: { index: process.env.VEXA_PREVIEW !== "1", follow: process.env.VEXA_PREVIEW !== "1" },
+  title: { default: "VEXA Digital | Esports consultancy", template: "%s | VEXA Digital" },
+  description:
+    "VEXA is an esports consultancy. We help brands succeed in gaming and help esports teams build partnerships brands can buy.",
+  openGraph: { type: "website", siteName: "VEXA Digital" },
 };
 
-export const viewport: Viewport = { themeColor: "#F7F5EF" };
+export const viewport: Viewport = { themeColor: "#ffffff" };
 
-// COUNSEL TO CONFIRM: legal name and address follow components/entity.ts.
-const ORGANIZATION = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "VEXA Digital",
-  alternateName: "VEXA",
-  legalName: "Blue Wings",
-  url: SITE.url,
-  logo: `${SITE.url}/brand/open-feather-lockup-primary.svg`,
-  email: SITE.email,
-  description: DESCRIPTION,
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "77A, LGF, Bhawani Kunj, Sector D-2",
-    addressLocality: "New Delhi",
-    addressRegion: "Delhi",
-    postalCode: "110070",
-    addressCountry: "IN",
-  },
-  areaServed: "IN",
-};
-
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>): React.ReactElement {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" className={text.variable} suppressHydrationWarning>
+    <html lang="en" className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
       <head>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION) }} />
+        <script dangerouslySetInnerHTML={{ __html: 'document.documentElement.classList.add("js")' }} />
       </head>
-      <body className="min-h-[100dvh] bg-vx-paper font-text text-body text-vx-ink">
-        <SkipToContent />
-        <PublicOnly>
-          {process.env.VEXA_PREVIEW === "1" ? <div className="preview-notice">Website preview for review. Test submissions stay on this Mac.</div> : null}
-          <Header />
-        </PublicOnly>
+      <body>
+        <a className="skip" href="#main">Skip to content</a>
+        <Pointer />
+        <Header />
         <main id="main">{children}</main>
-        <PublicOnly>
-          <Footer />
-        </PublicOnly>
+        <Footer />
       </body>
     </html>
   );

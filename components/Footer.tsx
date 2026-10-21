@@ -1,16 +1,43 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ENTITY } from "@/components/entity";
-import { FOOTER_GROUPS } from "@/components/nav";
-import { SITE, SOCIAL } from "@/lib/site";
+import { NAV, SITE } from "@/lib/site";
 
-export function Footer(): React.ReactElement {
-  return <footer data-segment="FOOTER-01" className="site-footer"><div className="vx-container">
-    <div className="footer-layout">
-      <div className="footer-company"><Image src="/brand/open-feather-lockup-light.svg" alt="VEXA Digital" width={348} height={112} className="footer-logo" /><p>Gaming campaigns for brands. Business advisory for esports teams and tournament organisers.</p></div>
-      {FOOTER_GROUPS.map(group => <nav key={group.title} aria-label={group.title}><h2 className="vx-label">{group.title}</h2><ul>{group.links.map(item => <li key={item.href}><Link href={item.href}>{item.label}</Link></li>)}</ul></nav>)}
-      <div className="footer-contact"><h2 className="vx-label">Start a conversation</h2><p><a className="break-all" href={`mailto:${SITE.email}`}>{SITE.email}</a></p><ul>{Object.values(SOCIAL).map(item => <li key={item.href}><a href={item.href} rel="noopener">{item.label}</a></li>)}</ul></div>
-    </div>
-    <div className="footer-legal"><div className="footer-entity">{[ENTITY.licence,ENTITY.registrations,ENTITY.operatingOffice,ENTITY.registeredOffice,ENTITY.invoicing].map(line => <p key={line} data-counsel="true">{line}</p>)}</div><div className="footer-bottom"><p>© {new Date().getFullYear()} Blue Wings</p><Link href="/legal/privacy">Privacy</Link><Link href="/legal/terms">Terms</Link><Link href="/legal/grievance-officer">Grievance Officer</Link></div></div>
-  </div></footer>;
+export function Footer() {
+  return (
+    <footer className="foot">
+      <div className="wrap">
+        <div className="foot-grid">
+          <div>
+            <Image className="logo-on-light" src="/img/vexa-logo.png" alt="VEXA Esports Consultancy" width={119} height={62} />
+            <Image className="logo-on-dark" src="/img/vexa-logo-light.png" alt="" aria-hidden="true" width={119} height={62} />
+          </div>
+          <nav aria-label="Pages">
+            <h2>Explore</h2>
+            <ul>
+              <li><Link href="/">Home</Link></li>
+              {NAV.map((item) => (
+                <li key={item.href}><Link href={item.href}>{item.label}</Link></li>
+              ))}
+            </ul>
+          </nav>
+          <div>
+            <h2>Say hello</h2>
+            <ul>
+              <li><a href={`mailto:${SITE.email}`} style={{ wordBreak: "break-all" }}>{SITE.email}</a></li>
+              <li><a href={SITE.instagram} rel="noopener" target="_blank">Instagram</a></li>
+              <li><a href={SITE.linkedin} rel="noopener" target="_blank">LinkedIn</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="wordmark" aria-hidden="true">VEXA</div>
+        <div className="legal">
+          <p>VEXA Digital is a trade name of Blue Wings. Operating office: {SITE.address}.</p>
+          <div className="bottom">
+            <span>© {new Date().getFullYear()} Blue Wings</span>
+            <span>Esports consultancy · est. 2025</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 }

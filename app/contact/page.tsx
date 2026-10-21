@@ -1,13 +1,37 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/ContactForm";
-import { withShare } from "@/lib/meta";
+import { Reveal } from "@/components/Reveal";
+import { Split } from "@/components/Split";
 import { SITE } from "@/lib/site";
 
-export const metadata: Metadata = withShare({ title: "Contact VEXA", description: "Tell us about a gaming campaign, esports organisation or creator question. A short note is enough to start the conversation.", alternates: { canonical: "/contact" } });
+export const metadata: Metadata = {
+  title: "Contact",
+  description: `Tell us about a gaming campaign or esports business. ${SITE.email}`,
+};
 
-export default function ContactPage(): React.ReactElement {
-  return <div className="contact-page"><div className="vx-container contact-composition">
-    <header className="contact-welcome" data-segment="CONTACT-01"><p className="vx-label hero-eyebrow">Contact us</p><h1>Good work starts<br />with a conversation.</h1><p>A campaign idea, an esports business or a creator question. Tell us what you have in mind, and we will work out the next step.</p><div className="contact-direct"><p className="vx-label">Prefer to write directly?</p><a href={`mailto:${SITE.email}`}>{SITE.email}<span aria-hidden="true">↗</span></a></div><p className="contact-office" data-counsel="true">VEXA Digital, a trade name of Blue Wings.<br />Operating office: 77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070.</p></header>
-    <div className="contact-form-stage"><ContactForm preview={process.env.VEXA_PREVIEW === "1"} /></div>
-  </div></div>;
+export default function ContactPage() {
+  return (
+    <div className="wrap contact">
+      <div className="c-intro">
+        <Reveal as="p" className="tag">Contact</Reveal>
+        <Split as="h1" className="h-xl">Say hello.</Split>
+        <Reveal delay={400}>
+          <a className="c-mail" href={`mailto:${SITE.email}`}>{SITE.email} <span aria-hidden="true">↗</span></a>
+        </Reveal>
+        <Reveal className="c-meta" delay={480}>
+          <p>{SITE.address}</p>
+          <ul>
+            <li><a href={SITE.instagram} rel="noopener" target="_blank">Instagram</a></li>
+            <li><a href={SITE.linkedin} rel="noopener" target="_blank">LinkedIn</a></li>
+          </ul>
+        </Reveal>
+      </div>
+
+      <Reveal className="fcard" variant="s" delay={250}>
+        <div className="fin">
+          <ContactForm />
+        </div>
+      </Reveal>
+    </div>
+  );
 }

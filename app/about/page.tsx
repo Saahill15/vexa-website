@@ -1,16 +1,69 @@
 import type { Metadata } from "next";
-import { ButtonLink } from "@/components/ButtonLink";
-import { PageMotion } from "@/components/PageMotion";
-import { withShare } from "@/lib/meta";
+import Image from "next/image";
+import { Cta } from "@/components/Cta";
+import { Reveal } from "@/components/Reveal";
+import { Split } from "@/components/Split";
+import { SITE } from "@/lib/site";
 
-export const metadata: Metadata = withShare({ title: "The team behind VEXA", description: "Meet Kaustubh Srivastava, Pratham Asknani and Bhaskar. Gaming experience, campaign thinking, research, administration and design at VEXA.", alternates: { canonical: "/about" } });
+export const metadata: Metadata = {
+  title: "About",
+  description: "VEXA is an esports consultancy founded in 2025 by Kaustubh Srivastava, a former competitive player and in-game leader.",
+};
 
-export default function AboutPage(): React.ReactElement {
-  return <>
-    <PageMotion />
-    <header className="about-opening vx-container"><p className="vx-label hero-eyebrow">About the team</p><h1>The people behind<br />the partnerships.</h1><div className="about-opening-note"><p>Campaign thinking, research and design, connected by an interest in the business around gaming.</p><ButtonLink href="/contact" variant="text">Start a conversation</ButtonLink></div></header>
-    <section className="about-founder vx-container"><div className="about-founder-name"><p className="vx-label">Founder and strategist</p><h2>Kaustubh<br />Srivastava</h2><p className="about-founder-years">Former competitive player<br />and in-game leader</p></div><div className="about-founder-story"><p>Kaustubh, known as Soda, has competed in mobile battle royale games and led a team as its in-game leader. His role was to set strategy and call the team&apos;s decisions during matches. His playing background spans PUBG Mobile and BGMI; it informs how he thinks about players, audiences and the work around competition.</p><p>That experience raised a question beyond the match: what can players and teams build that gives someone a reason to pay them? VEXA grew from that interest in the business around competition.</p><p>At VEXA, he leads campaign thinking and commercial decisions, and teaches how gaming partnerships work. His explanations focus on what a brand receives and what a team can reliably deliver.</p><ButtonLink href="/learn" variant="text">Read his insights</ButtonLink><p><a className="vx-link" href="https://www.linkedin.com/in/kaustubhsrivastava26/" rel="noopener noreferrer">Kaustubh on LinkedIn</a></p></div></section>
-    <section className="about-team-section"><div className="vx-container about-team-grid"><div className="about-team-heading"><p className="vx-label">Working together</p><h2>Different work.<br />One clear idea.</h2></div><article><p className="vx-label">Research and business administration</p><h3>Pratham Asknani</h3><p>Pratham researches brands, their products and their existing activity in gaming, helping the team prepare informed campaign conversations. He also handles business administration, including invoicing and the vendor registration work required for an engagement.</p><p>His role connects the preparation for a campaign with the records needed to deliver it.</p></article><article><p className="vx-label">Design and video editing</p><h3>Bhaskar</h3><p>Bhaskar develops VEXA&apos;s visual work, including presentation decks, brand assets and the short videos made from Kaustubh&apos;s teaching.</p><p>He turns an agreed content structure into clear layouts and edits, helping the same idea remain understandable across the website and social channels.</p></article></div></section>
-    <section className="about-work-route vx-container"><h2>Where the work goes.</h2><div><ButtonLink href="/brands" variant="text">For brands</ButtonLink><ButtonLink href="/organisations" variant="text">For esports</ButtonLink><ButtonLink href="/valuate" variant="text">Meet Valuate</ButtonLink></div></section>
-  </>;
+export default function AboutPage() {
+  return (
+    <>
+      <header className="phero">
+        <div className="wrap phero-grid">
+          <div>
+            <Reveal as="p" className="tag">About</Reveal>
+            <Split as="h1" className="h-xl" style={{ fontSize: "clamp(2.3rem,6.6vw,6rem)" }}>The people behind VEXA.</Split>
+          </div>
+          <Reveal className="phero-aside" delay={500}>
+            <p>VEXA is an esports consultancy, established in 2025.</p>
+          </Reveal>
+        </div>
+      </header>
+
+      <section className="sec--tight sec" style={{ paddingTop: 0 }} aria-labelledby="founder-h">
+        <div className="wrap founder">
+          <Reveal as="aside" className="founder-card" variant="x">
+            <Image className="mark" src="/img/vexa-vmark.png" alt="" width={335} height={318} />
+            <p className="tag">Founder</p>
+            <h2 className="h-lg" id="founder-h">Kaustubh Srivastava</h2>
+            <p className="dim">Known as Soda</p>
+          </Reveal>
+          <div className="story">
+            <Reveal as="p">
+              A former competitive player and in-game leader in PUBG Mobile and BGMI. VEXA grew from his interest in the
+              business around competition: what players and teams can build that gives someone a reason to pay them.
+            </Reveal>
+            <Reveal as="a" className="tl" href={SITE.founderLinkedin} rel="noopener" target="_blank" style={{ justifySelf: "start" }}>
+              LinkedIn
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      <section className="sec--tight sec" style={{ paddingTop: 0 }} aria-labelledby="crew-h">
+        <div className="wrap">
+          <h2 className="sr-only" id="crew-h">Team</h2>
+          <div className="team">
+            <Reveal as="article" className="member">
+              <span className="avatar" aria-hidden="true">PA</span>
+              <p className="role">Research and administration</p>
+              <h3 className="h-md">Pratham Asknani</h3>
+            </Reveal>
+            <Reveal as="article" className="member" delay={140}>
+              <span className="avatar" aria-hidden="true">B</span>
+              <p className="role">Design and video</p>
+              <h3 className="h-md">Bhaskar</h3>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      <Cta>Let’s *talk.*</Cta>
+    </>
+  );
 }

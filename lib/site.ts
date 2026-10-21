@@ -1,12 +1,15 @@
 export const SITE = {
-  url: "https://www.vexadigital.in",
   name: "VEXA Digital",
   email: "partnerships@vexadigital.in",
+  address: "77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070",
+  instagram: "https://www.instagram.com/vexadigital.in/",
+  linkedin: "https://www.linkedin.com/company/vexa-digital-in/",
+  founderLinkedin: "https://www.linkedin.com/in/kaustubhsrivastava26/",
 } as const;
 
-// Verified handles from the brain (positioning file, 01.10.2026). Add YouTube and the WhatsApp Channel
-// only when Soda gives the real links.
-export const SOCIAL = {
-  instagramVexa: { label: "Instagram @vexadigital.in", href: "https://www.instagram.com/vexadigital.in/" },
-  linkedinCompany: { label: "LinkedIn", href: "https://www.linkedin.com/company/vexa-digital-in/" },
-} as const;
+export const NAV = [
+  { href: "/services", label: "Services" },
+  { href: "/articles", label: "Articles" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+] as const;

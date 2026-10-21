@@ -1,38 +1,21 @@
 {
-  "name": "vexa-website-app",
+  "name": "vexa-website",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "test:admin": "node --test --test-reporter=spec scripts/check-admin.mjs",
-    "preview": "node scripts/local-preview.mjs",
-    "check:preview": "python3 scripts/check-preview.py",
-    "check:production": "python3 scripts/check-production-access.py"
+    "start": "next start"
   },
   "dependencies": {
-    "better-sqlite3": "^13.0.3",
-    "google-auth-library": "^10.9.1",
-    "next": "15.5.27",
-    "next-auth": "^4.24.15",
-    "react": "^18",
-    "react-dom": "^18"
+    "next": "^16.4.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^9.6.0",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "15.5.27",
-    "postcss": "^8.5.23",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
-  },
-  "overrides": {
-    "postcss": "$postcss",
-    "source-map-js": "^1.2.2"
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.9.3"
   }
 }

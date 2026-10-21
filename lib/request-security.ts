@@ -1,4 +1,0 @@
-import { isIP } from "node:net";
-/** Set only when the ingress overwrites X-Real-IP and the app cannot be reached directly. */
-export function clientAddress(headers:Headers):string {if(process.env.VEXA_TRUST_PROXY!=="1")return "unknown";const value=headers.get("x-real-ip")?.trim() || "";return isIP(value)?value:"unknown";}
-export async function boundedJson(request:Request):Promise<Record<string,unknown>> {const stream=request.body?.getReader();if(!stream)throw Error("Invalid request.");let size=0;const chunks:Uint8Array[]=[];while(true){const chunk=await stream.read();if(chunk.done)break;size+=chunk.value.length;if(size>16000){await stream.cancel();throw Error("Request too large.");}chunks.push(chunk.value);}const body=JSON.parse(Buffer.concat(chunks).toString("utf8"));if(!body || typeof body!=="object" || Array.isArray(body))throw Error("Invalid request.");return body;}
