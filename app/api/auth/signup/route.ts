@@ -1,8 +1,8 @@
 import { isLocal, clientIp, EMAIL, fail, ok, publicOrigin, readJson, sameOrigin, text } from "@/lib/http";
 import { mailReady } from "@/lib/mail";
-import { sendSignupLink, startSignup } from "@/lib/pending-signup";
+import { sendAlreadyRegistered, sendSignupLink, startSignup } from "@/lib/pending-signup";
 import { tooMany } from "@/lib/ratelimit";
-import { getUserByEmail } from "@/lib/users";
+import { getUserByEmail, hashPassword } from "@/lib/users";
 
 /**
  * Starts a sign-up. No account is created here: the account exists only once the link in the email is confirmed.
@@ -23,11 +23,17 @@ export async function POST(request: Request) {
   if (password.length > 200) return fail("That password is too long.");
   if (tooMany(`signup-email:${email}`, 5, 3600_000)) return fail("We have sent several links to this address. Please wait a while before trying again.", 429);
 
-  if (await getUserByEmail(email)) return fail("An account with that email already exists. Try logging in instead.", 409);
+  const showHere = process.env.NODE_ENV !== "production" && isLocal(request);
+  // the answer is the same whether or not the address already has an account, so this form cannot be used to find out who
+  // does; an existing account is told about it by email instead
+  if (await getUserByEmail(email)) {
+    await hashPassword(password); // the same work as a real sign-up, so the response time does not give the account away
+    if (mailReady()) await sendAlreadyRegistered(email, `${publicOrigin(request)}/login`);
+    return ok({ pending: true, email });
+  }
 
   const token = await startSignup({ name, email, password });
   const link = `${publicOrigin(request)}/verify-email?token=${token}`;
-  const showHere = process.env.NODE_ENV !== "production" && isLocal(request);
   const sent = mailReady() && (await sendSignupLink(email, link));
   if (!sent && !showHere) return fail("We could not send your confirmation email, so the account was not created. Please try again later.", 503);
   return ok({ pending: true, email, devLink: showHere ? link : undefined });

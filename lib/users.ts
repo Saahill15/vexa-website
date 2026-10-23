@@ -40,23 +40,31 @@ export function effectiveRole(user: User): Role {
   return user.role === "admin" || isListedAdmin(user) ? "admin" : "user";
 }
 
-const derive = (password: string, salt: Buffer) =>
-  new Promise<Buffer>((resolve, reject) => scrypt(password, salt, 64, (error, key) => (error ? reject(error) : resolve(key))));
+/** Cost of a new password hash (32 MB of memory per attempt). Earlier hashes, made with Node's lighter default, still verify. */
+const COST = 32768;
+const derive = (password: string, salt: Buffer, cost?: number) =>
+  new Promise<Buffer>((resolve, reject) =>
+    scrypt(password, salt, 64, cost ? { N: cost, r: 8, p: 1, maxmem: 128 * cost * 8 * 2 } : {}, (error, key) => (error ? reject(error) : resolve(key))),
+  );
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16);
-  const key = await derive(password, salt);
-  return `scrypt$${salt.toString("base64")}$${key.toString("base64")}`;
+  const key = await derive(password, salt, COST);
+  return `scrypt$${COST}$${salt.toString("base64")}$${key.toString("base64")}`;
 }
 
-const DUMMY = `scrypt$${Buffer.alloc(16).toString("base64")}$${Buffer.alloc(64).toString("base64")}`;
+const DUMMY = `scrypt$${COST}$${Buffer.alloc(16).toString("base64")}$${Buffer.alloc(64).toString("base64")}`;
 
 /** Always does the same work, so a wrong email takes as long as a wrong password. */
 export async function verifyPassword(password: string, stored: string | undefined): Promise<boolean> {
-  const [scheme, saltB64, keyB64] = (stored ?? DUMMY).split("$");
-  if (scheme !== "scrypt" || !saltB64 || !keyB64) return false;
+  const parts = (stored ?? DUMMY).split("$");
+  // "scrypt$cost$salt$key" (current) or "scrypt$salt$key" (earlier)
+  const [scheme, ...rest] = parts;
+  const cost = rest.length === 3 ? Number(rest[0]) : undefined;
+  const [saltB64, keyB64] = rest.length === 3 ? rest.slice(1) : rest;
+  if (scheme !== "scrypt" || !saltB64 || !keyB64 || (cost !== undefined && (!Number.isInteger(cost) || cost < 16384 || cost > 262144))) return false;
   const expected = Buffer.from(keyB64, "base64");
-  const actual = await derive(password, Buffer.from(saltB64, "base64"));
+  const actual = await derive(password, Buffer.from(saltB64, "base64"), cost);
   return stored !== undefined && expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 

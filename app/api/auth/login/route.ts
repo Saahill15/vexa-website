@@ -16,7 +16,8 @@ export async function POST(request: Request) {
   if (!EMAIL.test(email) || !password) return fail("Enter your email and password.");
 
   const perAccount = `login:${ip}:${email}`;
-  if (tooMany(`login-ip:${ip}`, 40, 15 * 60_000) || tooMany(perAccount, 8, 15 * 60_000)) {
+  // the third limit is for one account being tried from many addresses at once
+  if (tooMany(`login-ip:${ip}`, 40, 15 * 60_000) || tooMany(perAccount, 8, 15 * 60_000) || tooMany(`login-email:${email}`, 20, 3600_000)) {
     return fail("Too many attempts. Please wait a few minutes and try again.", 429);
   }
 

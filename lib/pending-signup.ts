@@ -40,6 +40,20 @@ export async function takeSignup(token: string): Promise<{ name: string; email: 
   });
 }
 
+/** Sent instead of a confirmation link when someone signs up with an address that already has an account. */
+export function sendAlreadyRegistered(to: string, link: string): Promise<boolean> {
+  return sendAccountMail({
+    to,
+    subject: "You already have a Vexa account",
+    heading: "You already have an account",
+    body: "Someone (hopefully you) tried to create a Vexa account with this email address, but it already has one. You can log in, or reset the password from the login page.",
+    button: "Go to log in",
+    note: "If this was not you, you can ignore this email. Nothing has changed on your account.",
+    link,
+    text: `Someone tried to create a Vexa account with this email address, but it already has one. Log in here: ${link}\n\nIf this was not you, you can ignore this email.`,
+  });
+}
+
 /** Emails the confirmation link. False when no mail service is set up or the send failed. */
 export function sendSignupLink(to: string, link: string): Promise<boolean> {
   return sendAccountMail({

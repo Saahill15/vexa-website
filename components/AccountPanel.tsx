@@ -49,6 +49,7 @@ export function AccountPanel({ account, googleClientId, comments, enquiries }: P
   const [devLink, setDevLink] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   useEffect(() => {
@@ -127,7 +128,7 @@ export function AccountPanel({ account, googleClientId, comments, enquiries }: P
   async function deleteAccount(e: FormEvent) {
     e.preventDefault();
     if (busy || confirmEmail.trim().toLowerCase() !== account.email) return;
-    const removed = await request("/api/account/delete", "POST", { email: confirmEmail.trim() });
+    const removed = await request("/api/account/delete", "POST", { email: confirmEmail.trim(), password: deletePassword });
     if (removed) router.replace("/");
   }
 
@@ -441,9 +442,15 @@ export function AccountPanel({ account, googleClientId, comments, enquiries }: P
                     <label htmlFor="acc-confirm">Type <strong>{account.email}</strong> to confirm</label>
                     <input className="in" id="acc-confirm" type="email" autoComplete="off" value={confirmEmail} onChange={(e) => setConfirmEmail(e.target.value)} />
                   </div>
+                  {account.hasPassword ? (
+                    <div className="field">
+                      <label htmlFor="acc-delete-pw">Your password</label>
+                      <input className="in" id="acc-delete-pw" type="password" autoComplete="current-password" value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} />
+                    </div>
+                  ) : null}
                   <div className="acc-inline">
                     <button type="submit" className="btn btn--sm acc-btn-danger" disabled={busy || !canDelete}>Delete my account</button>
-                    <button type="button" className="btn btn--line btn--sm" onClick={() => { setDeleteOpen(false); setConfirmEmail(""); }}>Cancel</button>
+                    <button type="button" className="btn btn--line btn--sm" onClick={() => { setDeleteOpen(false); setConfirmEmail(""); setDeletePassword(""); }}>Cancel</button>
                   </div>
                 </form>
               )}
