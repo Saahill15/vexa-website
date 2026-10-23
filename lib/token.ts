@@ -14,7 +14,9 @@ function secret(): Buffer {
   if (cachedSecret) return cachedSecret;
   const fromEnv = process.env.SESSION_SECRET;
   if (fromEnv && fromEnv.length >= 32) return (cachedSecret = Buffer.from(fromEnv));
-  // no SESSION_SECRET set: make one once and keep it in the data folder, so sessions survive restarts
+  // a hosted site has no folder that lasts between requests, so there the secret must be set
+  if (process.env.NODE_ENV === "production") throw new Error("SESSION_SECRET must be set in production: at least 32 random characters (openssl rand -base64 48).");
+  // development: make one once and keep it in the data folder, so sessions survive restarts
   const folder = process.env.VEXA_DATA_DIR ?? path.join(process.cwd(), "data");
   const where = path.join(folder, ".session-secret");
   if (!existsSync(where)) {
@@ -49,5 +51,3 @@ export function readToken(token: string): Claim | null {
   }
 }
 
-/** True when the token is genuine and unexpired (the account is not looked up). Used by the proxy to turn strangers away early. */
-export const tokenLooksValid = (token: string | undefined) => Boolean(token && readToken(token));

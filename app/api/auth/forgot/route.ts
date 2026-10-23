@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   const body = await readJson(request);
   const email = text(body?.email, 254).toLowerCase();
   if (!EMAIL.test(email)) return fail("Enter a full email address.");
-  if (tooMany(`forgot-ip:${clientIp(request)}`, 10, 3600_000) || tooMany(`forgot-email:${email}`, 5, 3600_000)) {
+  if (await tooMany(`forgot-ip:${clientIp(request)}`, 10, 3600_000) || await tooMany(`forgot-email:${email}`, 5, 3600_000)) {
     return fail("Too many requests. Please wait a while and try again.", 429);
   }
 

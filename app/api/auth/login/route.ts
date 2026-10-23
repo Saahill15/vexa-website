@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
   const perAccount = `login:${ip}:${email}`;
   // the third limit is for one account being tried from many addresses at once
-  if (tooMany(`login-ip:${ip}`, 40, 15 * 60_000) || tooMany(perAccount, 8, 15 * 60_000) || tooMany(`login-email:${email}`, 20, 3600_000)) {
+  if (await tooMany(`login-ip:${ip}`, 40, 15 * 60_000) || await tooMany(perAccount, 8, 15 * 60_000) || await tooMany(`login-email:${email}`, 20, 3600_000)) {
     return fail("Too many attempts. Please wait a few minutes and try again.", 429);
   }
 
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   if (!user || !good) return fail(WRONG, 401);
   if (user.disabled) return fail("This account has been disabled. Please contact us if you think that is a mistake.", 403);
 
-  resetLimit(perAccount);
+  await resetLimit(perAccount);
   // a Google sign-in that was waiting for this password is now confirmed
   const pending = await takePendingLink();
   if (pending && pending.email.toLowerCase() === user.email) await linkGoogle(user.id, pending.googleId);

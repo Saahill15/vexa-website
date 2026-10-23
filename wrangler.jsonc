@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "vexa-website-staging",
+  "main": ".open-next/worker.js",
+  "upload_source_maps": true,
+  "compatibility_date": "2026-10-13",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  // Settings and secrets you add in the Cloudflare dashboard (Settings > Variables and Secrets) are kept on each deploy.
+  "keep_vars": true,
+  // The database connection. Create it once (see docs/cloudflare.md), then paste its id here.
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "REPLACE-WITH-YOUR-HYPERDRIVE-ID",
+      // used by `npm run preview` on your own computer
+      "localConnectionString": "postgres://vexa:password@127.0.0.1:5432/vexa"
+    }
+  ]
+}

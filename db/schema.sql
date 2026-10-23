@@ -99,3 +99,10 @@ create table if not exists pending_signups (
   expires_at timestamptz not null
 );
 create index if not exists pending_signups_email_idx on pending_signups (email);
+
+-- rate limits: one row per counted hit, old rows are cleared automatically
+create table if not exists rate_hits (
+  key text not null,
+  at timestamptz not null default now()
+);
+create index if not exists rate_hits_key_idx on rate_hits (key, at desc);

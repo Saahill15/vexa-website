@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
   // someone using a stolen session cannot delete the account: an account with a password must confirm it
   if (user.passwordHash) {
-    if (tooMany(`account-delete:${clientIp(request)}:${user.id}`, 8, 15 * 60_000)) return fail("Too many attempts. Please wait a few minutes.", 429);
+    if (await tooMany(`account-delete:${clientIp(request)}:${user.id}`, 8, 15 * 60_000)) return fail("Too many attempts. Please wait a few minutes.", 429);
     const password = typeof body?.password === "string" ? body.password.slice(0, 200) : "";
     if (!password) return fail("Enter your password to confirm.");
     if (!(await verifyPassword(password, user.passwordHash))) return fail("That password is not right.", 401);

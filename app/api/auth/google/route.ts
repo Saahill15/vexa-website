@@ -8,7 +8,7 @@ import { googleLogin, touchLogin } from "@/lib/users";
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("This request can only be sent from the Vexa website.", 403);
   if (!process.env.GOOGLE_CLIENT_ID) return fail("Google sign-in is not set up yet.", 503);
-  if (tooMany(`google:${clientIp(request)}`, 30, 15 * 60_000)) return fail("Too many attempts. Please wait a few minutes.", 429);
+  if (await tooMany(`google:${clientIp(request)}`, 30, 15 * 60_000)) return fail("Too many attempts. Please wait a few minutes.", 429);
 
   const body = await readJson(request, 8000);
   const credential = typeof body?.credential === "string" ? body.credential : "";
