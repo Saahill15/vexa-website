@@ -1,0 +1,39 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { AdminNav } from "@/components/admin/AdminNav";
+import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { getSession } from "@/lib/auth";
+import { listEnquiries } from "@/lib/enquiries";
+import { loadInbox, unreadCount } from "@/lib/inbox";
+
+export const metadata: Metadata = { title: { default: "Admin", template: "%s · Vexa Admin" }, robots: { index: false, follow: false } };
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession();
+  if (!session) redirect("/login?next=/admin");
+  if (session.role !== "admin") {
+    return (
+      <section className="auth">
+        <div className="wrap">
+          <div className="auth-card">
+            <h1 className="auth-title">No access</h1>
+            <p className="muted">You're signed in as {session.name}, but this account isn't an admin. Ask an existing admin to give you access.</p>
+            <Link href="/" className="btn">Back to the site <span className="arr" aria-hidden="true">→</span></Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
+  const [enquiries, inbox] = await Promise.all([listEnquiries(), loadInbox(session.id)]);
+  const newEnquiries = enquiries.filter((e) => e.status === "new").length;
+  return (
+    <div className="adm">
+      <AdminNav newEnquiries={newEnquiries} unread={unreadCount(inbox.items)} />
+      <div className="adm-main">
+        <AdminTopbar name={session.name} email={session.email} />
+        {children}
+      </div>
+    </div>
+  );
+}

@@ -1,155 +1,127 @@
-import { createHash, randomUUID } from "crypto";
-import fs from "fs";
-import { open } from "fs/promises";
+import { randomUUID } from "crypto";
+import { readFile } from "fs/promises";
 import path from "path";
-import { getDb, insertBrief, type BriefInput } from "@/lib/db";
+import { dataDir, exists, readAll, update } from "./store";
 
-export const ENQUIRY_STATUSES = [
+/*
+ * Enquiries from the Start a conversation form. Each one is saved first, then sent to CONTACT_WEBHOOK_URL
+ * (the n8n flow that emails the Vexa inbox, same fields as before). The admin panel works from the saved copy.
+ */
+
+export const STATUSES = [
   { value: "new", label: "New" },
   { value: "in_progress", label: "In progress" },
-  { value: "waiting", label: "Waiting for response" },
+  { value: "waiting", label: "Waiting for a reply" },
   { value: "resolved", label: "Resolved" },
 ] as const;
-export type EnquiryStatus = (typeof ENQUIRY_STATUSES)[number]["value"];
-export const isEnquiryStatus = (value: unknown): value is EnquiryStatus => ENQUIRY_STATUSES.some((status) => status.value === value);
+export type EnquiryStatus = (typeof STATUSES)[number]["value"];
+export const isStatus = (v: unknown): v is EnquiryStatus => STATUSES.some((s) => s.value === v);
 
-/** The fields the existing webhook has always received. Kept identical so the n8n flow keeps working. */
-export type EnquiryEntry = {
-  at: string; name: string | null; email: string; role: string; interest: string | null; company: string | null;
-  problem: string; budget: string | null; launch: string | null; source: string | null; consent: boolean;
+/** What each status means to the person who sent the enquiry. */
+export const STATUS_NOTE: Record<EnquiryStatus, string> = {
+  new: "We have your enquiry and will reply by email.",
+  in_progress: "We are working on your enquiry.",
+  waiting: "We are waiting for a reply. Check your email for our latest message.",
+  resolved: "This enquiry is closed. If you need anything more, reply to our email.",
 };
 
-export function dataDir(): string {
-  return process.env.VEXA_DATA_DIR ?? path.join(process.cwd(), "data");
-}
-export function fallbackFile(): string {
-  return path.join(dataDir(), "contact-submissions.jsonl");
-}
+export type EnquiryEntry = {
+  at: string;
+  name: string | null;
+  email: string;
+  role: string;
+  interest: string | null;
+  company: string | null;
+  problem: string;
+  budget: string | null;
+  launch: string | null;
+  source: string | null;
+  consent: boolean;
+};
 
-function briefInput(entry: EnquiryEntry, submissionId: string, origin: "form" | "fallback-file"): BriefInput {
-  return { name: entry.name, email: entry.email, role: entry.role, interest: entry.interest, company: entry.company, problem: entry.problem, budget: entry.budget, launch: entry.launch, source: entry.source, consent: entry.consent, submissionId, createdAt: entry.at, origin };
-}
+export type Enquiry = EnquiryEntry & { id: string; status: EnquiryStatus; notes: string; emailed: "delivered" | "failed" | "not_configured" };
 
-/** Appends one line and flushes it to disk before returning, so "saved" means saved. */
-async function appendFallback(line: string): Promise<void> {
-  fs.mkdirSync(dataDir(), { recursive: true, mode: 0o700 });
-  const handle = await open(fallbackFile(), "a", 0o600);
+const COLLECTION = "enquiries";
+
+/** Enquiries saved by the first version of the form (a plain text file) are brought in once. */
+async function importOldFile() {
+  if (await exists(COLLECTION)) return;
+  let raw = "";
   try {
-    await handle.appendFile(`${line}\n`, "utf8");
-    await handle.datasync();
-  } finally {
-    await handle.close();
+    raw = await readFile(path.join(dataDir(), "contact-submissions.jsonl"), "utf8");
+  } catch {
+    return;
   }
+  await update<Enquiry>(COLLECTION, (rows) => {
+    if (rows.length) return;
+    for (const line of raw.split("\n")) {
+      try {
+        const e = JSON.parse(line) as EnquiryEntry & { id?: string };
+        if (e.email && e.problem) rows.push({ ...e, id: e.id ?? randomUUID(), status: "new", notes: "", emailed: "not_configured" });
+      } catch {
+        /* skip a damaged line */
+      }
+    }
+  });
 }
 
-export type WebhookResult = { status: "not_configured" | "delivered" | "failed"; detail: string | null };
+export async function listEnquiries(): Promise<Enquiry[]> {
+  await importOldFile();
+  return (await readAll<Enquiry>(COLLECTION)).sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+}
+/** Enquiries sent with this email address, newest first. Only show them to someone who has proven the address. */
+export async function listForEmail(email: string): Promise<Enquiry[]> {
+  const wanted = email.toLowerCase();
+  return (await listEnquiries()).filter((e) => e.email.toLowerCase() === wanted);
+}
+export async function getEnquiry(id: string) {
+  return (await listEnquiries()).find((e) => e.id === id) ?? null;
+}
 
-export async function notifyWebhook(entry: EnquiryEntry): Promise<WebhookResult> {
-  const webhook = process.env.CONTACT_WEBHOOK_URL;
-  if (!webhook) return { status: "not_configured", detail: null };
+export async function updateEnquiry(id: string, patch: { status?: EnquiryStatus; notes?: string }) {
+  await update<Enquiry>(COLLECTION, (rows) => {
+    const e = rows.find((x) => x.id === id);
+    if (!e) return;
+    if (patch.status) e.status = patch.status;
+    if (patch.notes !== undefined) e.notes = patch.notes.slice(0, 5000);
+  });
+}
+export async function deleteEnquiry(id: string) {
+  await update<Enquiry>(COLLECTION, (rows) => {
+    const i = rows.findIndex((x) => x.id === id);
+    if (i >= 0) rows.splice(i, 1);
+  });
+}
+
+async function notify(entry: EnquiryEntry): Promise<Enquiry["emailed"]> {
+  const url = process.env.CONTACT_WEBHOOK_URL;
+  if (!url) return "not_configured";
   try {
-    const response = await fetch(webhook, {
+    const token = process.env.CONTACT_WEBHOOK_TOKEN;
+    const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...(process.env.CONTACT_WEBHOOK_TOKEN ? { Authorization: `Bearer ${process.env.CONTACT_WEBHOOK_TOKEN}` } : {}) },
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify(entry),
       signal: AbortSignal.timeout(5000),
       redirect: "error",
     });
-    // Before this change any HTTP status counted as delivered. A rejected request is a failure.
-    return response.ok ? { status: "delivered", detail: `HTTP ${response.status}` } : { status: "failed", detail: `HTTP ${response.status}` };
-  } catch (cause) {
-    const timedOut = cause instanceof Error && (cause.name === "TimeoutError" || cause.name === "AbortError");
-    return { status: "failed", detail: timedOut ? "Timed out after 5 seconds" : "Could not connect" };
-  }
-}
-
-export function recordWebhook(briefId: number, result: WebhookResult): void {
-  getDb().prepare("UPDATE briefs SET webhook_status = ?, webhook_detail = ?, webhook_at = ? WHERE id = ?").run(result.status, result.detail, new Date().toISOString(), briefId);
-}
-
-export type AcceptResult = { ok: true; stored: "database" | "fallback-file"; id: number | null; webhook: WebhookResult } | { ok: false };
-
-/**
- * Durable first, notification second. Success is reported only after the database commit or, if the database
- * write fails, after the fallback line is flushed to disk. A webhook failure never undoes a saved enquiry.
- */
-export async function acceptEnquiry(entry: EnquiryEntry): Promise<AcceptResult> {
-  const submissionId = randomUUID();
-  let id: number | null = null;
-  let stored: "database" | "fallback-file";
-  try {
-    id = insertBrief(briefInput(entry, submissionId, "form"));
-    stored = "database";
+    return res.ok ? "delivered" : "failed";
   } catch {
-    console.error("brief database write failed; trying the fallback file");
-    try {
-      await appendFallback(JSON.stringify({ ...entry, submissionId }));
-      stored = "fallback-file";
-    } catch {
-      console.error("brief fallback write failed; the visitor is told the message was not saved");
-      return { ok: false };
-    }
+    return "failed";
   }
-  const webhook = await notifyWebhook(entry);
-  if (webhook.status === "failed") console.error(`contact webhook failed (${webhook.detail})`);
-  if (id !== null) {
-    try { recordWebhook(id, webhook); } catch { console.error("could not record webhook outcome"); }
-  }
-  return { ok: true, stored, id, webhook };
 }
 
-type FallbackLine = { key: string; entry: EnquiryEntry };
-export type FallbackScan = { exists: boolean; readable: FallbackLine[]; unreadable: number; pending: FallbackLine[] };
-
-function asEntry(value: unknown): EnquiryEntry | null {
-  if (!value || typeof value !== "object") return null;
-  const v = value as Record<string, unknown>;
-  const text = (key: string, max: number) => (typeof v[key] === "string" && (v[key] as string).trim() ? (v[key] as string).slice(0, max) : null);
-  const email = text("email", 254), problem = text("problem", 5000), at = text("at", 40);
-  if (!email || !problem || !at || Number.isNaN(Date.parse(at))) return null;
-  return { at: new Date(at).toISOString(), name: text("name", 120), email, role: text("role", 40) ?? "other", interest: text("interest", 300), company: text("company", 200), problem, budget: text("budget", 100), launch: text("launch", 100), source: text("source", 300), consent: v.consent === true };
-}
-
-/**
- * Reads the fallback file without changing it. Lines written before submission ids existed are keyed by a hash
- * of the line, so importing twice never duplicates a record.
- */
-export function scanFallback(): FallbackScan {
-  let raw: string;
+/** Accepts an enquiry when at least one route holds it: saved in the store or delivered to the webhook. */
+export async function acceptEnquiry(entry: EnquiryEntry): Promise<boolean> {
+  await importOldFile();
+  const emailed = await notify(entry);
+  if (emailed === "failed") console.error("enquiry: webhook delivery failed");
+  if (emailed === "not_configured" && process.env.NODE_ENV === "production") console.error("enquiry: CONTACT_WEBHOOK_URL is not set, nothing was emailed");
   try {
-    raw = fs.readFileSync(fallbackFile(), "utf8");
+    await update<Enquiry>(COLLECTION, (rows) => void rows.push({ ...entry, id: randomUUID(), status: "new", notes: "", emailed }));
+    return true;
   } catch {
-    return { exists: false, readable: [], unreadable: 0, pending: [] };
+    console.error("enquiry: could not write to the data folder");
+    return emailed === "delivered";
   }
-  const readable: FallbackLine[] = [];
-  let unreadable = 0;
-  for (const line of raw.split("\n")) {
-    if (!line.trim()) continue;
-    try {
-      const parsed = JSON.parse(line);
-      const entry = asEntry(parsed);
-      if (!entry) { unreadable++; continue; }
-      const key = typeof parsed.submissionId === "string" && /^[a-f0-9-]{36}$/.test(parsed.submissionId) ? parsed.submissionId : `legacy-${createHash("sha256").update(line.trim()).digest("hex").slice(0, 32)}`;
-      readable.push({ key, entry });
-    } catch {
-      unreadable++;
-    }
-  }
-  const known = new Set((getDb().prepare("SELECT submission_id FROM briefs WHERE submission_id IS NOT NULL").all() as { submission_id: string }[]).map((row) => row.submission_id));
-  const seen = new Set<string>();
-  const pending = readable.filter((line) => !known.has(line.key) && !seen.has(line.key) && seen.add(line.key));
-  return { exists: true, readable, unreadable, pending };
-}
-
-export function importFallback(): { imported: number; unreadable: number } {
-  const scan = scanFallback();
-  const db = getDb();
-  let imported = 0;
-  db.transaction(() => {
-    for (const line of scan.pending) {
-      insertBrief(briefInput(line.entry, line.key, "fallback-file"));
-      imported++;
-    }
-  })();
-  return { imported, unreadable: scan.unreadable };
 }

@@ -1,81 +1,113 @@
-import { googleIdentityEnabled, googleNonceFromCookieHeader, verifyGoogleIdentity } from "@/lib/google-identity";
-import { accountConfigured } from "@/lib/deployment";
-import { mailEnabled } from "@/lib/account-mail";
-import { clientAddress } from "@/lib/request-security";
-import type { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { allowAttempt, allowClient, createReader, endReaderSession, normalEmail, passwordMatches, readerByEmail, readerByGoogleSub, readerById, readerSessionCreatedAt, limitReached, startReaderSession, validEmail, validReaderSession, type Reader } from "@/lib/accounts";
-import { audit } from "@/lib/audit";
-import { registrationOpen } from "@/lib/settings";
+import { createHmac, randomBytes, timingSafeEqual } from "crypto";
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { cookies } from "next/headers";
+import path from "path";
+import { cache } from "react";
+import { dataDir } from "./store";
+import { effectiveRole, getUserById, type Role } from "./users";
 
-const isStaff=(reader:Reader)=>Boolean(reader.admin || reader.moderator);
-/** Staff sign-in outcomes are audited; failures are capped per account so a password-guessing run cannot flood the log. */
-function auditStaffSignIn(reader:Reader,outcome:"auth.sign_in"|"auth.sign_in_failed"|"auth.sign_in_blocked",method:string):void {
-  try {if(outcome!=="auth.sign_in" && !allowAttempt(`audit-signin:${reader.id}`,5,15*60_000))return;audit({id:reader.id,label:reader.email},outcome,{type:"user",id:reader.id},{method});}catch{console.error("staff sign-in audit failed");}
+/*
+ * Sessions are a signed cookie holding the account id, an expiry and the time it was issued. The account is looked
+ * up on every request, so disabling someone, removing their admin role or resetting their password takes effect at once.
+ */
+
+export type Session = { id: string; name: string; email: string; role: Role };
+
+const COOKIE = "vexa_session";
+const MAX_AGE = 60 * 60 * 24 * 30;
+
+let cachedSecret: Buffer | null = null;
+function secret(): Buffer {
+  if (cachedSecret) return cachedSecret;
+  const fromEnv = process.env.SESSION_SECRET;
+  if (fromEnv && fromEnv.length >= 32) return (cachedSecret = Buffer.from(fromEnv));
+  // no SESSION_SECRET set: make one once and keep it in the data folder, so sessions survive restarts
+  const where = path.join(dataDir(), ".session-secret");
+  if (!existsSync(where)) {
+    mkdirSync(dataDir(), { recursive: true, mode: 0o700 });
+    writeFileSync(where, randomBytes(48).toString("base64"), { mode: 0o600 });
+    chmodSync(where, 0o600);
+  }
+  return (cachedSecret = Buffer.from(readFileSync(where, "utf8").trim()));
 }
 
-/** Only advertise a provider whose required configuration is complete. */
-export const googleEnabled = googleIdentityEnabled();
-const legacyGoogleEnabled = process.env.GOOGLE_IDENTITY_ENABLED !== "true" && Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && accountConfigured());
+const sign = (payload: string) => createHmac("sha256", secret()).update(payload).digest("base64url");
 
-export const authOptions: NextAuthOptions = {
-  providers: [CredentialsProvider({name:"Email and password",credentials:{email:{type:"email"},password:{type:"password"}},async authorize(credentials,request){
-    if(!accountConfigured())return null;
-    const email=normalEmail(credentials?.email),password=credentials?.password;
-    const ip=clientAddress(new Headers(request.headers as Record<string,string>));
-    // Failed guesses are counted per address when it is trusted, otherwise against one high site-wide ceiling;
-    // successful sign-ins never use up that budget. Every account keeps its own limit of 12 attempts per 15 minutes.
-    const failKey=ip==="unknown"?"login-fail:shared":`login-fail:${ip}`,failMax=ip==="unknown"?600:30;
-    if(limitReached(failKey,failMax) || !allowAttempt(`login-email:${email}`,12,15*60_000))return null;
-    if(typeof password!=="string" || password.length>128 || password.length<1 || email.length>254)return null;
-    const reader=readerByEmail(email);const matches=await passwordMatches(password,reader?.password_hash ?? null);
-    if(!reader || !matches){allowAttempt(failKey,failMax,15*60_000);if(reader && isStaff(reader))auditStaffSignIn(reader,"auth.sign_in_failed","password");return null;}
-    if((process.env.NODE_ENV==="production" || mailEnabled) && !reader.email_verified)return null;
-    if(reader.disabled_at){if(isStaff(reader))auditStaffSignIn(reader,"auth.sign_in_blocked","password");return null;}
-    if(isStaff(reader))auditStaffSignIn(reader,"auth.sign_in","password");
-    return {id:reader.id,email:reader.email,name:reader.name};
-  }}),...(googleEnabled?[CredentialsProvider({id:"google-identity",name:"Google",credentials:{credential:{type:"text"},nonce:{type:"text"}},async authorize(credentials,request){
-    const requestHeaders=new Headers(request.headers as Record<string,string>);
-    if(!allowClient(clientAddress(requestHeaders),"google-login",30,600,15*60_000))return null;
-    const identity=await verifyGoogleIdentity(credentials?.credential,googleNonceFromCookieHeader(requestHeaders.get("cookie")),credentials?.nonce,requestHeaders.get("origin"));
-    if(!identity || !validEmail(identity.email))return null;
-    const linked=readerByGoogleSub(identity.sub);
-    if(linked){if(linked.disabled_at)return null;if(isStaff(linked))auditStaffSignIn(linked,"auth.sign_in","google");return {id:linked.id,email:linked.email,name:linked.name};}
-    if(readerByEmail(identity.email))throw Error("Use your original sign-in method for this email. Google cannot be linked automatically.");
-    if(!registrationOpen())throw Error("New account registration is currently closed.");
-    try {const reader=createReader(identity.email,null,identity.sub,identity.name);return {id:reader.id,email:reader.email,name:reader.name};}catch{return null;}
-  }})]:[]),...(legacyGoogleEnabled?[GoogleProvider({ clientId: process.env.GOOGLE_CLIENT_ID as string, clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, allowDangerousEmailAccountLinking:false })]:[])],
-  session: { strategy: "jwt", maxAge: 30*24*3600 },
-  cookies: Object.fromEntries([['sessionToken','session'],['csrfToken','csrf'],['callbackUrl','callback'],['pkceCodeVerifier','pkce'],['state','state'],['nonce','nonce']].map(([key,suffix])=>[key,{name:`${process.env.NODE_ENV==='production'?'__Host-':''}vexa-public-${suffix}`,options:{httpOnly:true,sameSite:'lax',path:'/',secure:process.env.NODE_ENV==='production',...(suffix==='pkce'||suffix==='state'||suffix==='nonce'?{maxAge:900}:{})}}])) as NextAuthOptions['cookies'],
-  useSecureCookies: process.env.NODE_ENV === "production",
-  secret: process.env.NEXTAUTH_SECRET,
-  logger: {error(code){console.error("reader authentication failed",code);},warn(code){console.warn("reader authentication warning",code);},debug(){}},
-  pages: { signIn:"/account", error:"/account" },
-  callbacks:{
-    async signIn({account,profile,user}) {
-      if(account?.provider!=="google")return true;
-      const p=profile as {email?:string;email_verified?:boolean;sub?:string}|undefined;
-      if(!p?.email_verified || !p.sub)return false;
-      const email=normalEmail(p.email);if(!validEmail(email))return false;const linked=readerByGoogleSub(p.sub);const existing=linked || readerByEmail(email);
-      // A verified Google address must never take over a password account with the same email.
-      if(existing && existing.google_sub!==p.sub)return false;
-      if(existing?.disabled_at || (!existing && !registrationOpen()))return false;
-      try {const reader=existing || createReader(email,null,p.sub,user.name || "");user.id=reader.id;user.email=reader.email;return true;}catch{return false;}
-    },
-    async jwt({token,user}) {
-      // A fresh sign-in replaces, rather than orphans, the session this browser held before.
-      if(user){if(typeof token.readerSession==="string")endReaderSession(token.readerSession);token.readerId=user.id;token.readerSession=startReaderSession(user.id);}
-      if(typeof token.readerId!=="string" || typeof token.readerSession!=="string" || !validReaderSession(token.readerSession,token.readerId)) {delete token.readerId;delete token.readerSession;}
-      return token;
-    },
-    async session({session,token}) {
-      const found=typeof token.readerId==="string"?readerById(token.readerId):null,reader=found&&!found.disabled_at?found:null;
-      session.user=reader?{id:reader.id,name:reader.name,email:reader.email,image:null} as typeof session.user:undefined;
-      // When this browser last signed in. Server-side admin checks require a recent sign-in.
-      (session as typeof session&{authTime?:number|null}).authTime=reader&&typeof token.readerSession==="string"?readerSessionCreatedAt(token.readerSession):null;
-      return session;
-    }
-  },
-  events:{async signOut({token}) {if(typeof token?.readerSession==="string")endReaderSession(token.readerSession);}},
-};
+function makeToken(userId: string): string {
+  const payload = Buffer.from(JSON.stringify({ u: userId, e: Math.floor(Date.now() / 1000) + MAX_AGE, i: Date.now() })).toString("base64url");
+  return `${payload}.${sign(payload)}`;
+}
+
+type Claim = { u: string; i: number };
+
+function readToken(token: string): Claim | null {
+  const [payload, signature] = token.split(".");
+  if (!payload || !signature) return null;
+  const expected = Buffer.from(sign(payload));
+  const given = Buffer.from(signature);
+  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { u?: unknown; e?: unknown; i?: unknown };
+    if (typeof data.u !== "string" || typeof data.e !== "number" || data.e <= Date.now() / 1000) return null;
+    return { u: data.u, i: typeof data.i === "number" ? data.i : 0 };
+  } catch {
+    return null;
+  }
+}
+
+export async function startSession(userId: string) {
+  (await cookies()).set(COOKIE, makeToken(userId), { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: MAX_AGE });
+}
+
+export async function endSession() {
+  (await cookies()).delete(COOKIE);
+}
+
+/** Who is signed in right now, or null. */
+export const getSession = cache(async (): Promise<Session | null> => {
+  const token = (await cookies()).get(COOKIE)?.value;
+  const claim = token ? readToken(token) : null;
+  if (!claim) return null;
+  const user = await getUserById(claim.u);
+  if (!user || user.disabled) return null;
+  // sessions issued before the last password change (for example a reset) or a "sign out everywhere" stop working
+  const cutoff = Math.max(user.passwordChangedAt ? Date.parse(user.passwordChangedAt) : 0, user.sessionsRevokedAt ? Date.parse(user.sessionsRevokedAt) : 0);
+  if (claim.i < cutoff) return null;
+  return { id: user.id, name: user.name, email: user.email, role: effectiveRole(user) };
+});
+
+/** For server actions and routes that change things: throws unless an admin is signed in. */
+export async function requireAdmin(): Promise<Session> {
+  const session = await getSession();
+  if (!session || session.role !== "admin") throw new Error("Not allowed");
+  return session;
+}
+
+/* A Google sign-in that matched an existing password account waits here until that account's password confirms the link. */
+const LINK_COOKIE = "vexa_link";
+export type PendingLink = { googleId: string; email: string; name: string };
+
+export async function setPendingLink(link: PendingLink) {
+  const payload = Buffer.from(JSON.stringify({ ...link, x: Date.now() + 15 * 60_000 })).toString("base64url");
+  (await cookies()).set(LINK_COOKIE, `${payload}.${sign(payload)}`, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 15 * 60 });
+}
+
+/** Reads and clears the pending link. Returns null if there is none, it expired, or it was tampered with. */
+export async function takePendingLink(): Promise<PendingLink | null> {
+  const jar = await cookies();
+  const token = jar.get(LINK_COOKIE)?.value;
+  jar.delete(LINK_COOKIE);
+  if (!token) return null;
+  const [payload, signature] = token.split(".");
+  if (!payload || !signature) return null;
+  const expected = Buffer.from(sign(payload));
+  const given = Buffer.from(signature);
+  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as PendingLink & { x?: number };
+    if (typeof data.x !== "number" || data.x < Date.now()) return null;
+    return { googleId: data.googleId, email: data.email, name: data.name };
+  } catch {
+    return null;
+  }
+}

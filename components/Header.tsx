@@ -1,135 +1,164 @@
 "use client";
 
+import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { AUDIENCE_LINKS, NAV } from "@/components/nav";
+import { expoOut } from "@/lib/ease";
+import { NAV } from "@/lib/site";
 
-type Group = keyof typeof AUDIENCE_LINKS;
-
-export function Header(): React.ReactElement {
+export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<{ name: string; role: "user" | "admin" } | null | undefined>(undefined);
+  const [menu, setMenu] = useState(false);
   const [open, setOpen] = useState(false);
-  const menuButton = useRef<HTMLButtonElement>(null);
-  const mobileSheet = useRef<HTMLDivElement>(null);
-  const header = useRef<HTMLElement>(null);
-  const dropdowns = useRef<Partial<Record<Group, HTMLDetailsElement>>>({});
-
-  function closeDropdowns(): void {
-    Object.values(dropdowns.current).forEach(details => { if (details) details.open = false; });
-  }
+  const [solid, setSolid] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
 
   useEffect(() => {
     setOpen(false);
-    closeDropdowns();
+    setMenu(false);
+  }, [pathname]);
+
+  // who is signed in (the page itself stays cached; only this small request is per visitor)
+  useEffect(() => {
+    let live = true;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { user: { name: string; role: "user" | "admin" } | null }) => live && setUser(d.user))
+      .catch(() => live && setUser(null));
+    return () => {
+      live = false;
+    };
   }, [pathname]);
 
   useEffect(() => {
-    const outside = (event: MouseEvent): void => {
-      if (!header.current?.contains(event.target as Node)) closeDropdowns();
-    };
-    document.addEventListener("click", outside);
-    return () => document.removeEventListener("click", outside);
-  }, []);
+    if (!menu) return;
+    const close = (e: MouseEvent) => !(e.target as HTMLElement).closest(".acct") && setMenu(false);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [menu]);
 
-  useEffect(() => {
-    if (!open) return;
-    const before = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    mobileSheet.current?.querySelector<HTMLElement>("button")?.focus();
-    const onKey = (event: KeyboardEvent): void => {
-      if (event.key === "Escape") {
-        setOpen(false);
-        menuButton.current?.focus();
-      }
-      if (event.key === "Tab" && mobileSheet.current) {
-        const items = Array.from(mobileSheet.current.querySelectorAll<HTMLElement>("a,button,summary"))
-          .filter(item => item.getClientRects().length > 0);
-        const first = items[0];
-        const last = items[items.length - 1];
-        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = before;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  function audience(group: Group, mobile = false): React.ReactElement {
-    const item = AUDIENCE_LINKS[group];
-    return <details
-      key={group}
-      className={mobile ? "mobile-audience" : "nav-audience"}
-      ref={element => { if (!mobile && element) dropdowns.current[group] = element; }}
-      onToggle={event => {
-        if (!mobile && event.currentTarget.open) {
-          Object.entries(dropdowns.current).forEach(([key, details]) => {
-            if (key !== group && details) details.open = false;
-          });
-        }
-      }}
-      onKeyDown={event => {
-        if (event.key === "Escape") {
-          event.currentTarget.open = false;
-          event.currentTarget.querySelector<HTMLElement>("summary")?.focus();
-          event.stopPropagation();
-        }
-        if (event.key === "ArrowDown" && event.target instanceof HTMLElement && event.target.tagName === "SUMMARY") {
-          event.preventDefault();
-          event.currentTarget.open = true;
-          event.currentTarget.querySelector<HTMLElement>("a")?.focus();
-        }
-      }}
-    >
-      <summary aria-current={(pathname.startsWith(item.href) || item.links.some(link => pathname.startsWith(link.href))) ? "page" : undefined}>
-        {item.label}<span className="nav-chevron" aria-hidden="true">⌄</span>
-      </summary>
-      <div className="audience-panel">
-        <div className="audience-intro">
-          <p className="vx-label">{item.label}</p>
-          <p>{item.intro}</p>
-          <Link href={item.href} onClick={() => { closeDropdowns(); setOpen(false); }}>Explore the work <span aria-hidden="true">↗</span></Link>
-        </div>
-        <div className="audience-options">
-          {item.links.map(link => <Link key={link.href} href={link.href} onClick={() => { closeDropdowns(); setOpen(false); }}>
-            <span>{link.label} <span aria-hidden="true">↗</span></span>
-            <small>{link.description}</small>
-          </Link>)}
-        </div>
-      </div>
-    </details>;
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+    setUser(null);
+    setMenu(false);
+    setOpen(false);
+    router.refresh();
   }
 
-  return <header ref={header} className="site-header" data-segment="NAV-01"
-    onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) closeDropdowns(); }}>
-    <div className="vx-container header-inner">
-      <Link href="/" aria-label="VEXA Digital, home" className="header-brand">
-        <Image src="/brand/open-feather-lockup-primary.svg" width={348} height={112} alt="" priority className="header-logo" />
-      </Link>
-      <nav aria-label="Primary" className="desktop-navigation">
-        {NAV.map(item => "group" in item ? audience(item.group) : <Link key={item.href} href={item.href}
-          aria-current={pathname.startsWith(item.href) ? "page" : undefined}>{item.label}</Link>)}
-      </nav>
-      <div className="header-utility">
-        <Link href="/account" className="account-link">Account <span aria-hidden="true">↗</span></Link>
-        <button ref={menuButton} type="button" className="mobile-menu-button" aria-expanded={open}
-          aria-controls="mobile-nav" onClick={() => setOpen(true)}>
-          Menu <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M4 8h16M4 16h16" stroke="currentColor" strokeWidth="1.5" /></svg>
+  useEffect(() => {
+    document.documentElement.classList.toggle("menu-open", open);
+  }, [open]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      setSolid(y > 24);
+      setHidden(y > lastY.current && y > 480);
+      lastY.current = y;
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  // log in, then come back to the page you were on (not to the login or signup page itself)
+  const back = encodeURIComponent(/^\/(login|signup)\b/.test(pathname) ? "/articles" : pathname);
+  const loginHref = `/login?next=${back}`;
+  const signupHref = `/signup?next=${back}`;
+
+  return (
+    <header className={`nav${solid ? " is-solid" : ""}${hidden && !open ? " is-hidden" : ""}`}>
+      <div className="nav-card">
+        <Link href="/" className="nav-logo" aria-label="Vexa Digital, home">
+          <Image src="/img/vexa-logo-teal.png" alt="Vexa Esports Consultancy" width={65} height={34} priority />
+        </Link>
+        <nav className="nav-links" aria-label="Main">
+          <Link href="/" aria-current={pathname === "/" ? "page" : undefined}>Home</Link>
+          {NAV.map((item) => (
+            <Link key={item.href} href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="nav-cta nav-auth">
+          {user ? (
+            <div className="acct">
+              <button type="button" className="acct-btn" aria-expanded={menu} aria-haspopup="menu" aria-label="Account menu" onClick={() => setMenu((v) => !v)}>
+                <span>{user.name.charAt(0).toUpperCase()}</span>
+              </button>
+              {menu ? (
+                <div className="acct-menu" role="menu">
+                  <p>{user.name}</p>
+                  <Link href="/account" role="menuitem">Your account</Link>
+                  {user.role === "admin" ? <Link href="/admin" role="menuitem">Admin panel</Link> : null}
+                  <button type="button" role="menuitem" onClick={logout}>Log out</button>
+                </div>
+              ) : null}
+            </div>
+          ) : user === null ? (
+            <>
+              <Link href={loginHref} className="nav-login" aria-current={pathname === "/login" ? "page" : undefined}>Log in</Link>
+              <Link href={signupHref} className="btn btn--sm">Sign up</Link>
+            </>
+          ) : null}
+        </div>
+        <button type="button" className="nav-burger" aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen((v) => !v)}>
+          <span />
+          <span />
         </button>
       </div>
-    </div>
-    <noscript><nav className="nojs-nav" aria-label="Primary navigation">{NAV.map(item => <Link key={item.href} href={item.href}>{item.label}</Link>)}</nav></noscript>
-    {open ? <div id="mobile-nav" ref={mobileSheet} className="mobile-sheet" role="dialog" aria-modal="true" aria-label="Navigation">
-      <div className="vx-container mobile-sheet-top"><span className="vx-label">Explore VEXA</span><button type="button"
-        onClick={() => { setOpen(false); menuButton.current?.focus(); }}>Close <span aria-hidden="true">×</span></button></div>
-      <nav className="vx-container mobile-navigation" aria-label="Mobile navigation">
-        {NAV.map(item => "group" in item ? audience(item.group, true) : <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>{item.label}</Link>)}
-        <Link href="/account" className="mobile-account" onClick={() => setOpen(false)}>Your account <span aria-hidden="true">↗</span></Link>
-      </nav>
-    </div> : null}
-  </header>;
+
+      <AnimatePresence>
+        {open ? (
+          <motion.div
+            id="mobile-menu"
+            className="sheet"
+            initial={{ opacity: 0, y: -8, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -8, filter: "blur(6px)" }}
+            transition={{ duration: 0.45, ease: expoOut }}
+          >
+            <nav aria-label="Mobile">
+              {[{ href: "/", label: "Home" }, ...NAV].map((item, i) => (
+                <motion.div
+                  key={item.href}
+                  initial={{ opacity: 0.001, y: 10, filter: "blur(8px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.8, ease: expoOut, delay: 0.04 + i * 0.05 }}
+                >
+                  <Link href={item.href} aria-current={item.href === "/" ? (pathname === "/" ? "page" : undefined) : isActive(item.href) ? "page" : undefined}>
+                    {item.label}
+                  </Link>
+                </motion.div>
+              ))}
+              {user ? (
+                <div className="sheet-acct">
+                  <p>Signed in as <strong>{user.name}</strong></p>
+                  <Link href="/account" className="btn btn--line">Your account</Link>
+                  {user.role === "admin" ? <Link href="/admin" className="btn btn--line">Admin panel</Link> : null}
+                  <button type="button" className="btn btn--line" onClick={logout}>Log out</button>
+                </div>
+              ) : user === null ? (
+                <div className="sheet-auth">
+                  <Link href={loginHref} className="btn btn--line">Log in</Link>
+                  <Link href={signupHref} className="btn">Sign up</Link>
+                </div>
+              ) : null}
+            </nav>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </header>
+  );
 }

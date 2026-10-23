@@ -1,94 +1,68 @@
-import { allowClient } from "@/lib/accounts";
-import { mutationGuard, readBody, requestIp } from "@/lib/account-security";
 import { NextResponse } from "next/server";
 import { acceptEnquiry } from "@/lib/enquiries";
 import { SITE } from "@/lib/site";
+import { istIso } from "@/lib/time";
 
-type ContactBody = {
-  name?: string;
-  email?: string;
-  company?: string;
-  problem?: string;
-  source?: string;
-  role?: string;
-  budget?: string;
-  launch?: string;
-  consent?: boolean;
-  interest?: string;
-  website?: string;
-};
+const ROLES = ["brand", "organisation", "other"];
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function isEmail(value: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+// A light per-address limit: 5 accepted enquiries an hour (rejected attempts don't count). Resets on restart.
+const recent = new Map<string, number[]>();
+const hitsFor = (ip: string) => (recent.get(ip) ?? []).filter((t) => Date.now() - t < 3600_000);
+function record(ip: string) {
+  if (recent.size > 5000) recent.clear();
+  recent.set(ip, [...hitsFor(ip), Date.now()]);
 }
 
-export async function POST(request: Request): Promise<NextResponse> {
-  const blocked=mutationGuard(request);if(blocked)return blocked;
-  if(!allowClient(requestIp(request),"contact",10,200,3600_000))return NextResponse.json({ok:false,error:"Please wait an hour before sending another brief."},{status:429});
-  let body: ContactBody;
+const text = (value: unknown, max: number) => (typeof value === "string" ? value.trim().slice(0, max) : "");
+const fail = (error: string, status = 400) => NextResponse.json({ ok: false, error }, { status });
+
+export async function POST(request: Request) {
+  // only accept posts from this site's own pages (compares against the public host, which a proxy forwards)
+  const origin = request.headers.get("origin");
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  let sameSite = !origin;
+  try { sameSite ||= new URL(origin!).host === host; } catch { /* malformed origin */ }
+  if (!sameSite) return fail("This form can only be sent from the Vexa website.", 403);
+
+  const ip = request.headers.get("x-real-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+  if (hitsFor(ip).length >= 5) return fail("You have sent a few messages already. Please wait an hour, or email us directly.", 429);
+
+  let body: Record<string, unknown>;
   try {
-    body = (await readBody(request)) as ContactBody;
-    if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error("Invalid request");
+    const raw = await request.text();
+    if (raw.length > 20_000) return fail("The message is too long.", 413);
+    body = JSON.parse(raw);
+    if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error("not an object");
   } catch {
-    return NextResponse.json({ ok: false, error: "Invalid JSON body." }, { status: 400 });
+    return fail("The form could not be read. Please try again.");
   }
 
-  const name = String(body.name ?? "").trim();
-  const email = String(body.email ?? "").trim();
-  const company = String(body.company ?? "").trim();
-  const problem = String(body.problem ?? "").trim().slice(0, 5000);
-  const source = String(body.source ?? "").trim();
-  const role = String(body.role ?? "").trim();
-  const budget = String(body.budget ?? "").trim();
-  const launch = String(body.launch ?? "").trim();
-  const consent = body.consent === true;
-  const interest = String(body.interest ?? "").trim().slice(0, 300);
+  // honeypot: people never see this field, so anything in it is a bot. Pretend it worked.
+  if (text(body.website, 200)) return NextResponse.json({ ok: true });
 
-  // Honeypot: people never see this field, so anything in it is a bot. Pretend success.
-  if (String(body.website ?? "").trim()) {
-    return NextResponse.json({ ok: true });
-  }
+  const role = text(body.role, 40);
+  const problem = text(body.problem, 2000);
+  const email = text(body.email, 254);
+  if (!ROLES.includes(role)) return fail("Choose the description that fits you.");
+  if (!problem) return fail("Tell us a little about what you have in mind.");
+  if (!EMAIL.test(email)) return fail("Enter a full email address so we can reply.");
+  if (body.consent !== true) return fail("Tick the box so we can use these details to reply.");
 
-  if (!email || !role || !problem) {
-    return NextResponse.json(
-      { ok: false, error: "Email, who you are and your brief are required." },
-      { status: 400 },
-    );
-  }
-  if (!["brand", "organisation", "other"].includes(role)) {
-    return NextResponse.json({ ok: false, error: "Choose who you are." }, { status: 400 });
-  }
-  if (!consent) {
-    return NextResponse.json(
-      { ok: false, error: "Tick the box to let us use these details to reply to your brief." },
-      { status: 400 },
-    );
-  }
-  if (email.length>254 || name.length>120 || company.length>200 || source.length>300 || budget.length>100 || launch.length>100 || !isEmail(email)) {
-    return NextResponse.json({ ok: false, error: "Enter a valid email." }, { status: 400 });
-  }
-
-  const entry = {
-    at: new Date().toISOString(),
-    name: name || null,
+  const ok = await acceptEnquiry({
+    at: istIso(),
+    name: text(body.name, 80) || null,
     email,
     role,
-    interest: interest || null,
-    company: company || null,
+    interest: text(body.interest, 300) || null,
+    company: text(body.company, 120) || null,
     problem,
-    budget: budget || null,
-    launch: launch || null,
-    source: source || null,
-    consent,
-  };
-
-  const result = await acceptEnquiry(entry);
-  if (!result.ok) {
-    return NextResponse.json(
-      { ok: false, error: `We could not save your message. Please try again in a few minutes, or email ${SITE.email}.` },
-      { status: 503 },
-    );
-  }
-
+    budget: null,
+    launch: text(body.timing, 80) || null,
+    source: null,
+    consent: true,
+  });
+  if (!ok) return fail(`Your message did not send. Please try again in a few minutes, or email ${SITE.email}.`, 503);
+  record(ip);
   return NextResponse.json({ ok: true });
 }

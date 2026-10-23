@@ -1,16 +1,58 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ENTITY } from "@/components/entity";
-import { FOOTER_GROUPS } from "@/components/nav";
-import { SITE, SOCIAL } from "@/lib/site";
+import { istDate } from "@/lib/time";
+import { NAV, SITE } from "@/lib/site";
+import { Icon } from "./Icon";
 
-export function Footer(): React.ReactElement {
-  return <footer data-segment="FOOTER-01" className="site-footer"><div className="vx-container">
-    <div className="footer-layout">
-      <div className="footer-company"><Image src="/brand/open-feather-lockup-light.svg" alt="VEXA Digital" width={348} height={112} className="footer-logo" /><p>Gaming campaigns for brands. Business advisory for esports teams and tournament organisers.</p></div>
-      {FOOTER_GROUPS.map(group => <nav key={group.title} aria-label={group.title}><h2 className="vx-label">{group.title}</h2><ul>{group.links.map(item => <li key={item.href}><Link href={item.href}>{item.label}</Link></li>)}</ul></nav>)}
-      <div className="footer-contact"><h2 className="vx-label">Start a conversation</h2><p><a className="break-all" href={`mailto:${SITE.email}`}>{SITE.email}</a></p><ul>{Object.values(SOCIAL).map(item => <li key={item.href}><a href={item.href} rel="noopener">{item.label}</a></li>)}</ul></div>
-    </div>
-    <div className="footer-legal"><div className="footer-entity">{[ENTITY.licence,ENTITY.registrations,ENTITY.operatingOffice,ENTITY.registeredOffice,ENTITY.invoicing].map(line => <p key={line} data-counsel="true">{line}</p>)}</div><div className="footer-bottom"><p>© {new Date().getFullYear()} Blue Wings</p><Link href="/legal/privacy">Privacy</Link><Link href="/legal/terms">Terms</Link><Link href="/legal/grievance-officer">Grievance Officer</Link></div></div>
-  </div></footer>;
+/* Full-width footer: CTA, link columns, contact details and a legal bar. */
+export function Footer() {
+  return (
+    <footer className="foot">
+      <div className="wrap">
+        <div className="foot-cols">
+          <div className="foot-brand">
+            <Image src="/img/vexa-logo-light-teal.png" alt="Vexa Esports Consultancy" width={92} height={48} />
+            <p>Brand campaigns in gaming, and business advisory for esports teams and tournament organisers.</p>
+            <div className="foot-social">
+              <a href={SITE.instagram} rel="noopener" target="_blank" aria-label="Instagram"><Icon name="instagram" size={18} /></a>
+              <a href={SITE.linkedin} rel="noopener" target="_blank" aria-label="LinkedIn"><Icon name="linkedin" size={16} /></a>
+            </div>
+          </div>
+
+          <nav className="foot-col" aria-label="Explore">
+            <p className="foot-h">Explore</p>
+            <Link href="/">Home</Link>
+            {NAV.map((item) => (
+              <Link key={item.href} href={item.href}>{item.label}</Link>
+            ))}
+            <Link href="/faq">FAQ</Link>
+          </nav>
+
+          <div className="foot-col">
+            <p className="foot-h">Reach us at</p>
+            <a href={`mailto:${SITE.email}`} className="f-line"><Icon name="mail" size={17} />{SITE.email}</a>
+            <p className="f-line"><Icon name="pin" size={17} />{SITE.address}</p>
+          </div>
+
+          <nav className="foot-col" aria-label="Legal">
+            <p className="foot-h">Legal</p>
+            <Link href="/privacy">Privacy Policy</Link>
+            <Link href="/terms">Terms &amp; Conditions</Link>
+          </nav>
+        </div>
+
+        <div className="foot-legal">
+          <p>Vexa Digital is a trade name used by Blue Wings, a sole proprietorship, under licence. Registered place of business: 13 Vrundavan, Nava Wadaj, Ahmedabad 380013. Invoices are issued by Blue Wings.</p>
+        </div>
+
+        <div className="foot-bar">
+          <p>© {istDate().slice(0, 4)} Blue Wings. All rights reserved.</p>
+          <nav aria-label="Legal links">
+            <Link href="/privacy">Privacy Policy</Link>
+            <Link href="/terms">Terms &amp; Conditions</Link>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  );
 }
