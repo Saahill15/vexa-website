@@ -1,5 +1,5 @@
 export const SITE = {
-  name: "VEXA Digital",
+  name: "Vexa Digital",
   email: "partnerships@vexadigital.in",
   address: "77A, LGF, Bhawani Kunj, Sector D-2, New Delhi 110070",
   instagram: "https://www.instagram.com/vexadigital.in/",
@@ -9,6 +9,7 @@ export const SITE = {
 
 export const NAV = [
   { href: "/services", label: "Services" },
+  { href: "/valuate", label: "Valuate" },
   { href: "/articles", label: "Articles" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },

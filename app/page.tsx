@@ -1,107 +1,36 @@
-import Image from "next/image";
-import type { CSSProperties } from "react";
-import { Button } from "@/components/Button";
-import { Cta } from "@/components/Cta";
-import { Reveal } from "@/components/Reveal";
-import { Split } from "@/components/Split";
-
-const TICKER = ["Creator campaigns", "Team partnerships", "Tournament activations", "Esports advisory"];
+import Link from "next/link";
+import { FolderDeck } from "@/components/FolderDeck";
+import { HeroTunnel } from "@/components/HeroTunnel";
+import { Reveal } from "@/components/motion/Reveal";
+import { WordReveal } from "@/components/motion/WordReveal";
 
 export default function HomePage() {
   return (
     <>
-      <section className="hero" aria-label="Introduction">
-        <div className="sun" aria-hidden="true" />
-        <div className="floor" aria-hidden="true" />
-        <div className="wrap">
-          <div className="hero-top">
-            <Reveal className="hero-meta">
-              <p className="tag">Esports consultancy · Est. 2025</p>
-              <p><b>New Delhi, India</b></p>
+      <HeroTunnel />
+
+      <section className="sec" id="services" style={{ scrollMarginTop: 70 }} aria-labelledby="svc-h">
+        <div className="wrap svc-split-home">
+          <div className="svc-intro">
+            <Reveal><span className="label">Services</span></Reveal>
+            <WordReveal className="h2" id="svc-h" lines={["Two ways we help", "you build in gaming."]} />
+            <Reveal delay={0.15}><p className="lede">Whether you are a brand entering gaming or an esports organisation selling to brands, we start with your goal and plan around what partners can deliver.</p></Reveal>
+            <Reveal delay={0.2} className="svc-points">
+              <Link href="/services#brands"><b>Brand campaigns</b><span>Creator, team and tournament campaigns</span></Link>
+              <Link href="/services#esports"><b>Esports advisory</b><span>Commercial offers, content plans and proposals</span></Link>
             </Reveal>
-            <Reveal className="orbit" variant="s" delay={300} aria-hidden="true">
-              <svg viewBox="0 0 300 300">
-                <defs>
-                  <path id="ring" d="M150,150 m-118,0 a118,118 0 1,1 236,0 a118,118 0 1,1 -236,0" />
-                </defs>
-                <text>
-                  <textPath href="#ring" startOffset="0" textLength="735" lengthAdjust="spacing">
-                    Brand campaigns ✦ Esports advisory ✦ Creators ✦ Teams ✦{" "}
-                  </textPath>
-                </text>
-              </svg>
-              <Image src="/img/vexa-vmark.png" alt="" width={335} height={318} />
-            </Reveal>
+            <Reveal delay={0.25}><Link href="/services" className="btn btn--line">Explore <span className="arr" aria-hidden="true">→</span></Link></Reveal>
           </div>
-          <Split as="h1" className="h-xl">Where brands *meet* gaming.</Split>
-          <div className="hero-bottom">
-            <Reveal as="p" className="lede" delay={700}>
-              We help brands succeed in gaming, and help esports teams build partnerships brands can buy.
-            </Reveal>
-            <Reveal className="row" delay={850}>
-              <Button href="/services">Our services</Button>
-              <Button href="/contact" variant="line">Contact us</Button>
-            </Reveal>
-          </div>
+          <FolderDeck
+            items={[
+              { number: "01", title: "Brand campaigns", text: "Creator, team and tournament campaigns built around your goal.", href: "/services#brands", tone: "teal" },
+              { number: "02", title: "Esports advisory", text: "Help teams and organisers build partnerships brands can buy.", href: "/services#esports", tone: "ink" },
+            ]}
+          />
         </div>
       </section>
 
-      <div className="ticker" aria-hidden="true">
-        <div className="ticker-track">
-          {[...TICKER, ...TICKER].map((item, i) => (
-            <span key={i}>{item}</span>
-          ))}
-        </div>
-      </div>
 
-      <section className="sec" aria-labelledby="svc-h">
-        <div className="wrap">
-          <div className="sec-head">
-            <Reveal as="p" className="tag">Services</Reveal>
-            <Split as="h2" className="h-lg" id="svc-h">Two ways we help.</Split>
-          </div>
-          <div className="stack">
-            <Reveal as="link" href="/services#brands" className="panel panel--b" style={{ "--n": 0 } as CSSProperties}>
-              <div className="panel-main">
-                <div>
-                  <span className="panel-num" aria-hidden="true">01</span>
-                  <p className="tag" style={{ marginTop: 18 }}>For brands</p>
-                </div>
-                <div style={{ display: "grid", gap: 18 }}>
-                  <h3 className="h-lg">A campaign built around your goal.</h3>
-                  <p>We develop the idea, choose the right gaming partners and manage delivery.</p>
-                </div>
-                <span className="panel-cta"><i aria-hidden="true">→</i> Brand campaigns</span>
-              </div>
-              <ul aria-label="Brand services">
-                <li>Creator campaigns</li>
-                <li>Team partnerships</li>
-                <li>Tournament activations</li>
-              </ul>
-            </Reveal>
-            <Reveal as="link" href="/services#esports" className="panel panel--e" style={{ "--n": 1 } as CSSProperties}>
-              <div className="panel-main">
-                <div>
-                  <span className="panel-num" aria-hidden="true">02</span>
-                  <p className="tag" style={{ marginTop: 18 }}>For esports teams and organisers</p>
-                </div>
-                <div style={{ display: "grid", gap: 18 }}>
-                  <h3 className="h-lg">A partnership a brand can understand.</h3>
-                  <p>We help define what a brand can buy from you, and build the proposal behind it.</p>
-                </div>
-                <span className="panel-cta"><i aria-hidden="true">→</i> Esports advisory</span>
-              </div>
-              <ul aria-label="Esports advisory services">
-                <li>Your commercial offer</li>
-                <li>Content and audience</li>
-                <li>Organiser partnerships</li>
-              </ul>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      <Cta>Let’s build in *gaming.*</Cta>
     </>
   );
 }

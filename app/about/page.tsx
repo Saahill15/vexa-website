@@ -1,69 +1,113 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Cta } from "@/components/Cta";
-import { Reveal } from "@/components/Reveal";
-import { Split } from "@/components/Split";
-import { SITE } from "@/lib/site";
+import { Icon, type IconName } from "@/components/Icon";
+import { Reveal } from "@/components/motion/Reveal";
+import { WordReveal } from "@/components/motion/WordReveal";
+import { TEAM } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "VEXA is an esports consultancy founded in 2025 by Kaustubh Srivastava, a former competitive player and in-game leader.",
+  description: "Vexa is an esports consultancy founded in 2025. Meet Kaustubh Srivastava, Pratham Asknani and Bhaskar.",
 };
+
+// How engagements work, in the words of the original Brands and Organisations pages
+const PRINCIPLES: { icon: IconName; title: string; text: string }[] = [
+  { icon: "doc", title: "A written scope", text: "Every engagement names its deliverables, review schedule and fee in writing before the work starts." },
+  { icon: "shield", title: "Honest about outcomes", text: "Sponsor introductions and production need their own scope. A sponsorship or income is never guaranteed." },
+  { icon: "check", title: "A record of delivery", text: "Once the scope is agreed, we manage partner coordination, approvals and the delivery record." },
+];
+
+const MORE: { icon: IconName; title: string; text: string; label: string; href: string }[] = [
+  { icon: "target", title: "Brand campaigns", text: "Creator, team and tournament campaigns built around your goal.", label: "See the services", href: "/services#brands" },
+  { icon: "trophy", title: "Esports advisory", text: "Help for teams and organisers building offers brands can buy.", label: "See the services", href: "/services#esports" },
+  { icon: "chart", title: "Valuate", text: "Our free tool for creators estimating a quote for a sponsored post.", label: "Meet Valuate", href: "/valuate" },
+  { icon: "doc", title: "Articles", text: "Notes on brand partnerships, creator pricing and the business of esports.", label: "Read the articles", href: "/articles" },
+];
 
 export default function AboutPage() {
   return (
     <>
-      <header className="phero">
-        <div className="wrap phero-grid">
-          <div>
-            <Reveal as="p" className="tag">About</Reveal>
-            <Split as="h1" className="h-xl" style={{ fontSize: "clamp(2.3rem,6.6vw,6rem)" }}>The people behind VEXA.</Split>
-          </div>
-          <Reveal className="phero-aside" delay={500}>
-            <p>VEXA is an esports consultancy, established in 2025.</p>
-          </Reveal>
+      <header className="xl-head">
+        <div className="wrap">
+          <Reveal><span className="label">About Vexa</span></Reveal>
+          <WordReveal as="h1" className="xl-title" lines={["The people behind", "the partnerships."]} />
+          <Reveal delay={0.3}><p className="lede">An esports consultancy founded in 2025 in New Delhi. Campaign thinking, research and design, connected by an interest in the business around gaming.</p></Reveal>
         </div>
       </header>
 
-      <section className="sec--tight sec" style={{ paddingTop: 0 }} aria-labelledby="founder-h">
-        <div className="wrap founder">
-          <Reveal as="aside" className="founder-card" variant="x">
-            <Image className="mark" src="/img/vexa-vmark.png" alt="" width={335} height={318} />
-            <p className="tag">Founder</p>
-            <h2 className="h-lg" id="founder-h">Kaustubh Srivastava</h2>
-            <p className="dim">Known as Soda</p>
+      <section className="xl-sec" aria-labelledby="story-h">
+        <div className="wrap ab-story">
+          <div>
+            <Reveal><span className="label">Our story</span></Reveal>
+            <WordReveal className="h2" id="story-h" lines={["A question", "beyond the match."]} />
+          </div>
+          <Reveal delay={0.1} className="ab-prose">
+            <p className="ab-lead">What can players and teams build that gives someone a reason to pay them? Vexa grew from that question.</p>
+            <p>Kaustubh, known as Soda, has competed in mobile battle royale games and led a team as its in-game leader. His role was to set strategy and call the team’s decisions during matches. His playing background spans PUBG Mobile and BGMI; it informs how he thinks about players, audiences and the work around competition.</p>
+            <p>At Vexa, he leads campaign thinking and commercial decisions, and teaches how gaming partnerships work. His explanations focus on what a brand receives and what a team can reliably deliver.</p>
           </Reveal>
-          <div className="story">
-            <Reveal as="p">
-              A former competitive player and in-game leader in PUBG Mobile and BGMI. VEXA grew from his interest in the
-              business around competition: what players and teams can build that gives someone a reason to pay them.
-            </Reveal>
-            <Reveal as="a" className="tl" href={SITE.founderLinkedin} rel="noopener" target="_blank" style={{ justifySelf: "start" }}>
-              LinkedIn
-            </Reveal>
-          </div>
         </div>
       </section>
 
-      <section className="sec--tight sec" style={{ paddingTop: 0 }} aria-labelledby="crew-h">
+      <section className="xl-sec sec--tint" aria-labelledby="team-h">
         <div className="wrap">
-          <h2 className="sr-only" id="crew-h">Team</h2>
-          <div className="team">
-            <Reveal as="article" className="member">
-              <span className="avatar" aria-hidden="true">PA</span>
-              <p className="role">Research and administration</p>
-              <h3 className="h-md">Pratham Asknani</h3>
-            </Reveal>
-            <Reveal as="article" className="member" delay={140}>
-              <span className="avatar" aria-hidden="true">B</span>
-              <p className="role">Design and video</p>
-              <h3 className="h-md">Bhaskar</h3>
-            </Reveal>
+          <div className="xl-sec-head">
+            <WordReveal className="h2" id="team-h" lines={["Different work.", "One clear idea."]} />
+            <Reveal delay={0.1}><p>Three people covering strategy, research and design, so a campaign is thought through, prepared and presented clearly.</p></Reveal>
+          </div>
+          <div className="gc-grid gc-grid--3">
+            {TEAM.map((person, i) => (
+              <Reveal key={person.chip} delay={i * 0.06} className="gc">
+                <span className="gc-photo"><Image src={person.photo} alt={`Placeholder portrait for ${person.name.join(" ")}`} width={480} height={360} unoptimized /></span>
+                <div>
+                  <span className="gc-role">{person.role}</span>
+                  <h3>{person.name.join(" ")}</h3>
+                </div>
+                <p>{person.bio}</p>
+                {person.link.external ? (
+                  <a className="gc-link" href={person.link.href} target="_blank" rel="noopener">{person.link.label}</a>
+                ) : (
+                  <a className="gc-link" href={person.link.href}>{person.link.label}</a>
+                )}
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
 
-      <Cta>Let’s *talk.*</Cta>
+      <section className="xl-sec" aria-labelledby="how-h">
+        <div className="wrap">
+          <div className="xl-sec-head">
+            <WordReveal className="h2" id="how-h" lines={["How we", "work."]} />
+            <Reveal delay={0.1}><p>The same three commitments run through every campaign and every advisory engagement.</p></Reveal>
+          </div>
+          <div className="gc-grid gc-grid--3">
+            {PRINCIPLES.map((p, i) => (
+              <Reveal key={p.title} delay={i * 0.06} className="gc">
+                <span className="gc-ico"><Icon name={p.icon} size={22} /></span>
+                <h3>{p.title}</h3>
+                <p>{p.text}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="xl-sec sec--tint" aria-labelledby="more-h">
+        <div className="wrap">
+          <h2 className="h2" id="more-h" style={{ margin: "0 0 clamp(24px,3vw,40px)" }}>More about Vexa</h2>
+          <div className="gc-grid">
+            {MORE.map((m, i) => (
+              <Reveal key={m.title} delay={i * 0.06} className="gc">
+                <span className="gc-ico"><Icon name={m.icon} size={22} /></span>
+                <h3>{m.title}</h3>
+                <p>{m.text}</p>
+                <a className="gc-link" href={m.href}>{m.label}</a>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
     </>
   );
 }

@@ -1,4 +1,4 @@
-# VEXA Digital website
+# Vexa Digital website
 
 Next.js (App Router) + React + TypeScript. Pages are statically prerendered.
 

@@ -15,8 +15,12 @@ export type Article = {
   blocks: Block[];
 };
 
-// Placeholder editorial content. Replace with real articles when they are ready.
-export const ARTICLES: Article[] = [
+export type ArticleStatus = "draft" | "published";
+export type StoredArticle = Article & { id: string; status: ArticleStatus; createdAt: string; updatedAt: string };
+
+// The starting articles. They are copied into the data store the first time the site runs; after that the
+// admin panel is the source of truth and edits there never touch this file.
+export const SEED_ARTICLES: Article[] = [
   {
     slug: "what-a-brand-buys-in-an-esports-partnership",
     title: "What a brand actually buys in an esports partnership",
@@ -86,11 +90,12 @@ export const ARTICLES: Article[] = [
   },
 ];
 
-export function getArticle(slug: string): Article | undefined {
-  return ARTICLES.find((a) => a.slug === slug);
+/** Anchor id for an in-article heading, used by the "In this article" list. */
+export function headingId(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-export function readingMinutes(article: Article): number {
+export function readingMinutes(article: Pick<Article, "blocks">): number {
   const words = article.blocks
     .map((b) => (b.type === "list" ? b.items.join(" ") : b.text))
     .join(" ")

@@ -1,88 +1,56 @@
 import type { Metadata } from "next";
-import { Button } from "@/components/Button";
-import { Cta } from "@/components/Cta";
-import { Reveal } from "@/components/Reveal";
-import { Split } from "@/components/Split";
+import Link from "next/link";
+import { FolderDeck } from "@/components/FolderDeck";
+import { Reveal } from "@/components/motion/Reveal";
+import { WordReveal } from "@/components/motion/WordReveal";
+import { PageHead } from "@/components/PageHead";
+import { SERVICES, serviceHref } from "@/lib/services";
 
 export const metadata: Metadata = {
   title: "Services",
   description: "Brand campaigns in gaming, and business advisory for esports teams and tournament organisers.",
 };
 
-type Item = { title: string; text: string };
-
-function Mini({ items }: { items: Item[] }) {
-  return (
-    <ul className="mini">
-      {items.map((item, i) => (
-        <Reveal as="li" key={item.title} delay={i * 100}>
-          <h3 className="h-md">{item.title}</h3>
-          <p>{item.text}</p>
-        </Reveal>
-      ))}
-    </ul>
-  );
-}
+const GROUPS = [
+  {
+    id: "brands",
+    label: "For brands",
+    lines: ["Campaigns built", "around your goal."],
+    lede: "We develop the idea, choose the right gaming partners and manage delivery, from first brief to final record.",
+    cta: { label: "Discuss a campaign", href: "/contact?as=brand#form" },
+  },
+  {
+    id: "esports",
+    label: "For esports teams and organisers",
+    lines: ["Offers a brand", "can understand."],
+    lede: "We help esports teams and tournament organisers define what a brand can buy from them, and build the plan behind it. The written scope names the deliverables and fee; a sponsorship is never guaranteed.",
+    cta: { label: "Discuss advisory", href: "/contact?as=organisation#form" },
+  },
+] as const;
 
 export default function ServicesPage() {
   return (
     <>
-      <header className="phero">
-        <div className="wrap">
-          <Reveal as="p" className="tag">Services</Reveal>
-          <Split as="h1" className="h-xl" style={{ fontSize: "clamp(2.3rem,6.6vw,6rem)" }}>What we do.</Split>
-          <Reveal className="jump" delay={400}>
-            <a href="#brands">For brands</a>
-            <a href="#esports">For esports teams and organisers</a>
-          </Reveal>
-        </div>
-      </header>
-
-      <section className="sec--tight sec" style={{ paddingTop: 0, scrollMarginTop: 90 }} id="brands" aria-labelledby="b-h">
-        <div className="wrap">
-          <div className="sec-head">
-            <Reveal as="p" className="tag">01 · For brands</Reveal>
-            <Split as="h2" className="h-lg" id="b-h">A place in gaming.</Split>
-            <Reveal as="p" className="lede" delay={200}>
-              We develop a campaign around your goal, choose the right gaming partners and manage delivery.
-            </Reveal>
+      <PageHead label="Services" lines={["Two types of service,", "one clear approach."]} lede="Brand campaigns for companies entering gaming, and advisory for esports teams and tournament organisers." />
+      {GROUPS.map((g, gi) => (
+        <section key={g.id} id={g.id} className={gi === 1 ? "sec sec--deep" : "sec sec--brands"} style={{ scrollMarginTop: 70 }} aria-labelledby={`${g.id}-h`}>
+          <div className="wrap">
+            <div className="grp-head">
+              <div className="grp-copy">
+                <Reveal><span className="label">{g.label}</span></Reveal>
+                <WordReveal className="h2 one-line" id={`${g.id}-h`} lines={[...g.lines]} />
+                <Reveal delay={0.15}><p className="lede">{g.lede}</p></Reveal>
+              </div>
+              <Reveal delay={0.2}>
+                <Link href={g.cta.href} className="btn">{g.cta.label} <span className="arr" aria-hidden="true">→</span></Link>
+              </Reveal>
+            </div>
+            <div className="deck-row">
+              <FolderDeck items={SERVICES.filter((s) => s.audience === g.id).map((s) => ({ number: s.number, title: s.title, text: s.text, href: serviceHref(s), tone: g.id === "brands" ? "ink" : "teal" }))} />
+            </div>
           </div>
-          <Mini
-            items={[
-              { title: "Creator campaigns", text: "Content made with gaming creators." },
-              { title: "Team partnerships", text: "Campaigns built around a team’s players and content." },
-              { title: "Tournament activations", text: "A role for your brand at a live event." },
-            ]}
-          />
-          <Reveal className="row" style={{ marginTop: 36 }}>
-            <Button href="/contact?as=brand">Discuss a campaign</Button>
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="sec--tight sec" style={{ paddingTop: 0, scrollMarginTop: 90 }} id="esports" aria-labelledby="e-h">
-        <div className="wrap">
-          <div className="sec-head">
-            <Reveal as="p" className="tag">02 · For esports teams and organisers</Reveal>
-            <Split as="h2" className="h-lg" id="e-h">A business around the game.</Split>
-            <Reveal as="p" className="lede" delay={200}>
-              We help define what a brand can buy from you, and build the proposal behind it.
-            </Reveal>
-          </div>
-          <Mini
-            items={[
-              { title: "Commercial offer", text: "Packages a brand can understand." },
-              { title: "Content and audience", text: "Repeatable formats and clear evidence." },
-              { title: "Organiser partnerships", text: "Event assets with a clear scope." },
-            ]}
-          />
-          <Reveal className="row" style={{ marginTop: 36 }}>
-            <Button href="/contact?as=organisation">Discuss esports advisory</Button>
-          </Reveal>
-        </div>
-      </section>
-
-      <Cta>Tell us your *goal.*</Cta>
+        </section>
+      ))}
     </>
   );
 }

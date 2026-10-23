@@ -1,9 +1,19 @@
 import type { Metadata } from "next";
-import { AuthPlaceholder } from "@/components/AuthPlaceholder";
+import { redirect } from "next/navigation";
+import { AuthForm } from "@/components/AuthForm";
+import { getSession } from "@/lib/auth";
+import { safeNext } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Sign up", robots: { index: false } };
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const { next } = await searchParams;
-  return <AuthPlaceholder mode="signup" next={next} />;
+  const next = safeNext((await searchParams).next);
+  if (await getSession()) redirect(next);
+  return (
+    <section className="auth">
+      <div className="wrap">
+        <AuthForm mode="signup" next={next} googleClientId={process.env.GOOGLE_CLIENT_ID ?? null} devNote={process.env.NODE_ENV !== "production"} />
+      </div>
+    </section>
+  );
 }

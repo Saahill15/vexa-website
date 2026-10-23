@@ -1,45 +1,38 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { DM_Sans, Inter } from "next/font/google";
 import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import { Pointer } from "@/components/Pointer";
+import { SiteShell } from "@/components/SiteShell";
+import "lenis/dist/lenis.css";
 import "./globals.css";
 
-const display = localFont({
-  src: "./fonts/unbounded-latin.woff2",
-  weight: "500 700",
+// DM Sans for headings, Inter for body text. next/font downloads both at build time and serves them from the site.
+const display = DM_Sans({
+  subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
 });
 
-const body = localFont({
-  src: "./fonts/manrope-latin.woff2",
-  weight: "400 700",
-  variable: "--font-body",
+const sans = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: { default: "VEXA Digital | Esports consultancy", template: "%s | VEXA Digital" },
+  title: { default: "Vexa Digital | Esports consultancy", template: "%s | Vexa Digital" },
   description:
-    "VEXA is an esports consultancy. We help brands succeed in gaming and help esports teams build partnerships brands can buy.",
-  openGraph: { type: "website", siteName: "VEXA Digital" },
+    "Vexa is an esports consultancy. We develop brand campaigns in gaming and help esports teams build partnerships brands can buy.",
+  openGraph: { type: "website", siteName: "Vexa Digital" },
 };
 
-export const viewport: Viewport = { themeColor: "#ffffff" };
+export const viewport: Viewport = { themeColor: "#F5FAFA" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: 'document.documentElement.classList.add("js")' }} />
-      </head>
+    <html lang="en" className={`${display.variable} ${sans.variable}`}>
       <body>
         <a className="skip" href="#main">Skip to content</a>
-        <Pointer />
-        <Header />
-        <main id="main">{children}</main>
-        <Footer />
+        <SiteShell footer={<Footer />}>{children}</SiteShell>
       </body>
     </html>
   );

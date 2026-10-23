@@ -1,42 +1,26 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Reveal } from "@/components/Reveal";
-import { Split } from "@/components/Split";
-import { ARTICLES, formatDate, readingMinutes } from "@/content/articles";
+import { ArticlesList } from "@/components/ArticlesList";
+import { Reveal } from "@/components/motion/Reveal";
+import { PageHead } from "@/components/PageHead";
+import { formatDate, readingMinutes } from "@/content/articles";
+import { listPublished } from "@/lib/articles";
+
+// the list comes from the admin-edited data store, so it is built per request rather than once at build time
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Articles",
   description: "Short, practical writing on brand partnerships, creators and building a business in esports.",
 };
 
-export default function ArticlesPage() {
+export default async function ArticlesPage() {
+  const cards = (await listPublished()).map((a) => ({ slug: a.slug, title: a.title, excerpt: a.excerpt, category: a.category, date: a.date, dateLabel: formatDate(a.date), minutes: readingMinutes(a) }));
   return (
     <>
-      <header className="phero">
+      <PageHead label="Articles" lines={["Notes on the business", "of gaming."]} lede="On brand partnerships, creator pricing and the business of esports." />
+      <section className="sec" style={{ paddingTop: 10 }} aria-label="All articles">
         <div className="wrap">
-          <Reveal as="p" className="tag">Articles</Reveal>
-          <Split as="h1" className="h-xl" style={{ fontSize: "clamp(2.3rem,6.6vw,6rem)" }}>Notes on gaming.</Split>
-          <Reveal as="p" className="lede" delay={400}>Short, practical writing on brand partnerships, creators and esports.</Reveal>
-        </div>
-      </header>
-
-      <section className="sec--tight sec" style={{ paddingTop: 0 }} aria-label="All articles">
-        <div className="wrap">
-          <ul className="agrid">
-            {ARTICLES.map((article, i) => (
-              <Reveal as="li" key={article.slug} delay={i * 100}>
-                <Link className="acard" href={`/articles/${article.slug}`}>
-                  <p className="tag">{article.category}</p>
-                  <h2 className="h-md">{article.title}</h2>
-                  <p className="aex">{article.excerpt}</p>
-                  <p className="ameta">
-                    <time dateTime={article.date}>{formatDate(article.date)}</time> · {readingMinutes(article)} min read
-                  </p>
-                  <span className="go" aria-hidden="true">→</span>
-                </Link>
-              </Reveal>
-            ))}
-          </ul>
+          <Reveal y={20}><ArticlesList articles={cards} /></Reveal>
         </div>
       </section>
     </>

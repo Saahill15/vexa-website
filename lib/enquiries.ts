@@ -1,0 +1,127 @@
+import { randomUUID } from "crypto";
+import { readFile } from "fs/promises";
+import path from "path";
+import { dataDir, exists, readAll, update } from "./store";
+
+/*
+ * Enquiries from the Start a conversation form. Each one is saved first, then sent to CONTACT_WEBHOOK_URL
+ * (the n8n flow that emails the Vexa inbox, same fields as before). The admin panel works from the saved copy.
+ */
+
+export const STATUSES = [
+  { value: "new", label: "New" },
+  { value: "in_progress", label: "In progress" },
+  { value: "waiting", label: "Waiting for a reply" },
+  { value: "resolved", label: "Resolved" },
+] as const;
+export type EnquiryStatus = (typeof STATUSES)[number]["value"];
+export const isStatus = (v: unknown): v is EnquiryStatus => STATUSES.some((s) => s.value === v);
+
+/** What each status means to the person who sent the enquiry. */
+export const STATUS_NOTE: Record<EnquiryStatus, string> = {
+  new: "We have your enquiry and will reply by email.",
+  in_progress: "We are working on your enquiry.",
+  waiting: "We are waiting for a reply. Check your email for our latest message.",
+  resolved: "This enquiry is closed. If you need anything more, reply to our email.",
+};
+
+export type EnquiryEntry = {
+  at: string;
+  name: string | null;
+  email: string;
+  role: string;
+  interest: string | null;
+  company: string | null;
+  problem: string;
+  budget: string | null;
+  launch: string | null;
+  source: string | null;
+  consent: boolean;
+};
+
+export type Enquiry = EnquiryEntry & { id: string; status: EnquiryStatus; notes: string; emailed: "delivered" | "failed" | "not_configured" };
+
+const COLLECTION = "enquiries";
+
+/** Enquiries saved by the first version of the form (a plain text file) are brought in once. */
+async function importOldFile() {
+  if (await exists(COLLECTION)) return;
+  let raw = "";
+  try {
+    raw = await readFile(path.join(dataDir(), "contact-submissions.jsonl"), "utf8");
+  } catch {
+    return;
+  }
+  await update<Enquiry>(COLLECTION, (rows) => {
+    if (rows.length) return;
+    for (const line of raw.split("\n")) {
+      try {
+        const e = JSON.parse(line) as EnquiryEntry & { id?: string };
+        if (e.email && e.problem) rows.push({ ...e, id: e.id ?? randomUUID(), status: "new", notes: "", emailed: "not_configured" });
+      } catch {
+        /* skip a damaged line */
+      }
+    }
+  });
+}
+
+export async function listEnquiries(): Promise<Enquiry[]> {
+  await importOldFile();
+  return (await readAll<Enquiry>(COLLECTION)).sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+}
+/** Enquiries sent with this email address, newest first. Only show them to someone who has proven the address. */
+export async function listForEmail(email: string): Promise<Enquiry[]> {
+  const wanted = email.toLowerCase();
+  return (await listEnquiries()).filter((e) => e.email.toLowerCase() === wanted);
+}
+export async function getEnquiry(id: string) {
+  return (await listEnquiries()).find((e) => e.id === id) ?? null;
+}
+
+export async function updateEnquiry(id: string, patch: { status?: EnquiryStatus; notes?: string }) {
+  await update<Enquiry>(COLLECTION, (rows) => {
+    const e = rows.find((x) => x.id === id);
+    if (!e) return;
+    if (patch.status) e.status = patch.status;
+    if (patch.notes !== undefined) e.notes = patch.notes.slice(0, 5000);
+  });
+}
+export async function deleteEnquiry(id: string) {
+  await update<Enquiry>(COLLECTION, (rows) => {
+    const i = rows.findIndex((x) => x.id === id);
+    if (i >= 0) rows.splice(i, 1);
+  });
+}
+
+async function notify(entry: EnquiryEntry): Promise<Enquiry["emailed"]> {
+  const url = process.env.CONTACT_WEBHOOK_URL;
+  if (!url) return "not_configured";
+  try {
+    const token = process.env.CONTACT_WEBHOOK_TOKEN;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify(entry),
+      signal: AbortSignal.timeout(5000),
+      redirect: "error",
+    });
+    return res.ok ? "delivered" : "failed";
+  } catch {
+    return "failed";
+  }
+}
+
+/** Accepts an enquiry when at least one route holds it: saved in the store or delivered to the webhook. */
+export async function acceptEnquiry(entry: EnquiryEntry): Promise<boolean> {
+  await importOldFile();
+  const emailed = await notify(entry);
+  if (emailed === "failed") console.error("enquiry: webhook delivery failed");
+  if (emailed === "not_configured" && process.env.NODE_ENV === "production") console.error("enquiry: CONTACT_WEBHOOK_URL is not set, nothing was emailed");
+  try {
+    await update<Enquiry>(COLLECTION, (rows) => void rows.push({ ...entry, id: randomUUID(), status: "new", notes: "", emailed }));
+    return true;
+  } catch {
+    console.error("enquiry: could not write to the data folder");
+    return emailed === "delivered";
+  }
+}

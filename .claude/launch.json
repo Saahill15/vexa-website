@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "vexa-dev",
+      "runtimeExecutable": "/Users/sahil/.local/node22/bin/node",
+      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev", "-p", "3310"],
+      "port": 3310
+    }
+  ]
+}

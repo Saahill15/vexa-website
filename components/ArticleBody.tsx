@@ -1,4 +1,4 @@
-import type { Block } from "@/content/articles";
+import { headingId, type Block } from "@/content/articles";
 
 export function ArticleBody({ blocks }: { blocks: Block[] }) {
   return (
@@ -6,7 +6,7 @@ export function ArticleBody({ blocks }: { blocks: Block[] }) {
       {blocks.map((block, i) => {
         switch (block.type) {
           case "h2":
-            return <h2 key={i}>{block.text}</h2>;
+            return <h2 key={i} id={headingId(block.text)}>{block.text}</h2>;
           case "quote":
             return <blockquote key={i}>{block.text}</blockquote>;
           case "list":
