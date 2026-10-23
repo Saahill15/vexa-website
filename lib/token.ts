@@ -1,7 +1,6 @@
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
-import { dataDir } from "./store";
 
 /*
  * The signed session token: the account id, an expiry and the time it was issued, signed with HMAC-SHA256. It carries no
@@ -16,9 +15,10 @@ function secret(): Buffer {
   const fromEnv = process.env.SESSION_SECRET;
   if (fromEnv && fromEnv.length >= 32) return (cachedSecret = Buffer.from(fromEnv));
   // no SESSION_SECRET set: make one once and keep it in the data folder, so sessions survive restarts
-  const where = path.join(dataDir(), ".session-secret");
+  const folder = process.env.VEXA_DATA_DIR ?? path.join(process.cwd(), "data");
+  const where = path.join(folder, ".session-secret");
   if (!existsSync(where)) {
-    mkdirSync(dataDir(), { recursive: true, mode: 0o700 });
+    mkdirSync(folder, { recursive: true, mode: 0o700 });
     writeFileSync(where, randomBytes(48).toString("base64"), { mode: 0o600 });
     chmodSync(where, 0o600);
   }

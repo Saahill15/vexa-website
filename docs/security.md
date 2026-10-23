@@ -5,13 +5,13 @@
 | Setting | Why |
 | --- | --- |
 | `SITE_URL=https://…` (https, no trailing slash) | Links in password-reset and verification emails, the sitemap and robots.txt are built from it. In production the site refuses to build email links without it, so nobody can poison a reset link by sending a fake `Host` header. |
-| `SESSION_SECRET` (48+ random characters) | Signs the login cookie. Without it a secret is generated into `data/.session-secret`. |
+| `SESSION_SECRET` (48+ random characters) | Signs the login cookie. Without it a secret is generated into `VEXA_DATA_DIR/.session-secret`. |
 | `RESEND_API_KEY`, Gmail OAuth values | Server-side only. Never prefix with `NEXT_PUBLIC_`. |
 | `GMAIL_AUTH=oauth` | `delegation` is for a developer's own machine only. |
 | `ADMIN_EMAILS` | Only addresses whose email is confirmed become admins. |
 | HTTPS in front of the site | The login cookie is `Secure`; HSTS is sent in production. |
 | A reverse proxy (nginx, Cloudflare) that **overwrites** `X-Real-IP` / `X-Forwarded-For` | Rate limits are per visitor address. If the site is exposed directly, a visitor can fake those headers and dodge the per-address limits (the per-account limits still hold). |
-| `data/` on a persistent disk, backed up, not served | Accounts, enquiries, comments and the session secret live there. Files are `0600`. On serverless hosting this folder is not kept. |
+| `DATABASE_URL` (PostgreSQL) | Accounts, enquiries, comments and content live in the database. Back it up daily (for example `pg_dump`) and keep it on the server only, never exposed to the internet. The role should own only the `vexa` database. |
 
 ## What is in place
 
@@ -27,7 +27,7 @@
 
 ## Known limits
 
-- The rate limiter is in memory: it resets on restart and is per server process. Use a shared store (Redis) if you run several instances.
+- The rate limiter is in memory: it resets on restart and is per server process. The data itself is in PostgreSQL, so several app servers can share it once the rate limiter moves to a shared store. Use a shared store (Redis) if you run several instances.
 - The CSP allows inline scripts (Next's own bootstrap). Adding per-request nonces would remove that.
 - Admin pages for a signed-in non-admin first send a loading shell (title only, no data) before the 404.
 - There is no two-factor sign-in for admins yet; the admin accounts rely on strong, unique passwords or Google sign-in.

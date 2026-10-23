@@ -1,5 +1,5 @@
 import { randomBytes, scrypt, timingSafeEqual } from "crypto";
-import { newId, readAll, update } from "./store";
+import { db, isUuid, isoOrUndefined, iso, transaction, type Queryer } from "./db";
 import { istIso } from "./time";
 
 export type Role = "user" | "admin";
@@ -25,7 +25,48 @@ export type User = {
   inboxRead?: string[];
 };
 
-const COLLECTION = "users";
+type UserRow = {
+  id: string;
+  name: string;
+  email: string;
+  password_hash: string | null;
+  google_id: string | null;
+  email_verified: boolean;
+  role: Role;
+  disabled: boolean;
+  created_at: Date;
+  last_login_at: Date | null;
+  password_changed_at: Date | null;
+  sessions_revoked_at: Date | null;
+  inbox_read_all: Date | null;
+  inbox_read: string[];
+};
+
+const COLUMNS = "id, name, email, password_hash, google_id, email_verified, role, disabled, created_at, last_login_at, password_changed_at, sessions_revoked_at, inbox_read_all, inbox_read";
+
+function toUser(r: UserRow): User {
+  return {
+    id: r.id,
+    name: r.name,
+    email: r.email,
+    ...(r.password_hash ? { passwordHash: r.password_hash } : {}),
+    ...(r.google_id ? { googleId: r.google_id } : {}),
+    emailVerified: r.email_verified,
+    role: r.role,
+    disabled: r.disabled,
+    createdAt: iso(r.created_at),
+    lastLoginAt: isoOrUndefined(r.last_login_at),
+    passwordChangedAt: isoOrUndefined(r.password_changed_at),
+    sessionsRevokedAt: isoOrUndefined(r.sessions_revoked_at),
+    inboxReadAll: isoOrUndefined(r.inbox_read_all),
+    inboxRead: r.inbox_read,
+  };
+}
+
+async function oneUser(q: Queryer, sql: string, params: unknown[]): Promise<User | null> {
+  const { rows } = await q.query<UserRow>(sql, params);
+  return rows[0] ? toUser(rows[0]) : null;
+}
 
 /** Emails in ADMIN_EMAILS are admins once their address is verified by Google. */
 function adminEmails(): string[] {
@@ -68,24 +109,28 @@ export async function verifyPassword(password: string, stored: string | undefine
   return stored !== undefined && expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 
-export const listUsers = () => readAll<User>(COLLECTION);
-export async function getUserById(id: string) {
-  return (await listUsers()).find((u) => u.id === id) ?? null;
+export async function listUsers(): Promise<User[]> {
+  const { rows } = await db.query<UserRow>(`select ${COLUMNS} from users order by created_at`);
+  return rows.map(toUser);
 }
-export async function getUserByEmail(email: string) {
-  const e = email.toLowerCase();
-  return (await listUsers()).find((u) => u.email === e) ?? null;
+
+export async function getUserById(id: string): Promise<User | null> {
+  if (!isUuid(id)) return null;
+  return oneUser(db, `select ${COLUMNS} from users where id = $1`, [id]);
+}
+
+export async function getUserByEmail(email: string): Promise<User | null> {
+  return oneUser(db, `select ${COLUMNS} from users where email = $1`, [email.toLowerCase()]);
 }
 
 /** Creates an account once its email has been confirmed. Null if the email already has an account. */
 export async function createConfirmedUser(input: { name: string; email: string; passwordHash: string }): Promise<User | null> {
-  return update<User, User | null>(COLLECTION, (rows) => {
-    const email = input.email.toLowerCase();
-    if (rows.some((u) => u.email === email)) return null;
-    const user: User = { id: newId(), name: input.name, email, passwordHash: input.passwordHash, emailVerified: true, role: "user", disabled: false, createdAt: istIso() };
-    rows.push(user);
-    return user;
-  });
+  return oneUser(
+    db,
+    `insert into users (name, email, password_hash, email_verified, role, disabled)
+     values ($1, $2, $3, true, 'user', false) on conflict do nothing returning ${COLUMNS}`,
+    [input.name, input.email.toLowerCase(), input.passwordHash],
+  );
 }
 
 export type GoogleOutcome = { kind: "login"; user: User } | { kind: "link"; user: User } | { kind: "blocked" };
@@ -96,142 +141,144 @@ export type GoogleOutcome = { kind: "login"; user: User } | { kind: "link"; user
  * password (not expected, but safe) is linked. Otherwise a new account is created.
  */
 export async function googleLogin(input: { googleId: string; name: string; email: string }): Promise<GoogleOutcome> {
-  return update<User, GoogleOutcome>(COLLECTION, (rows) => {
-    const email = input.email.toLowerCase();
-    const byGoogle = rows.find((u) => u.googleId === input.googleId);
+  const email = input.email.toLowerCase();
+  return transaction(async (client): Promise<GoogleOutcome> => {
+    const byGoogle = await oneUser(client, `select ${COLUMNS} from users where google_id = $1`, [input.googleId]);
     if (byGoogle) return { kind: "login", user: byGoogle };
-    const byEmail = rows.find((u) => u.email === email);
+    const byEmail = await oneUser(client, `select ${COLUMNS} from users where email = $1 for update`, [email]);
     if (byEmail?.passwordHash) return { kind: "link", user: byEmail };
     // a Google-only account already holds this email under a different Google account: never swap it over
     if (byEmail?.googleId) return { kind: "blocked" };
     if (byEmail) {
-      byEmail.googleId = input.googleId;
-      byEmail.emailVerified = true;
-      return { kind: "login", user: byEmail };
+      const linked = await oneUser(client, `update users set google_id = $2, email_verified = true where id = $1 returning ${COLUMNS}`, [byEmail.id, input.googleId]);
+      return { kind: "login", user: linked as User };
     }
-    const user: User = { id: newId(), name: input.name || email.split("@")[0], email, googleId: input.googleId, emailVerified: true, role: "user", disabled: false, createdAt: istIso() };
-    rows.push(user);
-    return { kind: "login", user };
+    const user = await oneUser(
+      client,
+      `insert into users (name, email, google_id, email_verified, role, disabled)
+       values ($1, $2, $3, true, 'user', false) returning ${COLUMNS}`,
+      [input.name || email.split("@")[0], email, input.googleId],
+    );
+    return { kind: "login", user: user as User };
   });
 }
 
 /** Links a Google account to an existing account. Returns an error message, or null when linked. */
 export async function linkGoogle(userId: string, googleId: string): Promise<string | null> {
-  return update<User, string | null>(COLLECTION, (rows) => {
-    if (rows.some((u) => u.googleId === googleId && u.id !== userId)) return "That Google account is already linked to another account.";
-    const user = rows.find((u) => u.id === userId);
+  if (!isUuid(userId)) return "That account no longer exists.";
+  return transaction(async (client) => {
+    const user = await oneUser(client, `select ${COLUMNS} from users where id = $1 for update`, [userId]);
     if (!user) return "That account no longer exists.";
     if (user.googleId && user.googleId !== googleId) return "This account is already linked to a different Google account. Unlink it first.";
-    user.googleId = googleId;
-    user.emailVerified = true;
+    const taken = await client.query("select 1 from users where google_id = $1 and id <> $2", [googleId, userId]);
+    if (taken.rowCount) return "That Google account is already linked to another account.";
+    await client.query("update users set google_id = $2, email_verified = true where id = $1", [userId, googleId]);
     return null;
   });
 }
 
 /** Removes the Google link. Refused unless a password is set, so nobody is left without a way to log in. */
 export async function unlinkGoogle(userId: string): Promise<string | null> {
-  return update<User, string | null>(COLLECTION, (rows) => {
-    const user = rows.find((u) => u.id === userId);
+  if (!isUuid(userId)) return "That account no longer exists.";
+  return transaction(async (client) => {
+    const user = await oneUser(client, `select ${COLUMNS} from users where id = $1 for update`, [userId]);
     if (!user) return "That account no longer exists.";
     if (!user.passwordHash) return "Set a password first, so you still have a way to log in.";
-    delete user.googleId;
+    await client.query("update users set google_id = null where id = $1", [userId]);
     return null;
   });
 }
 
 /** Removes the password. Refused unless Google is linked, so nobody is left without a way to log in. */
 export async function removePassword(userId: string): Promise<string | null> {
-  return update<User, string | null>(COLLECTION, (rows) => {
-    const user = rows.find((u) => u.id === userId);
+  if (!isUuid(userId)) return "That account no longer exists.";
+  return transaction(async (client) => {
+    const user = await oneUser(client, `select ${COLUMNS} from users where id = $1 for update`, [userId]);
     if (!user) return "That account no longer exists.";
     if (!user.googleId) return "Link Google first, so you still have a way to log in.";
-    delete user.passwordHash;
+    await client.query("update users set password_hash = null where id = $1", [userId]);
     return null;
   });
 }
 
 export async function touchLogin(id: string) {
-  await update<User>(COLLECTION, (rows) => {
-    const user = rows.find((u) => u.id === id);
-    if (user) user.lastLoginAt = istIso();
-  });
+  if (!isUuid(id)) return;
+  await db.query("update users set last_login_at = $2 where id = $1", [id, istIso()]);
 }
 
 /** Admin actions. Both refuse to leave the site without an administrator. */
 export async function setRole(id: string, role: Role): Promise<string | null> {
-  return update<User, string | null>(COLLECTION, (rows) => {
-    const user = rows.find((u) => u.id === id);
+  if (!isUuid(id)) return "That account no longer exists.";
+  return transaction(async (client) => {
+    const user = await oneUser(client, `select ${COLUMNS} from users where id = $1 for update`, [id]);
     if (!user) return "That account no longer exists.";
     if (role === "user" && isListedAdmin(user)) return "This person is an admin through ADMIN_EMAILS. Remove them from that list to change it.";
-    if (role === "user" && user.role === "admin" && rows.filter((u) => effectiveRole(u) === "admin" && !u.disabled).length <= 1) return "There must be at least one admin.";
-    user.role = role;
+    if (role === "user" && user.role === "admin" && (await activeAdminCount(client)) <= 1) return "There must be at least one admin.";
+    await client.query("update users set role = $2 where id = $1", [id, role]);
     return null;
   });
 }
 
 export async function setDisabled(id: string, disabled: boolean): Promise<string | null> {
-  return update<User, string | null>(COLLECTION, (rows) => {
-    const user = rows.find((u) => u.id === id);
+  if (!isUuid(id)) return "That account no longer exists.";
+  return transaction(async (client) => {
+    const user = await oneUser(client, `select ${COLUMNS} from users where id = $1 for update`, [id]);
     if (!user) return "That account no longer exists.";
-    if (disabled && effectiveRole(user) === "admin" && rows.filter((u) => effectiveRole(u) === "admin" && !u.disabled).length <= 1) return "You can't disable the only admin.";
-    user.disabled = disabled;
+    if (disabled && effectiveRole(user) === "admin" && (await activeAdminCount(client)) <= 1) return "You can't disable the only admin.";
+    await client.query("update users set disabled = $2 where id = $1", [id, disabled]);
     return null;
   });
+}
+
+/** Accounts that are currently admins (by role or by ADMIN_EMAILS) and not disabled. */
+async function activeAdminCount(client: Queryer): Promise<number> {
+  const { rows } = await client.query<UserRow>(`select ${COLUMNS} from users where (role = 'admin' or email = any($1)) and not disabled`, [adminEmails()]);
+  return rows.map(toUser).filter((u) => effectiveRole(u) === "admin").length;
 }
 
 /** Admin inbox read state. */
 export async function markInboxRead(userId: string, key: string) {
-  await update<User>(COLLECTION, (rows) => {
-    const user = rows.find((u) => u.id === userId);
+  if (!isUuid(userId)) return;
+  await transaction(async (client) => {
+    const user = await oneUser(client, `select ${COLUMNS} from users where id = $1 for update`, [userId]);
     if (!user) return;
     const read = user.inboxRead ?? [];
-    if (!read.includes(key)) user.inboxRead = [...read, key].slice(-400);
+    if (read.includes(key)) return;
+    await client.query("update users set inbox_read = $2 where id = $1", [userId, [...read, key].slice(-400)]);
   });
 }
 export async function markAllInboxRead(userId: string) {
-  await update<User>(COLLECTION, (rows) => {
-    const user = rows.find((u) => u.id === userId);
-    if (!user) return;
-    user.inboxReadAll = istIso();
-    user.inboxRead = [];
-  });
+  if (!isUuid(userId)) return;
+  await db.query("update users set inbox_read_all = $2, inbox_read = '{}' where id = $1", [userId, istIso()]);
 }
 
 /** Sets a new password. A password reset also proves the email address, so the account counts as verified. */
 export async function setPassword(userId: string, password: string): Promise<boolean> {
+  if (!isUuid(userId)) return false;
   const passwordHash = await hashPassword(password);
-  return update<User, boolean>(COLLECTION, (rows) => {
-    const user = rows.find((u) => u.id === userId);
-    if (!user) return false;
-    user.passwordHash = passwordHash;
-    user.emailVerified = true;
-    user.passwordChangedAt = istIso();
-    return true;
-  });
+  const { rowCount } = await db.query(
+    "update users set password_hash = $2, email_verified = true, password_changed_at = $3 where id = $1",
+    [userId, passwordHash, istIso()],
+  );
+  return Boolean(rowCount);
 }
 
 /** Marks the email address as proven (after the verification link, a password reset, or a Google link). */
 export async function setEmailVerified(userId: string): Promise<void> {
-  await update<User>(COLLECTION, (rows) => {
-    const user = rows.find((u) => u.id === userId);
-    if (user) user.emailVerified = true;
-  });
+  if (!isUuid(userId)) return;
+  await db.query("update users set email_verified = true where id = $1", [userId]);
 }
 
 /** Changes the display name. Returns an error message, or null when saved. */
 export async function setName(userId: string, name: string): Promise<string | null> {
-  return update<User, string | null>(COLLECTION, (rows) => {
-    const user = rows.find((u) => u.id === userId);
-    if (!user) return "That account no longer exists.";
-    user.name = name;
-    return null;
-  });
+  if (!isUuid(userId)) return "That account no longer exists.";
+  const { rowCount } = await db.query("update users set name = $2 where id = $1", [userId, name]);
+  return rowCount ? null : "That account no longer exists.";
 }
 
 /** Signs out every session issued before now. The caller starts a new session for the device they are on. */
 export async function revokeSessions(userId: string): Promise<void> {
-  await update<User>(COLLECTION, (rows) => {
-    const user = rows.find((u) => u.id === userId);
-    if (user) user.sessionsRevokedAt = istIso();
-  });
+  if (!isUuid(userId)) return;
+  await db.query("update users set sessions_revoked_at = $2 where id = $1", [userId, istIso()]);
 }
+

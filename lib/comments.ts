@@ -1,42 +1,46 @@
-import { newId, readAll, update } from "./store";
-import { istIso } from "./time";
+import { db, isUuid, iso } from "./db";
 
 export type Comment = { id: string; slug: string; userId: string; name: string; text: string; createdAt: string };
 
-const COLLECTION = "comments";
 export const COMMENT_MAX = 1000;
 
+type CommentRow = { id: string; slug: string; user_id: string | null; name: string; text: string; created_at: Date };
+
+const toComment = (r: CommentRow): Comment => ({ id: r.id, slug: r.slug, userId: r.user_id ?? "", name: r.name, text: r.text, createdAt: iso(r.created_at) });
+
 export async function listForArticle(slug: string): Promise<Comment[]> {
-  return (await readAll<Comment>(COLLECTION)).filter((c) => c.slug === slug).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  const { rows } = await db.query<CommentRow>("select * from comments where slug = $1 order by created_at desc", [slug]);
+  return rows.map(toComment);
 }
+
 export async function listAllComments(): Promise<Comment[]> {
-  return (await readAll<Comment>(COLLECTION)).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  const { rows } = await db.query<CommentRow>("select * from comments order by created_at desc");
+  return rows.map(toComment);
 }
 
 export async function addComment(input: { slug: string; userId: string; name: string; text: string }): Promise<Comment> {
-  const comment: Comment = { id: newId(), createdAt: istIso(), ...input };
-  await update<Comment>(COLLECTION, (rows) => void rows.push(comment));
-  return comment;
+  const { rows } = await db.query<CommentRow>(
+    "insert into comments (slug, user_id, name, text) values ($1, $2, $3, $4) returning *",
+    [input.slug, input.userId, input.name, input.text],
+  );
+  return toComment(rows[0]);
 }
 
 /** An admin can remove any comment; a reader can remove their own. */
 export async function removeComment(id: string, by: { id: string; admin: boolean }): Promise<boolean> {
-  return update<Comment, boolean>(COLLECTION, (rows) => {
-    const i = rows.findIndex((c) => c.id === id && (by.admin || c.userId === by.id));
-    if (i < 0) return false;
-    rows.splice(i, 1);
-    return true;
-  });
+  if (!isUuid(id)) return false;
+  const { rowCount } = await db.query("delete from comments where id = $1 and ($2::boolean or user_id = $3)", [id, by.admin, by.id]);
+  return Boolean(rowCount);
 }
 
 /** The comments one reader has posted. */
 export async function listForUser(userId: string): Promise<Comment[]> {
-  return (await readAll<Comment>(COLLECTION)).filter((c) => c.userId === userId).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  const { rows } = await db.query<CommentRow>("select * from comments where user_id = $1 order by created_at desc", [userId]);
+  return rows.map(toComment);
 }
 
 /** Keeps a reader's name on their comments in step with their profile. */
 export async function renameCommenter(userId: string, name: string): Promise<void> {
-  await update<Comment>(COLLECTION, (rows) => {
-    for (const c of rows) if (c.userId === userId) c.name = name;
-  });
+  await db.query("update comments set name = $2 where user_id = $1", [userId, name]);
 }
+

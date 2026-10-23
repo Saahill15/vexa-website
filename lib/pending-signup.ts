@@ -1,43 +1,40 @@
 import { createHash, randomBytes } from "crypto";
+import { db, transaction } from "./db";
 import { sendAccountMail } from "./mail";
-import { newId, update } from "./store";
 import { hashPassword } from "./users";
-import { istIso } from "./time";
 
 /*
  * A sign-up waits here until its email is confirmed; the account is only created then. The password is stored already
  * hashed, and only a hash of the link token is kept. A new sign-up for the same email replaces the one waiting.
  */
 
-type Pending = { id: string; email: string; name: string; passwordHash: string; tokenHash: string; createdAt: string; expiresAt: string };
-
-const COLLECTION = "pending-signups";
-export const SIGNUP_HOURS = 24;
 const sha = (token: string) => createHash("sha256").update(token).digest("hex");
+export const SIGNUP_HOURS = 24;
 
 /** Stores the sign-up and returns the link token for it. */
 export async function startSignup(input: { name: string; email: string; password: string }): Promise<string> {
   const passwordHash = await hashPassword(input.password);
   const token = randomBytes(32).toString("base64url");
-  const now = Date.now();
-  await update<Pending>(COLLECTION, (rows) => {
-    for (let i = rows.length - 1; i >= 0; i--) if (rows[i].email === input.email) rows.splice(i, 1);
-    rows.push({ id: newId(), email: input.email, name: input.name, passwordHash, tokenHash: sha(token), createdAt: istIso(now), expiresAt: istIso(now + SIGNUP_HOURS * 3600_000) });
-    while (rows.length > 500) rows.shift();
+  await transaction(async (client) => {
+    await client.query("delete from pending_signups where email = $1", [input.email]);
+    await client.query(
+      "insert into pending_signups (email, name, password_hash, token_hash, expires_at) values ($1, $2, $3, $4, now() + make_interval(hours => $5))",
+      [input.email, input.name, passwordHash, sha(token), SIGNUP_HOURS],
+    );
+    await client.query("delete from pending_signups where expires_at < now()");
   });
   return token;
 }
 
 /** Takes a waiting sign-up for its link, once. Returns null if the link is unknown, used or expired. */
 export async function takeSignup(token: string): Promise<{ name: string; email: string; passwordHash: string } | null> {
-  const hash = sha(token);
-  return update<Pending, { name: string; email: string; passwordHash: string } | null>(COLLECTION, (rows) => {
-    const i = rows.findIndex((r) => r.tokenHash === hash);
-    if (i < 0) return null;
-    const [row] = rows.splice(i, 1);
-    if (Date.parse(row.expiresAt) < Date.now()) return null;
-    return { name: row.name, email: row.email, passwordHash: row.passwordHash };
-  });
+  const { rows } = await db.query<{ name: string; email: string; password_hash: string; expires_at: Date }>(
+    "delete from pending_signups where token_hash = $1 returning name, email, password_hash, expires_at",
+    [sha(token)],
+  );
+  const row = rows[0];
+  if (!row || row.expires_at.getTime() < Date.now()) return null;
+  return { name: row.name, email: row.email, passwordHash: row.password_hash };
 }
 
 /** Sent instead of a confirmation link when someone signs up with an address that already has an account. */
