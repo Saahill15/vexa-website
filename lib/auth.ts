@@ -1,9 +1,7 @@
-import { createHmac, randomBytes, timingSafeEqual } from "crypto";
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
-import path from "path";
 import { cache } from "react";
-import { dataDir } from "./store";
+import { makeToken, MAX_AGE, readToken, sign } from "./token";
 import { effectiveRole, getUserById, type Role } from "./users";
 
 /*
@@ -14,46 +12,6 @@ import { effectiveRole, getUserById, type Role } from "./users";
 export type Session = { id: string; name: string; email: string; role: Role };
 
 const COOKIE = "vexa_session";
-const MAX_AGE = 60 * 60 * 24 * 30;
-
-let cachedSecret: Buffer | null = null;
-function secret(): Buffer {
-  if (cachedSecret) return cachedSecret;
-  const fromEnv = process.env.SESSION_SECRET;
-  if (fromEnv && fromEnv.length >= 32) return (cachedSecret = Buffer.from(fromEnv));
-  // no SESSION_SECRET set: make one once and keep it in the data folder, so sessions survive restarts
-  const where = path.join(dataDir(), ".session-secret");
-  if (!existsSync(where)) {
-    mkdirSync(dataDir(), { recursive: true, mode: 0o700 });
-    writeFileSync(where, randomBytes(48).toString("base64"), { mode: 0o600 });
-    chmodSync(where, 0o600);
-  }
-  return (cachedSecret = Buffer.from(readFileSync(where, "utf8").trim()));
-}
-
-const sign = (payload: string) => createHmac("sha256", secret()).update(payload).digest("base64url");
-
-function makeToken(userId: string): string {
-  const payload = Buffer.from(JSON.stringify({ u: userId, e: Math.floor(Date.now() / 1000) + MAX_AGE, i: Date.now() })).toString("base64url");
-  return `${payload}.${sign(payload)}`;
-}
-
-type Claim = { u: string; i: number };
-
-function readToken(token: string): Claim | null {
-  const [payload, signature] = token.split(".");
-  if (!payload || !signature) return null;
-  const expected = Buffer.from(sign(payload));
-  const given = Buffer.from(signature);
-  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;
-  try {
-    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { u?: unknown; e?: unknown; i?: unknown };
-    if (typeof data.u !== "string" || typeof data.e !== "number" || data.e <= Date.now() / 1000) return null;
-    return { u: data.u, i: typeof data.i === "number" ? data.i : 0 };
-  } catch {
-    return null;
-  }
-}
 
 export async function startSession(userId: string) {
   (await cookies()).set(COOKIE, makeToken(userId), { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: MAX_AGE });

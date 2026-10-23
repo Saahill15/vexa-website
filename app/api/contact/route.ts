@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { acceptEnquiry } from "@/lib/enquiries";
+import { clientIp, readBody, sameOrigin } from "@/lib/http";
 import { SITE } from "@/lib/site";
 import { istIso } from "@/lib/time";
 
@@ -18,20 +19,15 @@ const text = (value: unknown, max: number) => (typeof value === "string" ? value
 const fail = (error: string, status = 400) => NextResponse.json({ ok: false, error }, { status });
 
 export async function POST(request: Request) {
-  // only accept posts from this site's own pages (compares against the public host, which a proxy forwards)
-  const origin = request.headers.get("origin");
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  let sameSite = !origin;
-  try { sameSite ||= new URL(origin!).host === host; } catch { /* malformed origin */ }
-  if (!sameSite) return fail("This form can only be sent from the Vexa website.", 403);
+  if (!sameOrigin(request)) return fail("This form can only be sent from the Vexa website.", 403);
 
-  const ip = request.headers.get("x-real-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+  const ip = clientIp(request);
   if (hitsFor(ip).length >= 5) return fail("You have sent a few messages already. Please wait an hour, or email us directly.", 429);
 
   let body: Record<string, unknown>;
   try {
-    const raw = await request.text();
-    if (raw.length > 20_000) return fail("The message is too long.", 413);
+    const raw = await readBody(request, 20_000);
+    if (raw === null) return fail("The message is too long.", 413);
     body = JSON.parse(raw);
     if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error("not an object");
   } catch {

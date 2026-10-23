@@ -1,7 +1,4 @@
-import { randomUUID } from "crypto";
-import { readFile } from "fs/promises";
-import path from "path";
-import { dataDir, exists, readAll, update } from "./store";
+import { db, isUuid, iso } from "./db";
 
 /*
  * Enquiries from the Start a conversation form. Each one is saved first, then sent to CONTACT_WEBHOOK_URL
@@ -41,56 +38,51 @@ export type EnquiryEntry = {
 
 export type Enquiry = EnquiryEntry & { id: string; status: EnquiryStatus; notes: string; emailed: "delivered" | "failed" | "not_configured" };
 
-const COLLECTION = "enquiries";
+type EnquiryRow = {
+  id: string;
+  at: Date;
+  name: string | null;
+  email: string;
+  role: string;
+  interest: string | null;
+  company: string | null;
+  problem: string;
+  budget: string | null;
+  launch: string | null;
+  source: string | null;
+  consent: boolean;
+  status: EnquiryStatus;
+  notes: string;
+  emailed: Enquiry["emailed"];
+};
 
-/** Enquiries saved by the first version of the form (a plain text file) are brought in once. */
-async function importOldFile() {
-  if (await exists(COLLECTION)) return;
-  let raw = "";
-  try {
-    raw = await readFile(path.join(dataDir(), "contact-submissions.jsonl"), "utf8");
-  } catch {
-    return;
-  }
-  await update<Enquiry>(COLLECTION, (rows) => {
-    if (rows.length) return;
-    for (const line of raw.split("\n")) {
-      try {
-        const e = JSON.parse(line) as EnquiryEntry & { id?: string };
-        if (e.email && e.problem) rows.push({ ...e, id: e.id ?? randomUUID(), status: "new", notes: "", emailed: "not_configured" });
-      } catch {
-        /* skip a damaged line */
-      }
-    }
-  });
-}
+const toEnquiry = (r: EnquiryRow): Enquiry => ({ ...r, at: iso(r.at) });
 
 export async function listEnquiries(): Promise<Enquiry[]> {
-  await importOldFile();
-  return (await readAll<Enquiry>(COLLECTION)).sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+  const { rows } = await db.query<EnquiryRow>("select * from enquiries order by at desc");
+  return rows.map(toEnquiry);
 }
 /** Enquiries sent with this email address, newest first. Only show them to someone who has proven the address. */
 export async function listForEmail(email: string): Promise<Enquiry[]> {
-  const wanted = email.toLowerCase();
-  return (await listEnquiries()).filter((e) => e.email.toLowerCase() === wanted);
+  const { rows } = await db.query<EnquiryRow>("select * from enquiries where lower(email) = $1 order by at desc", [email.toLowerCase()]);
+  return rows.map(toEnquiry);
 }
-export async function getEnquiry(id: string) {
-  return (await listEnquiries()).find((e) => e.id === id) ?? null;
+export async function getEnquiry(id: string): Promise<Enquiry | null> {
+  if (!isUuid(id)) return null;
+  const { rows } = await db.query<EnquiryRow>("select * from enquiries where id = $1", [id]);
+  return rows[0] ? toEnquiry(rows[0]) : null;
 }
 
 export async function updateEnquiry(id: string, patch: { status?: EnquiryStatus; notes?: string }) {
-  await update<Enquiry>(COLLECTION, (rows) => {
-    const e = rows.find((x) => x.id === id);
-    if (!e) return;
-    if (patch.status) e.status = patch.status;
-    if (patch.notes !== undefined) e.notes = patch.notes.slice(0, 5000);
-  });
+  if (!isUuid(id)) return;
+  await db.query(
+    "update enquiries set status = coalesce($2, status), notes = coalesce($3, notes) where id = $1",
+    [id, patch.status ?? null, patch.notes === undefined ? null : patch.notes.slice(0, 5000)],
+  );
 }
 export async function deleteEnquiry(id: string) {
-  await update<Enquiry>(COLLECTION, (rows) => {
-    const i = rows.findIndex((x) => x.id === id);
-    if (i >= 0) rows.splice(i, 1);
-  });
+  if (!isUuid(id)) return;
+  await db.query("delete from enquiries where id = $1", [id]);
 }
 
 async function notify(entry: EnquiryEntry): Promise<Enquiry["emailed"]> {
@@ -111,17 +103,20 @@ async function notify(entry: EnquiryEntry): Promise<Enquiry["emailed"]> {
   }
 }
 
-/** Accepts an enquiry when at least one route holds it: saved in the store or delivered to the webhook. */
+/** Accepts an enquiry when at least one route holds it: saved in the database or delivered to the webhook. */
 export async function acceptEnquiry(entry: EnquiryEntry): Promise<boolean> {
-  await importOldFile();
   const emailed = await notify(entry);
   if (emailed === "failed") console.error("enquiry: webhook delivery failed");
   if (emailed === "not_configured" && process.env.NODE_ENV === "production") console.error("enquiry: CONTACT_WEBHOOK_URL is not set, nothing was emailed");
   try {
-    await update<Enquiry>(COLLECTION, (rows) => void rows.push({ ...entry, id: randomUUID(), status: "new", notes: "", emailed }));
+    await db.query(
+      `insert into enquiries (at, name, email, role, interest, company, problem, budget, launch, source, consent, emailed)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      [entry.at, entry.name, entry.email, entry.role, entry.interest, entry.company, entry.problem, entry.budget, entry.launch, entry.source, entry.consent, emailed],
+    );
     return true;
   } catch {
-    console.error("enquiry: could not write to the data folder");
+    console.error("enquiry: could not save to the database");
     return emailed === "delivered";
   }
 }
