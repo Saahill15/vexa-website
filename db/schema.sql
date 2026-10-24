@@ -106,3 +106,15 @@ create table if not exists rate_hits (
   at timestamptz not null default now()
 );
 create index if not exists rate_hits_key_idx on rate_hits (key, at desc);
+
+-- Row level security with no policies: the table owner (the site's own database user) is unaffected, but anyone else who can
+-- reach the database through another door (for example Supabase's public REST API and its "anon" key) sees nothing.
+alter table app_meta enable row level security;
+alter table users enable row level security;
+alter table articles enable row level security;
+alter table comments enable row level security;
+alter table enquiries enable row level security;
+alter table email_verifications enable row level security;
+alter table password_resets enable row level security;
+alter table pending_signups enable row level security;
+alter table rate_hits enable row level security;

@@ -16,6 +16,16 @@ visitor -> Cloudflare (WAF, HTTPS) -> Worker (the Next.js site) -> Hyperdrive ->
   - **Your own server's Postgres**, exposed privately with a Cloudflare Tunnel (Hyperdrive supports it): https://developers.cloudflare.com/hyperdrive/configuration/connect-to-private-database/
 - Node 22 and this repo on your computer (`npm install`).
 
+## 1a. Using Supabase
+
+1. supabase.com > New project. Pick the region closest to your visitors (Mumbai, `ap-south-1`) and a **strong database password** (save it).
+2. Project > **Connect** (top bar) > tab **Session pooler** (or **Direct connection** if your plan has the IPv4 add-on). Copy the URI; it looks like
+   `postgres://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres`. Port **5432**.
+   Do not use the "Transaction pooler" (port 6543): Hyperdrive already pools connections.
+3. Put that URI in `.env.production` as `DATABASE_URL=...` and use it for the Hyperdrive step below.
+4. The schema turns on row level security for every table, so Supabase's public REST API (and the project's anon key) cannot read your users or enquiries. Leave RLS on and do not add policies.
+5. Supabase > Database > Backups: check daily backups are on (paid plans have point-in-time recovery).
+
 ## 1. Create the production database
 
 ```bash
@@ -46,7 +56,7 @@ Or from the terminal: `npx wrangler secret put NAME`.
 | --- | --- | --- |
 | `SITE_URL` | text | `https://www.vexadigital.in` (the final address, https, no trailing slash). While testing, use the Worker's `https://....workers.dev` address. |
 | `SESSION_SECRET` | **secret** | 48+ random characters: `openssl rand -base64 48`. Required, the site refuses to run without it. |
-| `ADMIN_EMAILS` | text | Comma-separated admin emails. |
+| `ADMIN_EMAILS` | text | Already set in `wrangler.jsonc` to `sahil@vexadigital.in` only. Other admins are made from Admin > Users. |
 | `GOOGLE_CLIENT_ID` | text | Google sign-in client id (no secret needed). |
 | `RESEND_API_KEY` | **secret** | Resend key for verification and reset emails. |
 | `MAIL_FROM` | text | `Vexa Digital <no-reply@mail.vexadigital.in>` |
