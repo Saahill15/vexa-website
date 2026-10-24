@@ -95,7 +95,7 @@ async function notify(entry: EnquiryEntry): Promise<Enquiry["emailed"]> {
       headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify(entry),
       signal: AbortSignal.timeout(5000),
-      redirect: "error",
+      redirect: "manual",
     });
     return res.ok ? "delivered" : "failed";
   } catch {

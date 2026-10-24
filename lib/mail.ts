@@ -61,7 +61,7 @@ export async function sendAccountMail(mail: Mail): Promise<boolean> {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
         body: JSON.stringify({ from: process.env.MAIL_FROM || DEFAULT_FROM, to: [mail.to], subject: mail.subject, text: mail.text, html: html(mail) }),
         signal: AbortSignal.timeout(8000),
-        redirect: "error",
+        redirect: "manual",
       });
       if (!res.ok) console.error(`mail: Resend refused the message (${res.status})`);
       return res.ok;
@@ -80,7 +80,7 @@ export async function sendAccountMail(mail: Mail): Promise<boolean> {
       headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify(mail),
       signal: AbortSignal.timeout(5000),
-      redirect: "error",
+      redirect: "manual",
     });
     return res.ok;
   } catch {

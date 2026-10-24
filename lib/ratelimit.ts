@@ -27,7 +27,7 @@ export async function tooMany(key: string, max: number, windowMs: number): Promi
       `insert into rate_hits (key) select $1 where (select count(*) from rate_hits where key = $1 and at > now() - make_interval(secs => $2)) < $3 returning 1`,
       [key.slice(0, 200), windowMs / 1000, max],
     );
-    if (Math.random() < 0.02) void db.query("delete from rate_hits where at < now() - interval '1 day'").catch(() => undefined);
+    if (Math.random() < 0.02) await db.query("delete from rate_hits where at < now() - interval '1 day'").catch(() => undefined);
     return added.rowCount === 0;
   } catch {
     return inMemory(key, max, windowMs);
