@@ -1,7 +1,7 @@
 import { startSession, takePendingLink } from "@/lib/auth";
 import { clientIp, EMAIL, fail, ok, readJson, sameOrigin, text } from "@/lib/http";
 import { resetLimit, tooMany } from "@/lib/ratelimit";
-import { getUserByEmail, linkGoogle, touchLogin, verifyPassword } from "@/lib/users";
+import { effectiveRole, getUserByEmail, linkGoogle, touchLogin, verifyPassword } from "@/lib/users";
 
 const WRONG = "Incorrect email or password.";
 
@@ -32,5 +32,6 @@ export async function POST(request: Request) {
   if (pending && pending.email.toLowerCase() === user.email) await linkGoogle(user.id, pending.googleId);
   await touchLogin(user.id);
   await startSession(user.id);
-  return ok();
+  // an admin still has to confirm the second step before the admin panel opens
+  return ok({ secondStep: effectiveRole(user) === "admin" });
 }

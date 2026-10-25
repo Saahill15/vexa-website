@@ -1521,3 +1521,10 @@ select.adm-gm-input{cursor:pointer}
 .adm-folders-group a.is-unread span{font-weight:700}
 .adm-cw-editor:empty::before{content:attr(data-placeholder);color:#8aa09f;pointer-events:none}
 .adm-gm-compose .adm-cw-editor{min-height:170px}
+
+/* show / hide the password on the sign-in and sign-up forms */
+.pw-wrap{position:relative}
+.pw-wrap .in{padding-right:64px}
+.pw-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:6px 10px;border:0;border-radius:8px;background:transparent;font:inherit;font-size:13px;font-weight:600;color:var(--teal, #0B7F7C);cursor:pointer}
+.pw-toggle:hover{background:rgba(11,127,124,.08)}
+.pw-toggle:focus-visible{outline:2px solid var(--teal, #0B7F7C);outline-offset:2px}

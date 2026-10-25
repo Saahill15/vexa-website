@@ -108,7 +108,8 @@ export async function passkeyRegistrationOptions(userId: string, email: string) 
     userID: new TextEncoder().encode(userId),
     attestationType: "none",
     excludeCredentials: rows.map((r) => ({ id: r.credential_id })),
-    authenticatorSelection: { residentKey: "preferred", userVerification: "preferred" },
+    // admins always confirm with a fingerprint or device PIN, not just by touching a key
+    authenticatorSelection: { residentKey: "preferred", userVerification: "required" },
   });
   await saveChallenge(userId, "register", options.challenge);
   return options;
@@ -139,7 +140,7 @@ export async function passkeyAuthOptions(userId: string) {
   const options = await generateAuthenticationOptions({
     rpID: relyingParty().rpID,
     allowCredentials: rows.map((r) => ({ id: r.credential_id, transports: r.transports as never })),
-    userVerification: "preferred",
+    userVerification: "required",
   });
   await saveChallenge(userId, "auth", options.challenge);
   return options;

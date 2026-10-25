@@ -11,8 +11,6 @@ export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("This request can only be sent from the Vexa website.", 403);
   const session = await getSession();
   if (!isAdminSession(session) || !session) return fail("Sign in as an admin first.", 403);
-  if (await tooMany(`mfa:${session.id}`, 20, 15 * 60_000)) return fail("Too many attempts. Wait a few minutes and try again.", 429);
-
   const body = await readJson(request);
   const action = text(body?.action, 30);
   const code = text(body?.code, 20);
@@ -26,6 +24,8 @@ export async function POST(request: Request) {
     return ok({ codes: result.codes });
   }
   if (action === "verify") {
+    // only codes that are entered count towards the limit, so ordinary set-up steps never lock anyone out
+    if (await tooMany(`mfa-verify:${session.id}`, 20, 15 * 60_000)) return fail("Too many attempts. Wait a few minutes and try again.", 429);
     if (!(await checkSecondFactor(session.id, code))) return fail("That code is not right. Try again.", 401);
     await completeSecondStep();
     return ok();

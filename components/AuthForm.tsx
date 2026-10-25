@@ -35,6 +35,7 @@ export function AuthForm({ mode, next, googleClientId, devNote }: Props) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -57,7 +58,7 @@ export function AuthForm({ mode, next, googleClientId, devNote }: Props) {
     setError("");
     try {
       const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; needsLink?: boolean; pending?: boolean; email?: string; devLink?: string };
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; needsLink?: boolean; pending?: boolean; secondStep?: boolean; email?: string; devLink?: string };
       if (data.needsLink) {
         // Google matched an existing password account: ask for its password instead of merging silently
         setLinking(true);
@@ -74,6 +75,12 @@ export function AuthForm({ mode, next, googleClientId, devNote }: Props) {
         // the account is created only once the emailed link is confirmed
         setWaiting({ email: data.email ?? body.email, devLink: data.devLink });
         setBusy(false);
+        return;
+      }
+      if (data.secondStep) {
+        // admins confirm their authenticator code or passkey before anything else
+        router.replace("/login/verify");
+        router.refresh();
         return;
       }
       router.replace(next);
@@ -155,7 +162,12 @@ export function AuthForm({ mode, next, googleClientId, devNote }: Props) {
               </div>
               <div className="field">
                 <label htmlFor="auth-password">Password {isSignup ? <span>(8 characters or more)</span> : null}</label>
-                <input className="in" id="auth-password" type="password" autoComplete={isSignup ? "new-password" : "current-password"} maxLength={200} value={password} onChange={(e) => setPassword(e.target.value)} />
+                <div className="pw-wrap">
+                  <input className="in" id="auth-password" type={showPassword ? "text" : "password"} autoComplete={isSignup ? "new-password" : "current-password"} maxLength={200} value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <button type="button" className="pw-toggle" aria-pressed={showPassword} aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((v) => !v)}>
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
               </div>
               {error ? <p className="err" role="alert">{error}</p> : null}
               {mode === "login" && !linking ? <Link className="auth-forgot" href="/forgot-password">Forgot password?</Link> : null}

@@ -9,8 +9,6 @@ export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("This request can only be sent from the Vexa website.", 403);
   const session = await getSession();
   if (!isAdminSession(session) || !session) return fail("Sign in as an admin first.", 403);
-  if (await tooMany(`mfa:${session.id}`, 20, 15 * 60_000)) return fail("Too many attempts. Wait a few minutes and try again.", 429);
-
   const body = await readJson(request, 40_000);
   const action = text(body?.action, 30);
 
@@ -33,6 +31,7 @@ export async function POST(request: Request) {
     return ok({ options: await passkeyAuthOptions(session.id) });
   }
   if (action === "auth-verify") {
+    if (await tooMany(`mfa-verify:${session.id}`, 20, 15 * 60_000)) return fail("Too many attempts. Wait a few minutes and try again.", 429);
     const response = body?.response as Parameters<typeof passkeyAuthVerify>[1];
     if (!response || typeof response !== "object") return fail("The passkey could not be read.", 400);
     if (!(await passkeyAuthVerify(session.id, response))) return fail("That passkey was not recognised. Try again.", 401);
