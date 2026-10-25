@@ -120,7 +120,7 @@ function confirmationHtml(first: string, interest: string | null, opening: strin
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
 <tr><td style="padding:0 4px 18px;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:700;letter-spacing:.04em;color:#0B7F7C">Vexa <span style="font-weight:400;color:#064B4A">Digital</span></td></tr>
 <tr><td style="background:#ffffff;border-radius:16px;border:1px solid #d3e6e4;padding:36px 32px;font-family:Arial,Helvetica,sans-serif;color:#12292a">
-<h1 style="margin:0 0 18px;font-size:24px;line-height:1.25;font-weight:700;color:#064B4A">Thanks for getting in touch${first ? `, ${escapeText(first)}` : ""}</h1>
+<h1 style="margin:0 0 18px;font-size:24px;line-height:1.25;font-weight:700;color:#064B4A">We've received your enquiry</h1>
 <p style="margin:0 0 16px;font-size:16px;line-height:1.65;color:#3d5352">${escapeText(opening)}</p>
 ${lines}
 <p style="margin:24px 0 0;padding-top:20px;border-top:1px solid #e3eeed;font-size:15px;line-height:1.6;color:#3d5352">Warm regards,<br><strong style="color:#064B4A">The Vexa Digital team</strong><br><a href="mailto:contact@vexadigital.in" style="color:#0B7F7C">contact@vexadigital.in</a></p>
@@ -137,7 +137,7 @@ async function confirmToSender(entry: EnquiryEntry): Promise<void> {
   const opening = first ? `Hi ${first},` : "Hi there,";
   const middle = `Thanks for reaching out${entry.interest ? ` about ${entry.interest}` : ""}.`;
   const next = "We've received your enquiry, and someone from our team will reply to you here within two working days. If there's anything else you'd like us to know, just reply to this email.";
-  const subject = first ? `Thanks for getting in touch, ${first}` : "Thanks for getting in touch";
+  const subject = "We've received your enquiry";
   const text = `${opening}\n\n${middle} ${next}\n\nWarm regards,\nVexa Digital\ncontact@vexadigital.in`;
   await sendTemplated({
     from: "contact",
