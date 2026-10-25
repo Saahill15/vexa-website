@@ -70,17 +70,12 @@ Or from the terminal: `npx wrangler secret put NAME`.
 
 ## 4. Deploy
 
-**From your computer (quickest to start):**
+The site is deployed by Cloudflare, from GitHub. Nothing is deployed from your computer.
 
-```bash
-npm run deploy
-```
-
-**From GitHub (every push deploys):** Workers & Pages > Create > Import a repository > choose `Saahill15/vexa-website`.
-Production branch `main`. Build command `npx opennextjs-cloudflare build`, deploy command `npx wrangler deploy`.
-The Worker name in the project must match `name` in `wrangler.jsonc` (now `vexa-website-staging`; change both together when you move to production).
-
-The build prints the Worker address (`https://<name>.<account>.workers.dev`). Open it and run the checks in step 7.
+- Every push to `main` starts a build on Cloudflare: `npx opennextjs-cloudflare build`, then `npx wrangler deploy`.
+- Check the result under **Workers & Pages > vexa-website-staging > Deployments**. A failed build keeps the previous version live.
+- Secrets and settings on the Worker are kept across deploys (`keep_vars` in `wrangler.jsonc`).
+- To release, merge the change into `main`. Work happens on a branch and goes into `main` through a pull request.
 
 ## 5. Your domain
 
