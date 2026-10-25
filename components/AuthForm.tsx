@@ -36,6 +36,7 @@ export function AuthForm({ mode, next, googleClientId, devNote }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -104,6 +105,8 @@ export function AuthForm({ mode, next, googleClientId, devNote }: Props) {
     if (!linking && mode === "signup" && !name.trim()) return setError("Enter your name.");
     if (!email.trim()) return setError("Enter your email address.");
     if (!password) return setError(mode === "signup" && !linking ? "Choose a password." : "Enter your password.");
+    // a new password is typed twice, so a typo cannot lock someone out
+    if (mode === "signup" && !linking && password !== confirmPassword) return setError("The two passwords do not match. Type the same password in both boxes.");
     // linking always confirms with the password, so it goes to the login endpoint whichever page this is
     void send(`/api/auth/${linking || mode === "login" ? "login" : "signup"}`, { name, email, password });
   }
@@ -169,6 +172,12 @@ export function AuthForm({ mode, next, googleClientId, devNote }: Props) {
                   </button>
                 </div>
               </div>
+              {isSignup ? (
+                <div className="field">
+                  <label htmlFor="auth-password-again">Type the password again</label>
+                  <input className="in" id="auth-password-again" type={showPassword ? "text" : "password"} autoComplete="new-password" maxLength={200} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                </div>
+              ) : null}
               {error ? <p className="err" role="alert">{error}</p> : null}
               {mode === "login" && !linking ? <Link className="auth-forgot" href="/forgot-password">Forgot password?</Link> : null}
               <button type="submit" className="btn auth-submit" disabled={busy}>{busy ? "One moment…" : copy.submit} <span className="arr" aria-hidden="true">→</span></button>

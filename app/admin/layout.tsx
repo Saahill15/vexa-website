@@ -4,8 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { getSession } from "@/lib/auth";
-import { listEnquiries } from "@/lib/enquiries";
-import { loadInbox, unreadCount } from "@/lib/inbox";
+import { inboxBadges } from "@/lib/inbox";
 
 export const metadata: Metadata = { title: { default: "Admin", template: "%s · Vexa Admin" }, robots: { index: false, follow: false } };
 
@@ -26,11 +25,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </section>
     );
   }
-  const [enquiries, inbox] = await Promise.all([listEnquiries(), loadInbox(session.id)]);
-  const newEnquiries = enquiries.filter((e) => e.status === "new").length;
+  const badges = await inboxBadges(session.id);
   return (
     <div className="adm">
-      <AdminNav newEnquiries={newEnquiries} unread={unreadCount(inbox.items)} />
+      <AdminNav newEnquiries={badges.newEnquiries} unread={badges.unread} />
       <div className="adm-main">
         <AdminTopbar name={session.name} email={session.email} />
         {children}

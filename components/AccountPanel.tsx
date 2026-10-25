@@ -46,6 +46,7 @@ export function AccountPanel({ account, googleClientId, comments, enquiries }: P
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [newPasswordAgain, setNewPasswordAgain] = useState("");
   const [devLink, setDevLink] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState("");
@@ -108,12 +109,14 @@ export function AccountPanel({ account, googleClientId, comments, enquiries }: P
     e.preventDefault();
     if (busy) return;
     if (newPassword.length < 8) return setMessage({ kind: "err", text: "Use a password of at least 8 characters." });
+    if (newPassword !== newPasswordAgain) return setMessage({ kind: "err", text: "The two new passwords do not match. Type the same password in both boxes." });
     const done = account.hasPassword ? "Password changed. You have been signed out everywhere else." : "Password set. You can now log in with your email and password.";
     const saved = await request("/api/account/password", "POST", { password: newPassword, currentPassword }, done);
     if (saved) {
       setPasswordOpen(false);
       setCurrentPassword("");
       setNewPassword("");
+      setNewPasswordAgain("");
     }
   }
 
@@ -377,6 +380,10 @@ export function AccountPanel({ account, googleClientId, comments, enquiries }: P
                     <div className="field">
                       <label htmlFor="acc-new">New password <span>(8 characters or more)</span></label>
                       <input className="in" id="acc-new" type="password" autoComplete="new-password" maxLength={200} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="acc-new-again">Type the new password again</label>
+                      <input className="in" id="acc-new-again" type="password" autoComplete="new-password" maxLength={200} value={newPasswordAgain} onChange={(e) => setNewPasswordAgain(e.target.value)} />
                     </div>
                     <div className="acc-inline">
                       <button type="submit" className="btn btn--sm" disabled={busy}>{busy ? "Saving…" : "Save password"}</button>

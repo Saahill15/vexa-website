@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AccountPanel } from "@/components/AccountPanel";
 import { MfaSettings } from "@/components/MfaSettings";
-import { getBySlug } from "@/lib/articles";
+import { listAll } from "@/lib/articles";
 import { getSession } from "@/lib/auth";
 import { listForUser } from "@/lib/comments";
 import { listForEmail, STATUSES, STATUS_NOTE } from "@/lib/enquiries";
@@ -16,15 +16,14 @@ export const metadata: Metadata = { title: "Your account", robots: { index: fals
 export default async function AccountPage() {
   const session = await getSession();
   if (!session) redirect("/login?next=%2Faccount");
-  const user = await getUserById(session.id);
+  // the account, the person's comments, and their two-step sign-in are read together, not one after another
+  const admin = isAdminSession(session);
+  const [user, comments, factors, articles] = await Promise.all([getUserById(session.id), listForUser(session.id), admin ? listFactors(session.id) : Promise.resolve([]), listAll()]);
   if (!user) redirect("/login?next=%2Faccount");
 
   // enquiries are only shown once the email address is confirmed, so nobody can read another person's enquiries
-  const [comments, enquiries] = await Promise.all([listForUser(user.id), user.emailVerified ? listForEmail(user.email) : Promise.resolve([])]);
-  const slugs = [...new Set(comments.map((c) => c.slug))];
-  const articles = new Map(await Promise.all(slugs.map(async (slug) => [slug, await getBySlug(slug)] as const)));
-  const admin = isAdminSession(session);
-  const factors = admin ? await listFactors(user.id) : [];
+  const enquiries = user.emailVerified ? await listForEmail(user.email) : [];
+  const titles = new Map(articles.map((a) => [a.slug, a]));
 
   return (
     <section className="auth acc-page-section">
@@ -42,7 +41,7 @@ export default async function AccountPage() {
             hasGoogle: Boolean(user.googleId),
           }}
           googleClientId={process.env.GOOGLE_CLIENT_ID ?? null}
-          comments={comments.map((c) => ({ id: c.id, slug: c.slug, title: articles.get(c.slug)?.title ?? "Article", text: c.text, date: formatShortDate(c.createdAt) }))}
+          comments={comments.map((c) => ({ id: c.id, slug: c.slug, title: titles.get(c.slug)?.title ?? "Article", text: c.text, date: formatShortDate(c.createdAt) }))}
           enquiries={enquiries.map((e) => ({
             id: e.id,
             title: e.interest ?? "General enquiry",

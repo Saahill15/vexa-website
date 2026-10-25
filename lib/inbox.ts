@@ -1,4 +1,5 @@
 import { listAll } from "./articles";
+import { db } from "./db";
 import { listAllComments, type Comment } from "./comments";
 import { listEnquiries, type Enquiry } from "./enquiries";
 import { listFolder, mailConfigured, MailError, mailSyncInfo, queryThreads, threadsSignature, type Box, type Folder } from "./gmail";
@@ -51,3 +52,22 @@ export async function loadInbox(adminId: string, options: { mail?: boolean; quer
 }
 
 export const unreadCount = (items: InboxItem[]) => items.filter((i) => i.unread).length;
+
+/**
+ * The two numbers the admin sidebar shows, counted in the database. Same rules as the inbox list (what is unread for this
+ * admin, and enquiries waiting for a first reply), without loading every row on each page.
+ */
+export async function inboxBadges(adminId: string): Promise<{ unread: number; newEnquiries: number }> {
+  const { rows: [me] } = await db.query<{ inbox_read_all: Date | string | null; inbox_read: string[] | null }>("select inbox_read_all, inbox_read from users where id = $1", [adminId]);
+  const since = me?.inbox_read_all ? new Date(me.inbox_read_all) : new Date(0);
+  const read = me?.inbox_read ?? [];
+  const { rows: [counts] } = await db.query<{ enquiries: number; comments: number; users: number; new_enquiries: number }>(
+    `select
+       (select count(*)::int from enquiries where at > $1 and not ('enq:' || id::text = any($2))) as enquiries,
+       (select count(*)::int from comments where created_at > $1 and not ('com:' || id::text = any($2))) as comments,
+       (select count(*)::int from users where created_at > $1 and id <> $3 and not ('usr:' || id::text = any($2))) as users,
+       (select count(*)::int from enquiries where status = 'new') as new_enquiries`,
+    [since, read, adminId],
+  );
+  return { unread: counts.enquiries + counts.comments + counts.users, newEnquiries: counts.new_enquiries };
+}
