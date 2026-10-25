@@ -139,11 +139,11 @@ create table if not exists sessions (
 create index if not exists sessions_user_idx on sessions (user_id);
 alter table sessions enable row level security;
 
--- two-step sign-in for admins: authenticator app codes and backup codes
+-- two-step sign-in for admins: authenticator codes and passkeys
 create table if not exists admin_factors (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references users (id) on delete cascade,
-  kind text not null check (kind in ('totp', 'passkey')),  -- only 'totp' is used for now
+  kind text not null check (kind in ('totp', 'passkey')),
   name text not null default '',
   secret text,
   credential_id text unique,
@@ -165,8 +165,18 @@ create table if not exists admin_backup_codes (
 );
 create index if not exists admin_backup_codes_user_idx on admin_backup_codes (user_id);
 
+-- short-lived passkey challenges, one per attempt
+create table if not exists mfa_challenges (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references users (id) on delete cascade,
+  kind text not null,
+  challenge text not null,
+  expires_at timestamptz not null
+);
+
 -- a session only counts as fully signed in once its second step is done (admins)
 alter table sessions add column if not exists mfa_at timestamptz;
 
 alter table admin_factors enable row level security;
 alter table admin_backup_codes enable row level security;
+alter table mfa_challenges enable row level security;

@@ -13,7 +13,7 @@ import { effectiveRole, getUserById, type Role } from "./users";
  */
 
 /**
- * `pendingAdmin` is set for an admin whose second step (an authenticator code) is not done in this session. Such a
+ * `pendingAdmin` is set for an admin whose second step (authenticator code or passkey) is not done in this session. Such a
  * session has the role "user" until then, so every admin check refuses it.
  */
 export type Session = { id: string; name: string; email: string; role: Role; pendingAdmin?: boolean };
@@ -58,7 +58,7 @@ export const getSession = cache(async (): Promise<Session | null> => {
   return { id: user.id, name: user.name, email: user.email, role };
 });
 
-/** Marks this session's second step as done (after a correct authenticator code). */
+/** Marks this session's second step as done (after a correct authenticator code or passkey). */
 export async function completeSecondStep(): Promise<void> {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token) return;

@@ -15,7 +15,7 @@ export default async function Page() {
   return (
     <section className="auth">
       <div className="wrap">
-        <SecondStepForm hasAuthenticator={factors.length > 0} />
+        <SecondStepForm hasAuthenticator={factors.some((f) => f.kind === "totp")} hasPasskey={factors.some((f) => f.kind === "passkey")} />
       </div>
     </section>
   );

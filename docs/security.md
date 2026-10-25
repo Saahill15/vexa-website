@@ -27,16 +27,15 @@
 
 ## Two-step sign-in for admins
 
-- An admin signs in with a password (or Google), then must enter a six-digit code from an authenticator app before the admin panel opens.
-- Until that code is entered, the session has no admin rights (`pendingAdmin`), so every admin page, action and endpoint refuses it.
-- Ten one-time backup codes are issued when the authenticator app is connected. Only their hashes are stored.
-- The authenticator secret is encrypted in the database (AES-256-GCM). A code works once, and an old time step cannot be reused.
-- Changing or removing the authenticator needs the current code first, so a stolen password alone cannot take over the account.
-- Removing the last way in is refused.
+- An admin signs in with a password (or Google), then must confirm a second step before the admin panel opens: a six-digit code from an authenticator app, or a passkey (fingerprint or device key).
+- Until the second step is done the session has no admin rights (`pendingAdmin`), so every admin page, action and endpoint refuses it.
+- Ten one-time backup codes are issued when the authenticator app is connected. Only hashes are stored.
+- Authenticator secrets are encrypted in the database (AES-256-GCM). A code can be used only once, and a time step cannot be replayed.
+- Adding or changing a second step needs the current second step first, so a stolen password alone cannot take over the account.
+- Keep at least two ways in. Removing the last one is refused.
 
 ## Known limits
 
 - The rate limiter is in memory: it resets on restart and is per server process. The data itself is in PostgreSQL, so several app servers can share it once the rate limiter moves to a shared store. Use a shared store (Redis) if you run several instances.
 - The CSP allows inline scripts (Next's own bootstrap). Adding per-request nonces would remove that.
 - Admin pages for a signed-in non-admin first send a loading shell (title only, no data) before the 404.
-- There is no two-factor sign-in for admins yet; the admin accounts rely on strong, unique passwords or Google sign-in.

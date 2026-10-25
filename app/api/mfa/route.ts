@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   const code = text(body?.code, 20);
 
   if (action === "totp-begin" || action === "totp-confirm") {
-    if (session.pendingAdmin && (await hasFactors(session.id))) return fail("Confirm it is you first, with your current code.", 403);
+    if (session.pendingAdmin && (await hasFactors(session.id))) return fail("Confirm it is you first, with your current code or passkey.", 403);
     if (action === "totp-begin") return ok(await beginTotp(session.id, session.email));
     const result = await confirmTotp(session.id, code);
     if (result.error) return fail(result.error);
