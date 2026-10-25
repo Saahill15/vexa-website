@@ -13,6 +13,8 @@ export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("This form can only be sent from the Vexa website.", 403);
   const session = await getSession();
   if (!session) return fail(SIGNED_OUT, 401);
+  // an admin confirms the second step before the password can change, so a stolen session alone cannot take the account
+  if (session.pendingAdmin) return fail("Confirm it is you first, with your authenticator code or passkey, then change your password.", 403);
 
   const body = await readJson(request);
   const password = typeof body?.password === "string" ? body.password : "";
