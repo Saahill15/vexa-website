@@ -27,7 +27,7 @@ type EnquiryItem = {
   problem: string;
   facts: [string, string][];
 };
-type Props = { account: Account; googleClientId: string | null; comments: CommentItem[]; enquiries: EnquiryItem[] };
+type Props = { account: Account; googleClientId: string | null; comments: CommentItem[]; enquiries: EnquiryItem[]; twoStep?: React.ReactNode };
 type Message = { kind: "ok" | "err"; text: string };
 type Data = Record<string, unknown> & { ok?: boolean; error?: string };
 type Tab = "overview" | "enquiries" | "comments" | "security";
@@ -36,7 +36,7 @@ const TABS: Tab[] = ["overview", "enquiries", "comments", "security"];
 const LABEL: Record<Tab, string> = { overview: "Overview", enquiries: "Enquiries", comments: "Comments", security: "Security" };
 
 /** The profile: one tab at a time, so each screen stays short. The tab is kept in the address, so a reload stays on it. */
-export function AccountPanel({ account, googleClientId, comments, enquiries }: Props) {
+export function AccountPanel({ account, googleClientId, comments, enquiries, twoStep }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("overview");
   const [message, setMessage] = useState<Message | null>(null);
@@ -417,6 +417,7 @@ export function AccountPanel({ account, googleClientId, comments, enquiries }: P
                 ) : null}
               </div>
             </section>
+            {twoStep}
 
             <section className="acc-sec" aria-labelledby="sec-sessions">
               <h2 id="sec-sessions" className="acc-heading">Sessions and activity</h2>

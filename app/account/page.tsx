@@ -60,8 +60,8 @@ export default async function AccountPage() {
               ["Timing", e.launch],
             ] as [string, string | null][]).filter((f): f is [string, string] => Boolean(f[1])),
           }))}
+          twoStep={admin ? <MfaSettings factors={factors} verified={session.role === "admin"} /> : undefined}
         />
-        {admin ? <MfaSettings factors={factors} verified={session.role === "admin"} /> : null}
       </div>
     </section>
   );
