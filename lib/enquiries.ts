@@ -105,17 +105,17 @@ async function notify(entry: EnquiryEntry): Promise<Enquiry["emailed"]> {
 }
 
 /**
- * Sends the person who enquired a short confirmation from the partnerships mailbox, through Gmail (not Resend, which has a
+ * Sends the person who enquired a short confirmation from the contact mailbox, through Gmail (not Resend, which has a
  * small daily limit on the free plan). The team does not get an email: each enquiry is in the admin Enquiries page.
  */
 async function confirmToSender(entry: EnquiryEntry): Promise<void> {
   const first = (entry.name || "").trim().split(/\s+/)[0];
   const interest = entry.interest ? ` about ${entry.interest}` : "";
   await sendNew({
-    from: "partnerships",
+    from: "contact",
     to: entry.email,
     subject: `Thanks for getting in touch${first ? `, ${first}` : ""}`,
-    body: `Hi ${first || "there"},\n\nThanks for reaching out${interest}. We've received your enquiry, and someone from our team will reply to you here within two working days.\n\nIf there's anything else you'd like us to know, just reply to this email.\n\nWarm regards,\nVexa Digital\npartnerships@vexadigital.in`,
+    body: `Hi ${first || "there"},\n\nThanks for reaching out${interest}. We've received your enquiry, and someone from our team will reply to you here within two working days.\n\nIf there's anything else you'd like us to know, just reply to this email.\n\nWarm regards,\nVexa Digital\ncontact@vexadigital.in`,
   });
 }
 
