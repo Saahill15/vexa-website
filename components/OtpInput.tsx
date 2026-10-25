@@ -18,7 +18,7 @@ export function OtpInput({ value, onChange, autoFocus = false, label = "Six-digi
   }
 
   return (
-    <div role="group" aria-label={label} style={{ display: "flex", gap: 8 }}>
+    <div role="group" aria-label={label} style={{ display: "flex", gap: 8, width: "100%", maxWidth: 340 }}>
       {digits.map((d, i) => (
         <input
           key={i}
@@ -44,7 +44,7 @@ export function OtpInput({ value, onChange, autoFocus = false, label = "Six-digi
             e.preventDefault();
             fill(i, e.clipboardData.getData("text"));
           }}
-          style={{ width: 44, height: 52, textAlign: "center", fontSize: 22, fontWeight: 600, padding: 0 }}
+          style={{ flex: "1 1 0", minWidth: 0, maxWidth: 48, height: 52, textAlign: "center", fontSize: 22, fontWeight: 600, padding: 0 }}
         />
       ))}
     </div>

@@ -56,6 +56,9 @@ const KEY = "vexa:admin:collapsed";
 export function AdminNav({ newEnquiries, unread }: { newEnquiries: number; unread: number }) {
   const path = usePathname();
   const [collapsed, setCollapsed] = useState<string[]>([]);
+  // on phones the menu is a button; it closes again as soon as a page is chosen
+  const [open, setOpen] = useState(false);
+  useEffect(() => setOpen(false), [path]);
 
   // remember which categories are folded (per browser)
   useEffect(() => {
@@ -95,9 +98,10 @@ export function AdminNav({ newEnquiries, unread }: { newEnquiries: number; unrea
   const count = (b?: Item["badge"]) => (b === "unread" ? unread : b === "enquiries" ? newEnquiries : 0);
 
   return (
-    <aside className="adm-side">
+    <aside className={`adm-side${open ? " is-open" : ""}`}>
       <Link href="/admin" className="adm-brand" aria-label="Vexa Admin"><b className="adm-nav-label">Vexa <span>Admin</span></b></Link>
-      <nav aria-label="Admin">
+      <button type="button" className="adm-menu-btn" aria-expanded={open} aria-controls="adm-nav" onClick={() => setOpen((v) => !v)}>{open ? "Close" : "Menu"}</button>
+      <nav id="adm-nav" aria-label="Admin">
         {GROUPS.map((g) => {
           const folded = collapsed.includes(g.id);
           return (
