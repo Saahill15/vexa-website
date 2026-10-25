@@ -28,7 +28,7 @@ export default async function Dashboard() {
 
   const setup = [
     { done: !!process.env.GOOGLE_CLIENT_ID, label: "Google sign-in", hint: "Set GOOGLE_CLIENT_ID to show the Google button on the login and signup pages." },
-    { done: !!process.env.CONTACT_WEBHOOK_URL, label: "Enquiry emails", hint: "Set CONTACT_WEBHOOK_URL so each enquiry is also emailed. Until then they are only saved here." },
+    { done: !!process.env.RESEND_API_KEY || !!process.env.CONTACT_WEBHOOK_URL, label: "Enquiry emails", hint: "Enquirers get a confirmation and the team gets the details by email. Set RESEND_API_KEY (or CONTACT_WEBHOOK_URL) to turn this on." },
     { done: published.length > 0, label: "A published article", hint: "Readers see published articles on the Articles page." },
     { done: !!process.env.ADMIN_EMAILS, label: "Admin emails", hint: "ADMIN_EMAILS makes those addresses admins when they sign in with Google. Optional." },
   ];
