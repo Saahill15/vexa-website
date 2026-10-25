@@ -12,7 +12,11 @@ import { effectiveRole, getUserById, type Role } from "./users";
  * their admin role takes effect at once.
  */
 
-export type Session = { id: string; name: string; email: string; role: Role };
+/**
+ * `pendingAdmin` is set for an admin whose second step (authenticator code or passkey) is not done in this session. Such a
+ * session has the role "user" until then, so every admin check refuses it.
+ */
+export type Session = { id: string; name: string; email: string; role: Role; pendingAdmin?: boolean };
 
 const COOKIE = "vexa_session";
 /** How long a sign-in lasts, in seconds. */
@@ -38,8 +42,8 @@ export async function endSession() {
 export const getSession = cache(async (): Promise<Session | null> => {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token || token.length > 100) return null;
-  const { rows } = await db.query<{ user_id: string; created_at: Date | string }>(
-    "select user_id, created_at from sessions where token_hash = $1 and revoked_at is null and expires_at > now()",
+  const { rows } = await db.query<{ user_id: string; created_at: Date | string; mfa_at: Date | string | null }>(
+    "select user_id, created_at, mfa_at from sessions where token_hash = $1 and revoked_at is null and expires_at > now()",
     [hash(token)],
   );
   const row = rows[0];
@@ -49,8 +53,20 @@ export const getSession = cache(async (): Promise<Session | null> => {
   // sessions started before the last password change (for example a reset) or a "sign out everywhere" stop working
   const cutoff = Math.max(user.passwordChangedAt ? Date.parse(user.passwordChangedAt) : 0, user.sessionsRevokedAt ? Date.parse(user.sessionsRevokedAt) : 0);
   if (new Date(row.created_at).getTime() < cutoff) return null;
-  return { id: user.id, name: user.name, email: user.email, role: effectiveRole(user) };
+  const role = effectiveRole(user);
+  if (role === "admin" && !row.mfa_at) return { id: user.id, name: user.name, email: user.email, role: "user", pendingAdmin: true };
+  return { id: user.id, name: user.name, email: user.email, role };
 });
+
+/** Marks this session's second step as done (after a correct authenticator code or passkey). */
+export async function completeSecondStep(): Promise<void> {
+  const token = (await cookies()).get(COOKIE)?.value;
+  if (!token) return;
+  await db.query("update sessions set mfa_at = now() where token_hash = $1 and revoked_at is null", [hash(token)]);
+}
+
+/** True for an admin, whether or not the second step is done yet. Used where enrolling is allowed before verifying. */
+export const isAdminSession = (session: Session | null) => Boolean(session && (session.role === "admin" || session.pendingAdmin));
 
 /** For server actions and routes that change things: throws unless an admin is signed in. */
 export async function requireAdmin(): Promise<Session> {
