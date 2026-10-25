@@ -137,7 +137,7 @@ async function confirmToSender(entry: EnquiryEntry): Promise<void> {
   const opening = first ? `Hi ${first},` : "Hi there,";
   const middle = `Thanks for reaching out${entry.interest ? ` about ${entry.interest}` : ""}.`;
   const next = "We've received your enquiry, and someone from our team will reply to you here within two working days. If there's anything else you'd like us to know, just reply to this email.";
-  const subject = "Thanks for getting in touch";
+  const subject = "We've received your enquiry";
   const text = `${opening}\n\n${middle} ${next}\n\nWarm regards,\nVexa Digital\ncontact@vexadigital.in`;
   await sendTemplated({
     from: "contact",
