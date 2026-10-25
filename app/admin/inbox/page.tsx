@@ -16,7 +16,7 @@ import { SyncButton } from "@/components/admin/SyncButton";
 import { Icon, type IconName } from "@/components/Icon";
 import { InboxListSkeleton, ThreadSkeleton } from "@/components/Skeletons";
 import { adminOnly } from "@/lib/admin-guard";
-import { ADDRESSES, BOX_LABEL, FOLDERS, folderCounts, getDraft, isFolder, listFolder, mailConfigured, queryThreads, type Address, type Box, type Folder } from "@/lib/gmail";
+import { ADDRESSES, BOX_LABEL, FOLDERS, getDraft, isFolder, listFolder, mailConfigured, queryThreads, type Address, type Box, type Folder } from "@/lib/gmail";
 import { STATUSES } from "@/lib/enquiries";
 import { formatDateTime, ROLE_LABEL } from "@/lib/format";
 import { loadInbox, unreadCount, type InboxItem, type InboxType } from "@/lib/inbox";
@@ -117,8 +117,8 @@ async function InboxList({ adminId, view }: { adminId: string; view: View }) {
   const { active, box, q } = view;
   const wantsMail = active === "all" || active === "mail";
   // the folder numbers are quick once saved; the first time they get 1.5 seconds before the page goes on without them
-  const countsPromise = active === "mail" && mailConfigured() ? Promise.race([folderCounts(), new Promise<Record<string, number>>((r) => setTimeout(() => r({}), 1500))]).catch(() => ({})) : Promise.resolve({});
-  const [data, counts] = await Promise.all([loadInbox(adminId, { mail: wantsMail, query: q, folder: view.folder }), countsPromise]);
+  // the folder numbers are not loaded here: each one costs a Gmail call, and the menu fetches them only when it is opened
+  const data = await loadInbox(adminId, { mail: wantsMail, query: q, folder: view.folder });
   const shown = data.items.filter(
     (i) =>
       (active === "all" || i.type === active) &&
@@ -175,7 +175,7 @@ async function InboxList({ adminId, view }: { adminId: string; view: View }) {
         <div className="adm-pills" aria-label="Narrow the mail">
           <FolderMenu
             current={view.folder}
-            items={FOLDERS.map((f) => ({ id: f.id, label: f.label, group: f.group, count: (counts as Record<string, number>)[f.id], href: hrefFor(view, { folder: f.id, box: "all", q: "", unread: false, starred: false, selectedKey: "" }) }))}
+            items={FOLDERS.map((f) => ({ id: f.id, label: f.label, group: f.group, href: hrefFor(view, { folder: f.id, box: "all", q: "", unread: false, starred: false, selectedKey: "" }) }))}
           />
           <span className="adm-pills-sep" aria-hidden="true" />
           {BOXES.map((b) => (

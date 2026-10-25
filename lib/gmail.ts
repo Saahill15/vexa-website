@@ -152,12 +152,21 @@ async function api<T>(route: string, init?: { method?: string; body?: unknown })
         signal: AbortSignal.timeout(15_000),
       });
       if (res.status === 401) cached = null; // the next attempt signs in again
+      if (!res.ok) {
+        // Google sends some rate limits as 403; read the reason so they are retried like 429 and show up in the logs
+        const reason = await res.text().catch(() => "");
+        const limited = res.status === 403 && /rateLimitExceeded|userRateLimitExceeded/.test(reason);
+        console.error(`gmail ${route.split("?")[0]} -> ${res.status}${limited ? " (rate limit)" : ""}: ${reason.slice(0, 200)}`);
+        // a per-minute limit is not cleared by retrying a second later, so it is reported straight away
+        throw new MailError(gmailProblem(limited ? 429 : res.status), !limited && (res.status === 401 || RETRY_STATUS.has(res.status)));
+      }
       if (res.ok) {
         const body = await res.text();
         return (body ? JSON.parse(body) : {}) as T;
       }
       throw new MailError(gmailProblem(res.status), res.status === 401 || RETRY_STATUS.has(res.status));
     } catch (e) {
+      if (!(e instanceof MailError)) console.error(`gmail ${route.split("?")[0]} failed: ${e instanceof Error ? `${e.name}: ${e.message}` : String(e)}`);
       const error = e instanceof MailError ? e : new MailError("Gmail could not be reached.", true);
       if (!error.retry || attempt >= attempts) throw error;
       await pause(attempt);
@@ -383,17 +392,48 @@ const FOLDER_QUERY: Record<Folder, string> = {
   purchases: category("purchases"),
 };
 
-type Slot = { cache: { at: number; data: MailThreadSummary[]; syncedAt: string } | null; error: string | null; inflight: Promise<MailThreadSummary[]> | null };
+type Slot = { cache: { at: number; data: MailThreadSummary[]; syncedAt: string } | null; error: string | null; inflight: Promise<MailThreadSummary[]> | null; loaded: boolean };
+
+/*
+ * The saved lists are also kept in the database, so every server instance (on Cloudflare there are many) shares one copy.
+ * Without it each instance fetches from Gmail on its own, and Gmail's per-minute limit for the mailbox runs out.
+ * Both calls are best effort: if the database is unavailable, the list just works from memory as before.
+ */
+async function readShared(folder: Folder): Promise<{ at: number; data: MailThreadSummary[]; syncedAt: string } | null> {
+  try {
+    const { db } = await import("./db");
+    const { rows } = await db.query<{ fetched_at: string; synced_at: string; data: MailThreadSummary[] }>("select fetched_at, synced_at, data from mail_cache where folder = $1", [folder]);
+    return rows[0] ? { at: Number(rows[0].fetched_at), syncedAt: rows[0].synced_at, data: rows[0].data } : null;
+  } catch {
+    return null;
+  }
+}
+
+async function writeShared(folder: Folder, cache: { at: number; data: MailThreadSummary[]; syncedAt: string }): Promise<void> {
+  try {
+    const { db } = await import("./db");
+    await db.query(
+      "insert into mail_cache (folder, fetched_at, synced_at, data) values ($1, $2, $3, $4) on conflict (folder) do update set fetched_at = excluded.fetched_at, synced_at = excluded.synced_at, data = excluded.data",
+      [folder, cache.at, cache.syncedAt, JSON.stringify(cache.data)],
+    );
+  } catch {
+    /* kept in memory only */
+  }
+}
 const slots = new Map<Folder, Slot>();
 const slot = (folder: Folder): Slot => {
   let s = slots.get(folder);
-  if (!s) slots.set(folder, (s = { cache: null, error: null, inflight: null }));
+  if (!s) slots.set(folder, (s = { cache: null, error: null, inflight: null, loaded: false }));
   return s;
 };
 
 async function fetchThreads(query: string): Promise<MailThreadSummary[]> {
-  const { threads = [] } = await api<{ threads?: { id: string }[] }>(`/threads?${[query, "maxResults=30"].filter(Boolean).join("&")}`);
-  const full = await Promise.all(threads.map((t) => api<GmailThread>(`/threads/${t.id}?format=metadata&${METADATA}`)));
+  const { threads = [] } = await api<{ threads?: { id: string }[] }>(`/threads?${[query, "maxResults=20"].filter(Boolean).join("&")}`);
+  // in small batches: Gmail limits how much one user may use per minute, so 30 at once is too many
+  const full: GmailThread[] = [];
+  for (let i = 0; i < threads.length; i += 5) {
+    full.push(...(await Promise.all(threads.slice(i, i + 5).map((t) => api<GmailThread>(`/threads/${t.id}?format=metadata&${METADATA}`)))));
+  }
   return full.filter((t) => t.messages?.length).map(summarise);
 }
 
@@ -413,13 +453,20 @@ export function mailSyncInfo(folder: Folder = "inbox"): { syncedAt: string | nul
  */
 export async function listFolder(folder: Folder, force = false): Promise<MailThreadSummary[]> {
   const s = slot(folder);
+  if (!s.loaded) {
+    s.loaded = true;
+    const shared = await readShared(folder);
+    if (shared && (!s.cache || shared.at > s.cache.at)) s.cache = shared;
+  }
   const age = s.cache ? Date.now() - s.cache.at : Infinity;
-  if (s.cache && age < (force ? 10_000 : 45_000)) return s.cache.data;
+  // Gmail allows only a small number of requests per minute for this mailbox, so a list is reused for three minutes
+  if (s.cache && age < (force ? 10_000 : 180_000)) return s.cache.data;
   if (!s.inflight) {
     s.inflight = fetchThreads(FOLDER_QUERY[folder])
-      .then((data) => {
+      .then(async (data) => {
         s.cache = { at: Date.now(), data, syncedAt: istIso() };
         s.error = null;
+        await writeShared(folder, s.cache);
         return data;
       })
       .catch((e) => {
@@ -854,7 +901,8 @@ export async function getAttachment(messageId: string, attachmentId: string): Pr
 
 /** A short fingerprint of the inbox, for the auto-refresh to tell whether anything changed. It fetches fresh (at most every 10 seconds). */
 export async function pollMail(): Promise<{ signature: string; unread: number }> {
-  const list = await listThreads(true);
+  // uses the 45-second cache, so several open screens share one fetch instead of each forcing their own
+  const list = await listThreads(false);
   return { signature: threadsSignature(list), unread: list.filter((t) => t.unread).length };
 }
 

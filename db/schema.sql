@@ -118,3 +118,23 @@ alter table email_verifications enable row level security;
 alter table password_resets enable row level security;
 alter table pending_signups enable row level security;
 alter table rate_hits enable row level security;
+
+-- the saved mail lists, shared by every server instance so they do not each ask Gmail (the admin inbox only)
+create table if not exists mail_cache (
+  folder text primary key,
+  fetched_at bigint not null,
+  synced_at text not null,
+  data jsonb not null
+);
+alter table mail_cache enable row level security;
+
+-- signed-in sessions: only a hash of each token is stored; revoked_at is set when someone signs out
+create table if not exists sessions (
+  token_hash text primary key,
+  user_id uuid not null references users (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  expires_at timestamptz not null,
+  revoked_at timestamptz
+);
+create index if not exists sessions_user_idx on sessions (user_id);
+alter table sessions enable row level security;

@@ -288,7 +288,6 @@ export async function syncMailAction(formData: FormData) {
   const folderField = str(formData.get("folder"), 20);
   const folder = isFolder(folderField) ? folderField : "inbox";
   await listFolder(folder, true).catch(() => undefined);
-  const box = str(formData.get("box"), 20);
-  revalidatePath("/admin", "layout");
-  redirect(`/admin/inbox?filter=mail${folder !== "inbox" ? `&folder=${folder}` : ""}${box && box !== "all" ? `&box=${encodeURIComponent(box)}` : ""}`);
+  // only the inbox data is refreshed: no redirect, so the page, the open message and the filters stay as they are
+  revalidatePath("/admin/inbox");
 }

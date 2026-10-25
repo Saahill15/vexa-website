@@ -1,4 +1,5 @@
 import { db, isUuid, iso } from "./db";
+import { sendPlainMail } from "./mail";
 
 /*
  * Enquiries from the Start a conversation form. Each one is saved first, then sent to CONTACT_WEBHOOK_URL
@@ -103,8 +104,35 @@ async function notify(entry: EnquiryEntry): Promise<Enquiry["emailed"]> {
   }
 }
 
+/** The team's inbox that hears about every new enquiry. */
+const TEAM_INBOX = "partnerships@vexadigital.in";
+
+/** Tells the person who sent an enquiry that it arrived, and tells the team the details (reply goes to the sender). */
+async function emailParties(entry: EnquiryEntry): Promise<void> {
+  const who = entry.name || entry.email;
+  await sendPlainMail(
+    entry.email,
+    "We have received your enquiry at Vexa Digital",
+    `Hi ${entry.name || "there"},\n\nThanks for getting in touch. We have received your enquiry and will reply by email, usually within two working days.\n\nVexa Digital\npartnerships@vexadigital.in`,
+  );
+  const rows = [
+    ["From", `${who} <${entry.email}>`],
+    ["Is", entry.role],
+    ["Interested in", entry.interest],
+    ["Company or channel", entry.company],
+    ["Timing", entry.launch],
+  ].filter(([, v]) => v);
+  await sendPlainMail(
+    TEAM_INBOX,
+    `New enquiry from ${who}`,
+    `${rows.map(([k, v]) => `${k}: ${v}`).join("\n")}\n\n${entry.problem}\n\nReply to this email to answer ${entry.email}.`,
+    entry.email,
+  );
+}
+
 /** Accepts an enquiry when at least one route holds it: saved in the database or delivered to the webhook. */
 export async function acceptEnquiry(entry: EnquiryEntry): Promise<boolean> {
+  await emailParties(entry).catch(() => undefined);
   const emailed = await notify(entry);
   if (emailed === "failed") console.error("enquiry: webhook delivery failed");
   if (emailed === "not_configured" && process.env.NODE_ENV === "production") console.error("enquiry: CONTACT_WEBHOOK_URL is not set, nothing was emailed");
