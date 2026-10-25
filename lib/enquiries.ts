@@ -120,10 +120,10 @@ function confirmationHtml(first: string, interest: string | null, opening: strin
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
 <tr><td style="padding:0 4px 18px;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:700;letter-spacing:.04em;color:#0B7F7C">Vexa <span style="font-weight:400;color:#064B4A">Digital</span></td></tr>
 <tr><td style="background:#ffffff;border-radius:16px;border:1px solid #d3e6e4;padding:36px 32px;font-family:Arial,Helvetica,sans-serif;color:#12292a">
-<h1 style="margin:0 0 18px;font-size:24px;line-height:1.25;font-weight:700;color:#064B4A">We have your message${first ? `, ${escapeText(first)}` : ""}</h1>
+<h1 style="margin:0 0 18px;font-size:24px;line-height:1.25;font-weight:700;color:#064B4A">Thanks for getting in touch${first ? `, ${escapeText(first)}` : ""}</h1>
 <p style="margin:0 0 16px;font-size:16px;line-height:1.65;color:#3d5352">${escapeText(opening)}</p>
 ${lines}
-<p style="margin:24px 0 0;padding-top:20px;border-top:1px solid #e3eeed;font-size:15px;line-height:1.6;color:#3d5352">Speak soon,<br><strong style="color:#064B4A">The Vexa Digital team</strong><br><a href="mailto:contact@vexadigital.in" style="color:#0B7F7C">contact@vexadigital.in</a></p>
+<p style="margin:24px 0 0;padding-top:20px;border-top:1px solid #e3eeed;font-size:15px;line-height:1.6;color:#3d5352">Warm regards,<br><strong style="color:#064B4A">The Vexa Digital team</strong><br><a href="mailto:contact@vexadigital.in" style="color:#0B7F7C">contact@vexadigital.in</a></p>
 </td></tr>
 <tr><td style="padding:18px 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#6b8180">Vexa Digital is a trade name used by Blue Wings.<br>Reply to this email to add anything to your enquiry.</td></tr>
 </table>
@@ -135,18 +135,16 @@ ${lines}
 async function confirmToSender(entry: EnquiryEntry): Promise<void> {
   const first = (entry.name || "").trim().split(/\s+/)[0];
   const opening = first ? `Hi ${first},` : "Hi there,";
-  const middle = entry.interest
-    ? `It's great to hear about ${entry.interest}, and thank you for taking the time to write to us.`
-    : "Thank you for taking the time to write to us.";
-  const next = "Your enquiry is with our team now. Someone will read it properly and get back to you here within two working days. If anything else comes to mind in the meantime, just reply to this email and add it to the thread. We read every message.";
-  const subject = first ? `${first}, we've got your message` : "We've got your message";
-  const text = `${opening}\n\n${middle}\n\n${next}\n\nSpeak soon,\nThe Vexa Digital team\ncontact@vexadigital.in`;
+  const middle = `Thanks for reaching out${entry.interest ? ` about ${entry.interest}` : ""}.`;
+  const next = "We've received your enquiry, and someone from our team will reply to you here within two working days. If there's anything else you'd like us to know, just reply to this email.";
+  const subject = first ? `Thanks for getting in touch, ${first}` : "Thanks for getting in touch";
+  const text = `${opening}\n\n${middle} ${next}\n\nWarm regards,\nVexa Digital\ncontact@vexadigital.in`;
   await sendTemplated({
     from: "contact",
     to: entry.email,
     subject,
     body: text,
-    html: confirmationHtml(first, entry.interest, opening, [escapeText(middle), escapeText(next)]),
+    html: confirmationHtml(first, entry.interest, opening, [`${escapeText(middle)} ${escapeText(next)}`]),
   });
 }
 
