@@ -1,11 +1,73 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { startRegistration } from "@simplewebauthn/browser";
 import type { Factor } from "@/lib/mfa";
 import { OtpInput } from "@/components/OtpInput";
+import { startAuthentication } from "@simplewebauthn/browser";
+
+/** Confirms this session on the profile page, so changes can be made: a passkey first when there is one, else the code. */
+function ConfirmNow({ hasAuthenticator, hasPasskey }: { hasAuthenticator: boolean; hasPasskey: boolean }) {
+  const router = useRouter();
+  const [useCode, setUseCode] = useState(!hasPasskey);
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function usePasskey() {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const start = await fetch("/api/mfa/passkey", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "auth-options" }) });
+      if (!start.ok) throw new Error("options");
+      const { options } = (await start.json()) as { options: Parameters<typeof startAuthentication>[0]["optionsJSON"] };
+      const response = await startAuthentication({ optionsJSON: options });
+      const done = await fetch("/api/mfa/passkey", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "auth-verify", response }) });
+      if (!done.ok) throw new Error("verify");
+      router.refresh();
+    } catch {
+      setError(hasAuthenticator ? "The passkey was not used. Enter your authenticator code instead." : "The passkey was not accepted. Try again.");
+      if (hasAuthenticator) setUseCode(true);
+      setBusy(false);
+    }
+  }
+
+  async function submitCode() {
+    if (busy || code.length !== 6) return;
+    setBusy(true);
+    setError("");
+    const res = await fetch("/api/mfa", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "verify", code }) });
+    if (res.ok) return router.refresh();
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
+    setError(data.error ?? "That code is not right. Try again.");
+    setCode("");
+    setBusy(false);
+  }
+
+  return (
+    <div className="acc-method" style={{ marginTop: 16 }}>
+      <p style={{ margin: "0 0 4px" }}><strong>Confirm it is you</strong></p>
+      <p className="acc-meta" style={{ margin: "0 0 12px" }}>To change these settings, confirm with a passkey or your authenticator code first.</p>
+      {!useCode ? (
+        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+          <button type="button" className="btn btn--sm" disabled={busy} onClick={usePasskey}>Confirm with a passkey</button>
+          {hasAuthenticator ? <button type="button" className="btn btn--line btn--sm" disabled={busy} onClick={() => setUseCode(true)}>Use an authenticator code</button> : null}
+        </div>
+      ) : (
+        <div>
+          <OtpInput value={code} onChange={setCode} />
+          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", marginTop: 12 }}>
+            <button type="button" className="btn btn--sm" disabled={busy || code.length !== 6} onClick={submitCode}>Confirm</button>
+            {hasPasskey ? <button type="button" className="btn btn--line btn--sm" disabled={busy} onClick={usePasskey}>Use a passkey instead</button> : null}
+          </div>
+        </div>
+      )}
+      {error ? <p className="adm-note adm-note--error" role="alert" style={{ marginTop: 12 }}>{error}</p> : null}
+    </div>
+  );
+}
 
 async function call(url: string, body: Record<string, unknown>) {
   const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -89,7 +151,7 @@ export function MfaSettings({ factors, verified }: { factors: Factor[]; verified
       <h2 id="sec-mfa" className="acc-heading">Two-step sign-in</h2>
       <p className="acc-meta">Admins confirm with an authenticator code or a passkey before the admin panel opens. Keep at least one more way in than you use.</p>
       {!verified && factors.length > 0 ? (
-        <p className="adm-note" style={{ marginTop: 12 }}>To change this, first <Link href="/login/verify">confirm it is you</Link>.</p>
+        <ConfirmNow hasAuthenticator={Boolean(authenticator)} hasPasskey={passkeys.length > 0} />
       ) : null}
 
       {/* authenticator app */}
