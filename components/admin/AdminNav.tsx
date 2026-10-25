@@ -23,7 +23,6 @@ const GROUPS: Group[] = [
     items: [
       { href: "/admin/enquiries", label: "Enquiries", icon: "mail", badge: "enquiries" },
       { href: "/admin/users", label: "Users", icon: "users" },
-      { href: "/account", label: "My profile", icon: "users" },
     ],
   },
   {
@@ -43,6 +42,8 @@ const GROUPS: Group[] = [
       { href: "/", label: "View site", icon: "external", external: true },
     ],
   },
+  // at the very bottom of the sidebar, below the other sections
+  { id: "account", items: [{ href: "/account", label: "My profile", icon: "users" }] },
 ];
 
 const MAIL_FOLDERS: [string, string, MailIconName][] = [

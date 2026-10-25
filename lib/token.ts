@@ -26,3 +26,6 @@ function secret(): Buffer {
 }
 
 export const sign = (payload: string) => createHmac("sha256", secret()).update(payload).digest("base64url");
+
+/** The secret used for signing; also used to protect stored two-step secrets. */
+export const signingKey = () => secret();

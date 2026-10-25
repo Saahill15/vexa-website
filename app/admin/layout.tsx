@@ -12,6 +12,7 @@ export const metadata: Metadata = { title: { default: "Admin", template: "%s · 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   if (!session) redirect("/login?next=/admin");
+  if (session.pendingAdmin) redirect("/login/verify");
   if (session.role !== "admin") {
     return (
       <section className="auth">
