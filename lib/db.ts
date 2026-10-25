@@ -1,8 +1,9 @@
-import { Pool, type PoolClient, type QueryResult, type QueryResultRow } from "pg";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { Client, Pool, type PoolClient, type QueryResult, type QueryResultRow } from "pg";
 import { istIso } from "./time";
 
 /*
- * The PostgreSQL connection. One pool per server process, shared by every request. DATABASE_URL must be set.
+ * The PostgreSQL connection.
  * The tables are defined in db/schema.sql and created with `npm run db:schema`.
  */
 
@@ -11,24 +12,67 @@ export type Queryer = {
   query<T extends QueryResultRow = QueryResultRow>(text: string, params?: unknown[]): Promise<QueryResult<T>>;
 };
 
-const globalForDb = globalThis as unknown as { pool?: Pool };
-
-function createPool(): Pool {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) throw new Error("DATABASE_URL is not set. See .env.example.");
-  return new Pool({ connectionString, max: 10, idleTimeoutMillis: 30_000 });
+/*
+ * Where the connection comes from. On Cloudflare Workers it is the HYPERDRIVE binding (Cloudflare's pooled, accelerated
+ * route to the database), and every query or transaction opens its own short connection, because a Worker may not keep a
+ * connection open from one request to the next. Anywhere else (a laptop, a server) it is DATABASE_URL with one shared pool.
+ */
+function hyperdriveUrl(): string | null {
+  try {
+    return (getCloudflareContext().env as { HYPERDRIVE?: { connectionString: string } }).HYPERDRIVE?.connectionString ?? null;
+  } catch {
+    return null; // not running on Workers
+  }
 }
 
-// kept on globalThis so a development hot reload does not open a new pool each time
-const pool = globalForDb.pool ?? (globalForDb.pool = createPool());
+const globalForDb = globalThis as unknown as { pool?: Pool };
+
+function sharedPool(): Pool {
+  if (globalForDb.pool) return globalForDb.pool;
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) throw new Error("DATABASE_URL is not set. See .env.example.");
+  // kept on globalThis so a development hot reload does not open a new pool each time
+  return (globalForDb.pool = new Pool({ connectionString, max: 10, idleTimeoutMillis: 30_000 }));
+}
+
+/** A connection that was dropped between the Worker and the database: safe to try once more. */
+const dropped = (error: unknown) => /socket has been closed|socket hang up|ECONNRESET|Connection terminated|terminating connection|Client was closed/i.test(String((error as Error)?.message ?? error));
+
+/** Runs `attempt`, and once more if the connection was dropped. Reads and single statements only. */
+async function withRetry<T>(attempt: () => Promise<T>): Promise<T> {
+  try {
+    return await attempt();
+  } catch (error) {
+    if (!dropped(error)) throw error;
+    return attempt();
+  }
+}
 
 export const db: Queryer = {
-  query: (text, params) => pool.query(text, params),
+  query(text, params) {
+    return withRetry(async () => {
+      const url = hyperdriveUrl();
+      if (!url) return sharedPool().query(text, params);
+      const client = new Client({ connectionString: url });
+      client.on("error", () => undefined); // a connection the database closes is not an error to crash on
+      await client.connect();
+      try {
+        return await client.query(text, params);
+      } finally {
+        await client.end().catch(() => undefined);
+      }
+    });
+  },
 };
 
 /** Runs `fn` in one transaction: committed when it returns, rolled back when it throws. */
-export async function transaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
-  const client = await pool.connect();
+export async function transaction<T>(fn: (client: Queryer) => Promise<T>): Promise<T> {
+  const url = hyperdriveUrl();
+  const single = url ? new Client({ connectionString: url }) : null;
+  single?.on("error", () => undefined);
+  const pooled = single ? null : await sharedPool().connect();
+  const client = (single ?? pooled) as Client | PoolClient;
+  if (single) await single.connect();
   try {
     await client.query("begin");
     const result = await fn(client);
@@ -38,7 +82,8 @@ export async function transaction<T>(fn: (client: PoolClient) => Promise<T>): Pr
     await client.query("rollback").catch(() => undefined);
     throw error;
   } finally {
-    client.release();
+    if (single) await single.end().catch(() => undefined);
+    else pooled?.release();
   }
 }
 

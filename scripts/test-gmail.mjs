@@ -402,7 +402,8 @@ await test("polling gives a fingerprint that changes when mail changes", async (
   assert.match(a.signature, /^[0-9a-f]{16}$/);
   assert.equal(typeof a.unread, "number");
   THREADS.aaaa0001[0].labelIds = ["INBOX"]; // one conversation was read elsewhere
-  await g.markThreadRead("aaaa0001"); // expires the saved list; the 10-second guard no longer applies
+  await g.markThreadRead("aaaa0001"); // expires the saved list
+  await g.listThreads(true); // the poll reads the saved list, so refresh it first, as the next minute's poll would
   const b = await g.pollMail();
   assert.notEqual(a.signature, b.signature);
   assert.equal(b.unread, a.unread - 1);

@@ -10,7 +10,7 @@ import { getUserByEmail, hashPassword } from "@/lib/users";
  */
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("This form can only be sent from the Vexa website.", 403);
-  if (tooMany(`signup:${clientIp(request)}`, 10, 3600_000)) return fail("Too many sign-ups from this connection. Please try again later.", 429);
+  if (await tooMany(`signup:${clientIp(request)}`, 10, 3600_000)) return fail("Too many sign-ups from this connection. Please try again later.", 429);
   const body = await readJson(request);
   if (!body) return fail("The form could not be read. Please try again.");
 
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (!EMAIL.test(email)) return fail("Enter a full email address.");
   if (password.length < 8) return fail("Use a password of at least 8 characters.");
   if (password.length > 200) return fail("That password is too long.");
-  if (tooMany(`signup-email:${email}`, 5, 3600_000)) return fail("We have sent several links to this address. Please wait a while before trying again.", 429);
+  if (await tooMany(`signup-email:${email}`, 5, 3600_000)) return fail("We have sent several links to this address. Please wait a while before trying again.", 429);
 
   const showHere = process.env.NODE_ENV !== "production" && isLocal(request);
   // the answer is the same whether or not the address already has an account, so this form cannot be used to find out who

@@ -1,19 +1,12 @@
 import { NextResponse } from "next/server";
 import { acceptEnquiry } from "@/lib/enquiries";
 import { clientIp, readBody, sameOrigin } from "@/lib/http";
+import { peekLimit, tooMany } from "@/lib/ratelimit";
 import { SITE } from "@/lib/site";
 import { istIso } from "@/lib/time";
 
 const ROLES = ["brand", "organisation", "other"];
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// A light per-address limit: 5 accepted enquiries an hour (rejected attempts don't count). Resets on restart.
-const recent = new Map<string, number[]>();
-const hitsFor = (ip: string) => (recent.get(ip) ?? []).filter((t) => Date.now() - t < 3600_000);
-function record(ip: string) {
-  if (recent.size > 5000) recent.clear();
-  recent.set(ip, [...hitsFor(ip), Date.now()]);
-}
 
 const text = (value: unknown, max: number) => (typeof value === "string" ? value.trim().slice(0, max) : "");
 const fail = (error: string, status = 400) => NextResponse.json({ ok: false, error }, { status });
@@ -22,7 +15,8 @@ export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("This form can only be sent from the Vexa website.", 403);
 
   const ip = clientIp(request);
-  if (hitsFor(ip).length >= 5) return fail("You have sent a few messages already. Please wait an hour, or email us directly.", 429);
+  // 5 accepted enquiries an hour per address (a refused attempt does not count against it)
+  if (await peekLimit(`contact:${ip}`, 5, 3600_000)) return fail("You have sent a few messages already. Please wait an hour, or email us directly.", 429);
 
   let body: Record<string, unknown>;
   try {
@@ -59,6 +53,6 @@ export async function POST(request: Request) {
     consent: true,
   });
   if (!ok) return fail(`Your message did not send. Please try again in a few minutes, or email ${SITE.email}.`, 503);
-  record(ip);
+  await tooMany(`contact:${ip}`, 5, 3600_000);
   return NextResponse.json({ ok: true });
 }

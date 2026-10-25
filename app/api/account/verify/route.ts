@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   const user = await getUserById(session.id);
   if (!user) return fail("Please log in again to continue.", 401);
   if (user.emailVerified) return ok({ alreadyVerified: true });
-  if (tooMany(`verify-send:${user.id}`, 5, 3600_000) || tooMany(`verify-send-ip:${clientIp(request)}`, 20, 3600_000)) {
+  if (await tooMany(`verify-send:${user.id}`, 5, 3600_000) || await tooMany(`verify-send-ip:${clientIp(request)}`, 20, 3600_000)) {
     return fail("You have asked for several links. Please wait a while before trying again.", 429);
   }
 

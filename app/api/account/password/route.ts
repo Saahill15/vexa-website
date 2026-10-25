@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   if (!user) return fail(SIGNED_OUT, 401);
 
   if (user.passwordHash) {
-    if (tooMany(`account-pw:${clientIp(request)}:${user.id}`, 8, 15 * 60_000)) return fail("Too many attempts. Please wait a few minutes.", 429);
+    if (await tooMany(`account-pw:${clientIp(request)}:${user.id}`, 8, 15 * 60_000)) return fail("Too many attempts. Please wait a few minutes.", 429);
     if (!current) return fail("Enter your current password.");
     if (!(await verifyPassword(current, user.passwordHash))) return fail("Your current password is not right.", 401);
   }

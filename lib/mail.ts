@@ -51,6 +51,26 @@ function html(mail: Mail): string {
 </body></html>`;
 }
 
+/** Sends one plain email from the no-reply address through Resend. Used for enquiry replies and team alerts. */
+export async function sendPlainMail(to: string, subject: string, text: string, replyTo?: string): Promise<boolean> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return false;
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({ from: process.env.MAIL_FROM || DEFAULT_FROM, to: [to], subject, text, ...(replyTo ? { reply_to: replyTo } : {}) }),
+      signal: AbortSignal.timeout(8000),
+      redirect: "manual",
+    });
+    if (!res.ok) console.error(`mail: Resend refused a message (${res.status})`);
+    return res.ok;
+  } catch {
+    console.error("mail: could not reach Resend");
+    return false;
+  }
+}
+
 /** Sends one account email. False when no mail service is set up or the send failed. */
 export async function sendAccountMail(mail: Mail): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
@@ -61,7 +81,7 @@ export async function sendAccountMail(mail: Mail): Promise<boolean> {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
         body: JSON.stringify({ from: process.env.MAIL_FROM || DEFAULT_FROM, to: [mail.to], subject: mail.subject, text: mail.text, html: html(mail) }),
         signal: AbortSignal.timeout(8000),
-        redirect: "error",
+        redirect: "manual",
       });
       if (!res.ok) console.error(`mail: Resend refused the message (${res.status})`);
       return res.ok;
@@ -80,7 +100,7 @@ export async function sendAccountMail(mail: Mail): Promise<boolean> {
       headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify(mail),
       signal: AbortSignal.timeout(5000),
-      redirect: "error",
+      redirect: "manual",
     });
     return res.ok;
   } catch {

@@ -1,36 +1,54 @@
-import { timingSafeEqual } from "crypto";
+import { createHash, randomBytes, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { cache } from "react";
-import { makeToken, MAX_AGE, readToken, sign } from "./token";
+import { db } from "./db";
+import { sign } from "./token";
 import { effectiveRole, getUserById, type Role } from "./users";
 
 /*
- * Sessions are a signed cookie holding the account id, an expiry and the time it was issued. The account is looked
- * up on every request, so disabling someone, removing their admin role or resetting their password takes effect at once.
+ * Sessions live in the database. The cookie holds a random token; the database keeps only a hash of it, so a leaked
+ * database cannot be used to sign in. Each session can be ended on its own, and every session ends when the password
+ * changes or "sign out everywhere" is used. The account is looked up on every request, so disabling someone or removing
+ * their admin role takes effect at once.
  */
 
 export type Session = { id: string; name: string; email: string; role: Role };
 
 const COOKIE = "vexa_session";
+/** How long a sign-in lasts, in seconds. */
+export const SESSION_SECONDS = 60 * 60 * 24 * 14;
+const hash = (token: string) => createHash("sha256").update(token).digest("hex");
 
 export async function startSession(userId: string) {
-  (await cookies()).set(COOKIE, makeToken(userId), { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: MAX_AGE });
+  const token = randomBytes(32).toString("base64url");
+  await db.query("insert into sessions (token_hash, user_id, expires_at) values ($1, $2, now() + make_interval(secs => $3))", [hash(token), userId, SESSION_SECONDS]);
+  // old sessions that have run out are removed now and then, so the table does not grow forever
+  if (Math.random() < 0.05) await db.query("delete from sessions where expires_at < now() - interval '1 day' or revoked_at < now() - interval '1 day'").catch(() => undefined);
+  (await cookies()).set(COOKIE, token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: SESSION_SECONDS });
 }
 
 export async function endSession() {
-  (await cookies()).delete(COOKIE);
+  const jar = await cookies();
+  const token = jar.get(COOKIE)?.value;
+  if (token) await db.query("update sessions set revoked_at = now() where token_hash = $1", [hash(token)]).catch(() => undefined);
+  jar.delete(COOKIE);
 }
 
 /** Who is signed in right now, or null. */
 export const getSession = cache(async (): Promise<Session | null> => {
   const token = (await cookies()).get(COOKIE)?.value;
-  const claim = token ? readToken(token) : null;
-  if (!claim) return null;
-  const user = await getUserById(claim.u);
+  if (!token || token.length > 100) return null;
+  const { rows } = await db.query<{ user_id: string; created_at: Date | string }>(
+    "select user_id, created_at from sessions where token_hash = $1 and revoked_at is null and expires_at > now()",
+    [hash(token)],
+  );
+  const row = rows[0];
+  if (!row) return null;
+  const user = await getUserById(row.user_id);
   if (!user || user.disabled) return null;
-  // sessions issued before the last password change (for example a reset) or a "sign out everywhere" stop working
+  // sessions started before the last password change (for example a reset) or a "sign out everywhere" stop working
   const cutoff = Math.max(user.passwordChangedAt ? Date.parse(user.passwordChangedAt) : 0, user.sessionsRevokedAt ? Date.parse(user.sessionsRevokedAt) : 0);
-  if (claim.i < cutoff) return null;
+  if (new Date(row.created_at).getTime() < cutoff) return null;
   return { id: user.id, name: user.name, email: user.email, role: effectiveRole(user) };
 });
 

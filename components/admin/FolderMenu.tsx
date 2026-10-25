@@ -9,7 +9,20 @@ export type FolderItem = { id: string; label: string; group: "folders" | "catego
 /** The folder picker for the Mail view: Inbox, Starred, Sent, Drafts, Spam and the rest, with Gmail's inbox categories below. */
 export function FolderMenu({ current, items }: { current: string; items: FolderItem[] }) {
   const [open, setOpen] = useState(false);
+  const [counts, setCounts] = useState<Record<string, number>>({});
   const box = useRef<HTMLDivElement>(null);
+  const loadedAt = useRef(0);
+
+  // the numbers come from the server only when the menu opens, and at most once a minute
+  function toggle() {
+    setOpen((o) => !o);
+    if (Date.now() - loadedAt.current < 60_000) return;
+    loadedAt.current = Date.now();
+    fetch("/admin/inbox/counts", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((d) => setCounts(d && typeof d === "object" ? (d as Record<string, number>) : {}))
+      .catch(() => undefined);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -28,9 +41,10 @@ export function FolderMenu({ current, items }: { current: string; items: FolderI
     <div className="adm-folders-group" role="group" aria-label={title ?? "Folders"}>
       {title ? <p>{title}</p> : null}
       {items.filter((i) => i.group === name).map((i) => (
-        <Link key={i.id} href={i.href} role="menuitem" aria-current={i.id === current ? "true" : undefined} className={i.count && i.id !== "drafts" && i.id !== "spam" ? "is-unread" : undefined} onClick={() => setOpen(false)}>
+        // counts are shown only where they exist (unread folders)
+        <Link key={i.id} href={i.href} role="menuitem" aria-current={i.id === current ? "true" : undefined} className={counts[i.id] && i.id !== "drafts" && i.id !== "spam" ? "is-unread" : undefined} onClick={() => setOpen(false)}>
           <span>{i.label}</span>
-          {i.count ? <b>{i.count > 999 ? "999+" : i.count}</b> : null}
+          {counts[i.id] ? <b>{counts[i.id] > 999 ? "999+" : counts[i.id]}</b> : null}
         </Link>
       ))}
     </div>
@@ -38,7 +52,7 @@ export function FolderMenu({ current, items }: { current: string; items: FolderI
 
   return (
     <div className="adm-folders" ref={box}>
-      <button type="button" className="adm-folders-btn" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+      <button type="button" className="adm-folders-btn" aria-haspopup="menu" aria-expanded={open} onClick={toggle}>
         <MailIcon name="inbox" size={16} />
         <span>{active.label}</span>
         <MailIcon name="caret" size={14} />

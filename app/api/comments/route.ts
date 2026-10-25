@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("Not allowed.", 403);
   const session = await getSession();
   if (!session) return fail("Log in to comment.", 401);
-  if (tooMany(`comment:${session.id}`, 6, 60_000)) return fail("You're posting quickly. Wait a moment and try again.", 429);
+  if (await tooMany(`comment:${session.id}`, 6, 60_000)) return fail("You're posting quickly. Wait a moment and try again.", 429);
 
   const body = await readJson(request, 5000);
   const slug = text(body?.slug, 200);

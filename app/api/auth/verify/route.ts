@@ -13,7 +13,7 @@ const EXPIRED = "This link is invalid or has expired. Start again from the sign-
  */
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("This form can only be sent from the Vexa website.", 403);
-  if (tooMany(`verify-ip:${clientIp(request)}`, 30, 15 * 60_000)) return fail("Too many attempts. Please wait a few minutes.", 429);
+  if (await tooMany(`verify-ip:${clientIp(request)}`, 30, 15 * 60_000)) return fail("Too many attempts. Please wait a few minutes.", 429);
   const body = await readJson(request);
   const token = text(body?.token, 200);
   if (!token) return fail(EXPIRED);

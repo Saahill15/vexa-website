@@ -37,10 +37,18 @@ const private_ = [
   { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
 ];
 
+// lets `next dev` use the Cloudflare bindings (Hyperdrive) from wrangler.jsonc
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+initOpenNextCloudflareForDev();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // the Cloudflare build only follows pg's default import, which skips the file that opens connections on Workers
+  outputFileTracingIncludes: { "/**": ["./node_modules/pg-cloudflare/dist/index.js", "./node_modules/pg-cloudflare/esm/index.mjs"] },
+  // the logos are small static files; Cloudflare Images is not set up, so they are served as they are
+  images: { unoptimized: true },
   // the mail compose window sends attachments (up to 20 MB) through a server action
   experimental: { serverActions: { bodySizeLimit: "26mb" } },
   // dev only: lets a temporary Cloudflare tunnel link load the dev server's scripts

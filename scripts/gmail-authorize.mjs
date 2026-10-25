@@ -15,7 +15,8 @@ const MAILBOX = "partnerships@vexadigital.in";
 const SCOPES = ["https://www.googleapis.com/auth/gmail.modify", "https://www.googleapis.com/auth/gmail.send"];
 const PORT = 53682;
 const REDIRECT = `http://127.0.0.1:${PORT}/callback`;
-const envFile = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", ".env.local");
+// saved into .env.local; for the production values run:  ENV_FILE=.env.production npm run gmail-authorize
+const envFile = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", process.env.ENV_FILE ?? ".env.local");
 
 const env = existsSync(envFile) ? readFileSync(envFile, "utf8") : "";
 const read = (name) => env.match(new RegExp(`^${name}=(.*)$`, "m"))?.[1]?.trim() ?? "";
