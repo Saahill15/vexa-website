@@ -10,6 +10,7 @@ const TITLES: [string, string][] = [
   ["/admin/articles", "Articles"],
   ["/admin/comments", "Comments"],
   ["/admin/users", "Users"],
+  ["/account", "Profile"],
 ];
 
 export function AdminTopbar({ name, email }: { name: string; email: string }) {
@@ -51,6 +52,7 @@ export function AdminTopbar({ name, email }: { name: string; email: string }) {
           {open ? (
             <div className="adm-profile-menu" role="menu">
               <div className="adm-profile-who"><strong>{name}</strong><small>{email}</small><em>Admin</em></div>
+              <Link href="/account" role="menuitem">My profile</Link>
               <Link href="/" role="menuitem">View the site</Link>
               <Link href="/admin/users" role="menuitem">Manage users</Link>
               <button type="button" role="menuitem" onClick={logout}>Log out</button>
