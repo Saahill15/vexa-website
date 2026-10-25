@@ -110,12 +110,15 @@ async function notify(entry: EnquiryEntry): Promise<Enquiry["emailed"]> {
  */
 async function confirmToSender(entry: EnquiryEntry): Promise<void> {
   const first = (entry.name || "").trim().split(/\s+/)[0];
-  const interest = entry.interest ? ` about ${entry.interest}` : "";
+  const opening = first ? `Hi ${first},` : "Hi there,";
+  const middle = entry.interest
+    ? `It's great to hear about ${entry.interest}, and thank you for taking the time to write to us.`
+    : "Thank you for taking the time to write to us.";
   await sendNew({
     from: "contact",
     to: entry.email,
-    subject: `Thanks for getting in touch${first ? `, ${first}` : ""}`,
-    body: `Hi ${first || "there"},\n\nThanks for reaching out${interest}. We've received your enquiry, and someone from our team will reply to you here within two working days.\n\nIf there's anything else you'd like us to know, just reply to this email.\n\nWarm regards,\nVexa Digital\ncontact@vexadigital.in`,
+    subject: first ? `${first}, we've got your message` : "We've got your message",
+    body: `${opening}\n\n${middle}\n\nYour enquiry is with our team now. Someone will read it properly and get back to you here within two working days. If anything else comes to mind in the meantime, just reply to this email and add it to the thread. We read every message.\n\nSpeak soon,\nThe Vexa Digital team\ncontact@vexadigital.in`,
   });
 }
 
