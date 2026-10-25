@@ -751,6 +751,15 @@ function addressList(value: string, label: string, required: boolean): string {
   return list.join(", ");
 }
 
+/**
+ * Sends a message that Vexa wrote itself (a template), with its own HTML. Unlike sendNew, the HTML is not cleaned, because
+ * the styling is the point. Only use it for fixed templates whose variable parts are escaped by the caller.
+ */
+export async function sendTemplated(input: { from: Address; to: string; subject: string; body: string; html: string }): Promise<void> {
+  if (!isAddress(input.from)) throw new MailError("Choose one of the Vexa addresses to send from.");
+  await sendMime(buildMime({ from: input.from, to: addressList(input.to, "To", true), subject: input.subject, body: input.body, html: input.html }));
+}
+
 /** Sends a message to Gmail. Large ones (with files) go through Gmail's upload address, which accepts up to 35 MB. */
 async function sendMime(mime: string, threadId?: string): Promise<void> {
   if (mime.length < 3_000_000) {

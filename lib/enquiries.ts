@@ -1,5 +1,5 @@
 import { db, isUuid, iso } from "./db";
-import { sendNew } from "./gmail";
+import { sendTemplated } from "./gmail";
 
 /*
  * Enquiries from the Start a conversation form. Each one is saved first, then sent to CONTACT_WEBHOOK_URL
@@ -108,17 +108,45 @@ async function notify(entry: EnquiryEntry): Promise<Enquiry["emailed"]> {
  * Sends the person who enquired a short confirmation from the contact mailbox, through Gmail (not Resend, which has a
  * small daily limit on the free plan). The team does not get an email: each enquiry is in the admin Enquiries page.
  */
+const escapeText = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/** The confirmation, in the same look as the account emails: teal wordmark, white card, and a plain sign-off. */
+function confirmationHtml(first: string, interest: string | null, opening: string, paragraphs: string[]): string {
+  const lines = paragraphs.map((p) => `<p style="margin:0 0 16px;font-size:16px;line-height:1.65;color:#3d5352">${p}</p>`).join("");
+  return `<!doctype html>
+<html><body style="margin:0;padding:0;background:#eef7f6">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef7f6;padding:32px 12px">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
+<tr><td style="padding:0 4px 18px;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:700;letter-spacing:.04em;color:#0B7F7C">Vexa <span style="font-weight:400;color:#064B4A">Digital</span></td></tr>
+<tr><td style="background:#ffffff;border-radius:16px;border:1px solid #d3e6e4;padding:36px 32px;font-family:Arial,Helvetica,sans-serif;color:#12292a">
+<h1 style="margin:0 0 18px;font-size:24px;line-height:1.25;font-weight:700;color:#064B4A">We have your message${first ? `, ${escapeText(first)}` : ""}</h1>
+<p style="margin:0 0 16px;font-size:16px;line-height:1.65;color:#3d5352">${escapeText(opening)}</p>
+${lines}
+<p style="margin:24px 0 0;padding-top:20px;border-top:1px solid #e3eeed;font-size:15px;line-height:1.6;color:#3d5352">Speak soon,<br><strong style="color:#064B4A">The Vexa Digital team</strong><br><a href="mailto:contact@vexadigital.in" style="color:#0B7F7C">contact@vexadigital.in</a></p>
+</td></tr>
+<tr><td style="padding:18px 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#6b8180">Vexa Digital is a trade name used by Blue Wings.<br>Reply to this email to add anything to your enquiry.</td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
+}
+
+/** Sends the person who enquired a branded confirmation from the contact mailbox, through Gmail. */
 async function confirmToSender(entry: EnquiryEntry): Promise<void> {
   const first = (entry.name || "").trim().split(/\s+/)[0];
   const opening = first ? `Hi ${first},` : "Hi there,";
   const middle = entry.interest
     ? `It's great to hear about ${entry.interest}, and thank you for taking the time to write to us.`
     : "Thank you for taking the time to write to us.";
-  await sendNew({
+  const next = "Your enquiry is with our team now. Someone will read it properly and get back to you here within two working days. If anything else comes to mind in the meantime, just reply to this email and add it to the thread. We read every message.";
+  const subject = first ? `${first}, we've got your message` : "We've got your message";
+  const text = `${opening}\n\n${middle}\n\n${next}\n\nSpeak soon,\nThe Vexa Digital team\ncontact@vexadigital.in`;
+  await sendTemplated({
     from: "contact",
     to: entry.email,
-    subject: first ? `${first}, we've got your message` : "We've got your message",
-    body: `${opening}\n\n${middle}\n\nYour enquiry is with our team now. Someone will read it properly and get back to you here within two working days. If anything else comes to mind in the meantime, just reply to this email and add it to the thread. We read every message.\n\nSpeak soon,\nThe Vexa Digital team\ncontact@vexadigital.in`,
+    subject,
+    body: text,
+    html: confirmationHtml(first, entry.interest, opening, [escapeText(middle), escapeText(next)]),
   });
 }
 
