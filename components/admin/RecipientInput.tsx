@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-type Contact = { email: string; name: string };
+type Contact = { email: string; name: string; photo?: string };
 
 /* No photos are available for these people, so each gets a letter on a colour that stays the same for the same address. */
 const TINTS = [["#d9f2f0", "#064b4a"], ["#fde8d8", "#8a3b0c"], ["#e4e6fb", "#3a3f9e"], ["#fbe3ee", "#8e1f55"], ["#e6f3d6", "#3d6414"], ["#fff1c9", "#7a5200"], ["#e1ecf8", "#1f4f86"], ["#eadff7", "#5b2d91"]] as const;
