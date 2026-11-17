@@ -76,7 +76,7 @@ Contacts, so it needs two more read-only scopes. Nothing else changes, and witho
 1. Turn on the **People API** in the same Google Cloud project.
 2. Add the scopes `https://www.googleapis.com/auth/contacts.readonly` and `https://www.googleapis.com/auth/contacts.other.readonly`:
    - Domain-wide delegation: in the Google Workspace admin console, edit the service account's entry and add both scopes.
-   - OAuth: create the refresh token again with both scopes added, and replace `GMAIL_OAUTH_REFRESH_TOKEN`.
+   - OAuth: run `npm run gmail-authorize -- --photos` and sign in as the mailbox; it saves a new `GMAIL_OAUTH_REFRESH_TOKEN` with both scopes. Put the new value in Cloudflare too.
 3. Set `GMAIL_PHOTOS=1` (in Cloudflare variables for the live site, `.env.local` for local).
 
 Set the variable only after step 2. Asking Google for a scope that is not approved makes the whole mail sign-in fail.

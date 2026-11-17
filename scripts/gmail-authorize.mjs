@@ -12,7 +12,12 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const MAILBOX = "partnerships@vexadigital.in";
-const SCOPES = ["https://www.googleapis.com/auth/gmail.modify", "https://www.googleapis.com/auth/gmail.send"];
+// `npm run gmail-authorize -- --photos` also asks for read-only Google Contacts, for profile photos in address suggestions
+const SCOPES = [
+  "https://www.googleapis.com/auth/gmail.modify",
+  "https://www.googleapis.com/auth/gmail.send",
+  ...(process.argv.includes("--photos") ? ["https://www.googleapis.com/auth/contacts.readonly", "https://www.googleapis.com/auth/contacts.other.readonly"] : []),
+];
 const PORT = 53682;
 const REDIRECT = `http://127.0.0.1:${PORT}/callback`;
 // saved into .env.local; for the production values run:  ENV_FILE=.env.production npm run gmail-authorize
