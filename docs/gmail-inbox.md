@@ -67,3 +67,16 @@ This cannot run on the Hetzner server, which has no Google identity to sign in w
 ## Tests
 
 `npm run test:mail` runs the Gmail layer against a fake Google and a fake Gmail. Nothing real is contacted.
+
+## Profile photos in address suggestions (optional)
+
+The compose window can show people's Google profile photos next to their address. It reads photos from the mailbox's Google
+Contacts, so it needs two more read-only scopes. Nothing else changes, and without them the suggestions show coloured initials.
+
+1. Turn on the **People API** in the same Google Cloud project.
+2. Add the scopes `https://www.googleapis.com/auth/contacts.readonly` and `https://www.googleapis.com/auth/contacts.other.readonly`:
+   - Domain-wide delegation: in the Google Workspace admin console, edit the service account's entry and add both scopes.
+   - OAuth: create the refresh token again with both scopes added, and replace `GMAIL_OAUTH_REFRESH_TOKEN`.
+3. Set `GMAIL_PHOTOS=1` (in Cloudflare variables for the live site, `.env.local` for local).
+
+Set the variable only after step 2. Asking Google for a scope that is not approved makes the whole mail sign-in fail.

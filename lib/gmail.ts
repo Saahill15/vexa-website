@@ -28,6 +28,14 @@ export const BOX_LABEL: Record<Box, string> = { partnerships: "Partnerships", su
 export const isAddress = (v: unknown): v is Address => typeof v === "string" && v in ADDRESSES;
 
 const SCOPES = ["https://www.googleapis.com/auth/gmail.modify", "https://www.googleapis.com/auth/gmail.send"];
+/**
+ * Profile photos of the people you write to come from Google Contacts. This is off until GMAIL_PHOTOS=1, because the
+ * extra read-only scopes must first be approved for the mailbox (see docs/gmail-inbox.md); asking for a scope that is not
+ * approved would make the whole mail sign-in fail.
+ */
+export const photosEnabled = () => process.env.GMAIL_PHOTOS === "1";
+const PHOTO_SCOPES = ["https://www.googleapis.com/auth/contacts.readonly", "https://www.googleapis.com/auth/contacts.other.readonly"];
+const grantScopes = () => (photosEnabled() ? [...SCOPES, ...PHOTO_SCOPES] : SCOPES);
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me";
 const DEFAULT_SERVICE_ACCOUNT = "vexa-mail-inbox@vexa-digital.iam.gserviceaccount.com";
@@ -94,7 +102,7 @@ async function delegationGrant(): Promise<Grant> {
   const developer = await tokenRequest({ grant_type: "refresh_token", client_id: login.client_id, client_secret: login.client_secret, refresh_token: login.refresh_token });
 
   const now = Math.floor(Date.now() / 1000);
-  const claims = { iss: serviceAccount, sub: MAILBOX, scope: SCOPES.join(" "), aud: TOKEN_URL, iat: now, exp: now + 3600 };
+  const claims = { iss: serviceAccount, sub: MAILBOX, scope: grantScopes().join(" "), aud: TOKEN_URL, iat: now, exp: now + 3600 };
   const signed = await fetch(`https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${encodeURIComponent(serviceAccount)}:signJwt`, {
     method: "POST",
     headers: { Authorization: `Bearer ${developer.access_token}`, "Content-Type": "application/json" },
@@ -942,4 +950,52 @@ export async function pollMail(): Promise<{ signature: string; unread: number }>
 export function threadsSignature(list: MailThreadSummary[]): string {
   const text = list.map((t) => `${t.id}:${t.at}:${t.unread ? 1 : 0}:${t.starred ? 1 : 0}`).join("|");
   return createHash("sha1").update(text).digest("hex").slice(0, 16);
+}
+
+
+/* ---------- profile photos (Google Contacts) ---------- */
+
+const photoCache = new Map<string, { url: string | null; at: number }>();
+
+async function photoFor(email: string, token: string): Promise<string | null> {
+  const hit = photoCache.get(email);
+  if (hit && Date.now() - hit.at < 6 * 3600_000) return hit.url;
+  let url: string | null = null;
+  const find = async (route: string, key: string) => {
+    const res = await fetch(`https://people.googleapis.com/v1/${route}?query=${encodeURIComponent(email)}&readMask=photos,emailAddresses&pageSize=5`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { results?: { person?: { photos?: { url?: string; default?: boolean }[]; emailAddresses?: { value?: string }[] } }[] };
+    for (const r of data.results ?? []) {
+      if (!r.person?.emailAddresses?.some((e) => e.value?.toLowerCase() === email)) continue;
+      const photo = r.person.photos?.find((p) => p.url && !p.default);
+      if (photo?.url) return photo.url.replace(/=s\d+$/, "") + "=s96-c";
+    }
+    void key;
+    return null;
+  };
+  try {
+    // saved contacts first, then "other contacts" (people you have only emailed)
+    url = (await find("people:searchContacts", "c")) ?? (await find("otherContacts:search", "o"));
+  } catch {
+    url = null;
+  }
+  photoCache.set(email, { url, at: Date.now() });
+  return url;
+}
+
+/** Photo addresses for the given emails; missing ones are simply left out. Never throws. */
+export async function contactPhotos(emails: string[]): Promise<Record<string, string>> {
+  if (!photosEnabled() || !emails.length) return {};
+  try {
+    const token = await accessToken();
+    const list = [...new Set(emails.map((e) => e.toLowerCase()))].slice(0, 8);
+    const found = await Promise.all(list.map(async (e) => [e, await photoFor(e, token)] as const));
+    return Object.fromEntries(found.filter((f): f is readonly [string, string] => Boolean(f[1])));
+  } catch {
+    return {};
+  }
 }

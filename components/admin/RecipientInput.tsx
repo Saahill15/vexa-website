@@ -93,7 +93,7 @@ export function RecipientInput({ name, defaultValue, maxLength = 600, className,
         <ul className="rcpt-list" role="listbox">
           {items.map((c, i) => (
             <li key={c.email} role="option" aria-selected={i === active} className={i === active ? "is-on" : undefined} onMouseDown={(e) => { e.preventDefault(); choose(c); }} onMouseEnter={() => setActive(i)}>
-              <span className="rcpt-av" style={tint(c.email)} aria-hidden="true">{(c.name || c.email).charAt(0).toUpperCase()}</span>
+              <span className="rcpt-av" style={tint(c.email)} aria-hidden="true">{c.photo ? <img src={c.photo} alt="" referrerPolicy="no-referrer" onError={(ev) => { ev.currentTarget.style.display = "none"; }} /> : null}{(c.name || c.email).charAt(0).toUpperCase()}</span>
               <span className="rcpt-who"><b>{c.name || c.email}</b>{c.name ? <small>{c.email}</small> : null}</span>
             </li>
           ))}

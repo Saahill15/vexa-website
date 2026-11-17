@@ -2037,3 +2037,5 @@ p{text-align:left;text-justify:auto}
 .enq-ev strong{display:block;font-size:15px;color:var(--deep)}
 .enq-ev p{margin:2px 0 0;font-size:14px;color:var(--ink);overflow-wrap:anywhere}
 .enq-ev small{display:block;margin-top:3px;font-size:12.5px;color:var(--slate)}
+.rcpt-av{position:relative;overflow:hidden}
+.rcpt-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
