@@ -208,3 +208,7 @@ alter table sessions add column if not exists mfa_at timestamptz;
 alter table admin_factors enable row level security;
 alter table admin_backup_codes enable row level security;
 alter table mfa_challenges enable row level security;
+
+-- faster admin pages: the enquiry timeline looks entries up by target, and enquiries are counted by status
+create index if not exists audit_log_target_idx on audit_log (target, at desc);
+create index if not exists enquiries_status_idx on enquiries (status);

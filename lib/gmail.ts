@@ -497,6 +497,7 @@ export const listThreads = (force = false) => listFolder("inbox", force);
 const expire = () => {
   for (const s of slots.values()) if (s.cache) s.cache.at = 0;
   countsCache = null;
+  threadCache.clear();
 };
 
 /* ---------- folder counts ---------- */
@@ -552,9 +553,19 @@ export type MailThread = { id: string; subject: string; box: Box; unread: boolea
 const THREAD_ID = /^[0-9a-f]{8,32}$/;
 export const isThreadId = (v: string) => THREAD_ID.test(v);
 
+/** A conversation opened a moment ago is reused for 30 seconds; any change to the mailbox clears it. */
+const threadCache = new Map<string, { at: number; thread: GmailThread }>();
+
 export async function getThread(id: string): Promise<MailThread> {
   if (!isThreadId(id)) throw new MailError("That is not a valid conversation.");
-  const thread = await api<GmailThread>(`/threads/${id}?format=full`);
+  const hit = threadCache.get(id);
+  let thread: GmailThread;
+  if (hit && Date.now() - hit.at < 30_000) thread = hit.thread;
+  else {
+    thread = await api<GmailThread>(`/threads/${id}?format=full`);
+    if (threadCache.size > 30) threadCache.clear();
+    threadCache.set(id, { at: Date.now(), thread });
+  }
   const messages = thread.messages ?? [];
   if (!messages.length) throw new MailError("That conversation has no messages.");
   harvest([{ id: thread.id, messages }]);
