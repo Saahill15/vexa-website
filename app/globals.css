@@ -2026,3 +2026,14 @@ p{text-align:left;text-justify:auto}
 .enq .enq-msg p{padding:16px 20px}
 .enq .enq-msg > p:last-child{padding-bottom:16px}
 .enq .adm-card.enq-msg > p{padding:16px 20px!important;min-height:56px}
+.enq-time{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.enq-ev{position:relative;display:grid;grid-template-columns:20px 1fr;gap:12px;padding-bottom:20px}
+.enq-ev:last-child{padding-bottom:0}
+.enq-ev::before{content:"";position:absolute;left:9px;top:20px;bottom:0;width:2px;background:var(--line-2)}
+.enq-ev:last-child::before{display:none}
+.enq-ev-dot{width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid var(--teal);box-sizing:border-box;margin-top:1px}
+.enq-ev--mail .enq-ev-dot{background:var(--teal)}
+.enq-ev--edit .enq-ev-dot{border-color:#d19a1c}
+.enq-ev strong{display:block;font-size:15px;color:var(--deep)}
+.enq-ev p{margin:2px 0 0;font-size:14px;color:var(--ink);overflow-wrap:anywhere}
+.enq-ev small{display:block;margin-top:3px;font-size:12.5px;color:var(--slate)}

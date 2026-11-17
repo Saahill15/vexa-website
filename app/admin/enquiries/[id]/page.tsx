@@ -5,6 +5,7 @@ import { deleteEnquiryAction, saveEnquiryAction } from "@/app/admin/actions";
 import { ComposeWindow } from "@/components/admin/ComposeWindow";
 import { MailToast } from "@/components/admin/MailToast";
 import { ReplyButton } from "@/components/admin/ReplyButton";
+import { enquiryActivity } from "@/lib/audit";
 import { ADDRESSES, type Address } from "@/lib/gmail";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { StatusDot } from "@/components/admin/StatusDot";
@@ -21,11 +22,22 @@ export default async function EnquiryPage({ params, searchParams }: { params: Pr
   const e = await getEnquiry((await params).id);
   if (!e) notFound();
   const { saved } = await searchParams;
-  const earlier = (await listForEmail(e.email)).filter((x) => x.id !== e.id).slice(0, 5);
+  const [history, activity] = await Promise.all([listForEmail(e.email), enquiryActivity(e.id, e.email)]);
+  const earlier = history.filter((x) => x.id !== e.id).slice(0, 5);
+  const events = [
+    ...activity.map((a) => ({
+      at: a.at,
+      kind: a.action.startsWith("mail.") ? "mail" : "edit",
+      title: a.action === "mail.reply" || a.action === "mail.send" ? "Email sent" : a.detail.startsWith("Status:") ? `Status changed to ${label(a.detail.replace(/^Status: ([a-z_]+).*$/, "$1"))}` : "Notes updated",
+      by: a.actor,
+      note: a.action.startsWith("mail.") ? `${a.target.startsWith("Reply from") ? "Reply" : a.target}${a.detail ? ` · ${a.detail}` : ""}` : a.detail.includes("notes saved") ? "Notes saved with the status" : "",
+    })),
+    { at: e.at, kind: "in", title: "Enquiry received", by: "", note: EMAILED[e.emailed] },
+  ].sort((x, y) => Date.parse(y.at) - Date.parse(x.at));
   const subject = "Re: your message to Vexa Digital";
   const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const first = (e.name || "").trim().split(/\s+/)[0];
-  const replyHtml = `<p>Hi${first ? ` ${esc(first)}` : ""},</p><p><br></p><p><br></p><p>Warm regards,<br>Team Vexa Digital</p><blockquote>${esc(e.problem).replace(/\n/g, "<br>")}</blockquote>`;
+  const replyHtml = `<p>Hi${first ? ` ${esc(first)}` : ""},</p><p><br></p><p><br></p><p>Warm regards,<br>Team Vexa Digital</p>`;
   const options = (Object.keys(ADDRESSES) as Address[]).map((a) => ({ value: a, label: ADDRESSES[a] }));
   const who = e.name || e.email;
   const initials = who.split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
@@ -66,6 +78,22 @@ export default async function EnquiryPage({ params, searchParams }: { params: Pr
               <div><dt>Received</dt><dd>{formatDateTime(e.at)}</dd></div>
               <div><dt>Inbox email</dt><dd>{EMAILED[e.emailed]}</dd></div>
             </dl>
+          </section>
+
+          <section className="adm-card">
+            <h2 className="enq-h">Activity</h2>
+            <ol className="enq-time">
+              {events.map((ev, i) => (
+                <li key={i} className={`enq-ev enq-ev--${ev.kind}`}>
+                  <span className="enq-ev-dot" aria-hidden="true" />
+                  <div>
+                    <strong>{ev.title}</strong>
+                    {ev.note ? <p>{ev.note}</p> : null}
+                    <small>{formatDateTime(ev.at)}{ev.by ? ` · ${ev.by}` : ""}</small>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </section>
 
           {earlier.length ? (

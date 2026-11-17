@@ -131,3 +131,23 @@ export async function auditStats(): Promise<{ events: number; signIns: number; f
   const r = rows[0];
   return { events: r?.events ?? 0, signIns: r?.sign_ins ?? 0, failed: r?.failed ?? 0, changes: r?.changes ?? 0 };
 }
+
+export type ActivityItem = { at: string; action: string; actor: string; target: string; detail: string };
+
+/** Everything the team did about one enquiry: status and note changes, and mail sent to the person who wrote in. */
+export async function enquiryActivity(id: string, email: string): Promise<ActivityItem[]> {
+  const ref = `Enquiry VX-${id.slice(0, 4).toUpperCase()}`;
+  const like = `%${email.toLowerCase().replace(/[\\%_]/g, "\\$&")}%`;
+  try {
+    const { rows } = await db.query<{ at: Date; action: string; actor: string; target: string; detail: string }>(
+      `select at, action, actor, target, detail from audit_log
+        where (action in ('enquiry.update', 'enquiry.status') and target = $1)
+           or (action in ('mail.send', 'mail.reply') and lower(detail) like $2)
+        order by at desc limit 100`,
+      [ref, like],
+    );
+    return rows.map((r) => ({ ...r, at: new Date(r.at).toISOString() }));
+  } catch {
+    return [];
+  }
+}
