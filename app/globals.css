@@ -1871,3 +1871,12 @@ p{text-align:left;text-justify:auto}
 .art-toc-h,.legal-toc .art-toc-h{color:var(--deep)}
 .art-toc .is-locked,.ct-form-intro p,.legal-help p{color:#4a5f5e}
 .sec--tint .tl,.art-more .tl{color:#086a67}
+
+/* header logo: while the navigation is scrolled away the wordmark folds into the V; when it returns it unfolds from the V */
+.nav-logo .logo{transition:gap .45s var(--ease) .25s}
+.nav-logo .logo-text{overflow:hidden;white-space:nowrap;max-width:220px;padding-right:2px;transition:max-width .5s var(--ease) .25s,opacity .35s ease .25s}
+.nav-logo .logo.is-collapsed{gap:0;transition-delay:0s}
+.nav-logo .logo.is-collapsed .logo-text{max-width:0;opacity:0;transition-delay:0s}
+/* the bar leaves only after the wordmark has folded, so the animation can be seen */
+.nav.is-hidden{transition:background .4s,border-color .4s,transform .6s var(--ease) .4s}
+@media (prefers-reduced-motion:reduce){.nav-logo .logo,.nav-logo .logo-text{transition:none}.nav.is-hidden{transition-delay:0s}}

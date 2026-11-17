@@ -81,7 +81,7 @@ export function Header() {
     <header className={`nav${solid ? " is-solid" : ""}${hidden && !open ? " is-hidden" : ""}`}>
       <div className="nav-card">
         <Link href="/" className="nav-logo" aria-label="VEXA Esports Consultancy, home">
-          <Logo />
+          <Logo collapsed={hidden && !open} />
         </Link>
         <nav className="nav-links" aria-label="Main">
           <Link href="/" aria-current={pathname === "/" ? "page" : undefined}>Home</Link>
