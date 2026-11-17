@@ -3,7 +3,7 @@
 import { archiveThread, deleteDraft, saveDraft, reportSpam, restoreThread, type OutFile, isAddress, isFolder, listFolder, markThreadRead, markThreadUnread, MailError, sendNew, sendReply, setStarred, trashThread } from "@/lib/gmail";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { textToBlocks } from "@/lib/article-text";
+import { htmlToBlocks, sanitizeArticleHtml, topLevel } from "@/lib/article-html";
 import { deleteArticle, getById, saveArticle } from "@/lib/articles";
 import { requireAdmin } from "@/lib/auth";
 import { removeComment } from "@/lib/comments";
@@ -50,8 +50,9 @@ export async function saveArticleAction(_prev: ArticleFormState, formData: FormD
   const category = str(formData.get("category"), 30);
   const date = str(formData.get("date"), 10);
   const status = str(formData.get("status"), 12) === "published" ? "published" : "draft";
-  const blocks = textToBlocks(str(formData.get("body"), 60_000));
-  const previewBlocks = Math.min(Math.max(parseInt(str(formData.get("previewBlocks"), 3), 10) || 4, 1), Math.max(blocks.length, 1));
+  const html = sanitizeArticleHtml(str(formData.get("body"), 200_000));
+  const blocks = htmlToBlocks(html);
+  const previewBlocks = Math.min(Math.max(parseInt(str(formData.get("previewBlocks"), 3), 10) || 4, 1), Math.max(topLevel(html).length, 1));
 
   if (!title) return { error: "Add a title." };
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return { error: "The web address can only use lowercase letters, numbers and single dashes." };
@@ -60,7 +61,7 @@ export async function saveArticleAction(_prev: ArticleFormState, formData: FormD
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) return { error: "Choose a valid date." };
   if (!blocks.length) return { error: "The article body is empty." };
 
-  const result = await saveArticle({ slug, title, excerpt, category, date, previewBlocks, blocks, status }, id);
+  const result = await saveArticle({ slug, title, excerpt, category, date, previewBlocks, blocks, html, status }, id);
   if ("error" in result) return { error: result.error };
   revalidatePath("/articles");
   revalidatePath("/admin", "layout");
@@ -79,8 +80,8 @@ export async function setArticleStatusAction(formData: FormData) {
   await requireAdmin();
   const article = await getById(str(formData.get("id"), 100));
   if (!article) return;
-  const { id, slug, title, excerpt, category, date, previewBlocks, blocks } = article;
-  await saveArticle({ slug, title, excerpt, category, date, previewBlocks, blocks, status: article.status === "published" ? "draft" : "published" }, id);
+  const { id, slug, title, excerpt, category, date, previewBlocks, blocks, html } = article;
+  await saveArticle({ slug, title, excerpt, category, date, previewBlocks, blocks, html, status: article.status === "published" ? "draft" : "published" }, id);
   revalidatePath("/articles");
   revalidatePath("/admin", "layout");
 }

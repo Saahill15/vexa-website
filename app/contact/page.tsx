@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbs } from "@/lib/seo";
 import { ConversationForm } from "@/components/ConversationForm";
 import { Icon, type IconName } from "@/components/Icon";
 import { Reveal } from "@/components/motion/Reveal";
 import { WordReveal } from "@/components/motion/WordReveal";
 import { SITE } from "@/lib/site";
 
+// read at request time, so the Turnstile site key comes from the Worker's settings rather than the build machine
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
-  title: "Start a conversation",
-  description: `Tell us about a gaming campaign or esports business. ${SITE.email}`,
+  title: "Contact Vexa Digital: start a conversation",
+  description: "Tell us about a gaming campaign or an esports business. Send a short message and we reply by email with the next step. No finished brief or budget needed.",
 };
 
 // Who is getting in touch, each with its own next step (layout after the Accenture contact page)
@@ -21,6 +26,7 @@ const AUDIENCES: { icon: IconName; title: string; text: string; link: { label: s
 export default function ContactPage() {
   return (
     <>
+      <JsonLd data={breadcrumbs([["Contact", "/contact"]])} />
       <header className="xl-head">
         <div className="wrap">
           <Reveal><span className="label">Contact</span></Reveal>
@@ -50,7 +56,7 @@ export default function ContactPage() {
             <p>Three short steps. No finished brief or budget needed. We reply by email with the next step.</p>
           </div>
           <div className="ct-form-card">
-            <ConversationForm />
+            <ConversationForm turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? null} />
           </div>
         </div>
       </section>
@@ -64,8 +70,8 @@ export default function ContactPage() {
               <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
             </div>
             <div className="ct-way">
-              <h3>Visit us</h3>
-              <p>{SITE.address}</p>
+              <h3>Based in</h3>
+              <p>{SITE.city}</p>
             </div>
             <div className="ct-way">
               <h3>Follow us</h3>

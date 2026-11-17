@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbs } from "@/lib/seo";
 import Link from "next/link";
 import { FAQ } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "FAQ",
+  title: "FAQ: services, scope and what we promise",
   description: "Answers to common questions about Vexa Digital, our services, how an engagement works and what we do not promise.",
 };
 
@@ -17,6 +19,7 @@ export default function FaqPage() {
 
   return (
     <>
+      <JsonLd data={breadcrumbs([["FAQ", "/faq"]])} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <header className="xl-head">
         <div className="wrap">

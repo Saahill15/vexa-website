@@ -35,7 +35,7 @@ npm start        # serve the production build
 
 ## Contact form
 
-There is no backend yet. On the last step the form opens a ready-written email to partnerships@vexadigital.in in the visitor's email app, with a copy button as a fallback. To receive submissions directly, add an API route or a form service later.
+There is no backend yet. On the last step the form opens a ready-written email to contact@vexadigital.in in the visitor's email app, with a copy button as a fallback. To receive submissions directly, add an API route or a form service later.
 
 ## Articles
 

@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { Reveal } from "@/components/motion/Reveal";
 import { WordReveal } from "@/components/motion/WordReveal";
+import { JsonLd } from "@/components/JsonLd";
 import { APPROACH, SERVICES, serviceHref } from "@/lib/services";
+import { ORG_ID, abs, breadcrumbs, snippet } from "@/lib/seo";
 
 type Params = { slug: string };
 
@@ -17,7 +19,7 @@ export function generateStaticParams(): Params[] {
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const service = getService((await params).slug);
   if (!service) return {};
-  return { title: service.title, description: service.body };
+  return { title: `${service.title} | ${service.audience === "brands" ? "Brand campaigns" : "Esports advisory"}`, description: snippet(service.body), alternates: { canonical: serviceHref(service) } };
 }
 
 export default async function ServicePage({ params }: { params: Promise<Params> }) {
@@ -30,6 +32,8 @@ export default async function ServicePage({ params }: { params: Promise<Params> 
 
   return (
     <>
+      <JsonLd data={breadcrumbs([["Services", "/services"], [service.title, serviceHref(service)]])} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "Service", name: service.title, description: service.body, serviceType: approach.label, url: abs(serviceHref(service)), areaServed: "IN", provider: { "@id": ORG_ID } }} />
       <header className="svc-hero">
         <div className="wrap">
           <Link className="tl back-link svc-back" href={`/services#${service.audience}`}>All services</Link>

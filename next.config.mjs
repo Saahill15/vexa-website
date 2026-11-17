@@ -1,18 +1,18 @@
 const prod = process.env.NODE_ENV === "production";
 
 /*
- * Content-Security-Policy. Scripts: this site plus Google's sign-in button (the page's own bootstrap scripts are inline,
+ * Content-Security-Policy. Scripts: this site, Google's sign-in button, Cloudflare Turnstile and Cloudflare Web Analytics (the page's own bootstrap scripts are inline,
  * so 'unsafe-inline' stays until nonces are added). Images may come from any https address because the mail screen can
  * show a message's pictures when an admin asks for them. Nothing may frame the site, and forms only post to itself.
  */
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client${prod ? "" : " 'unsafe-eval'"}`,
+  `script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client https://challenges.cloudflare.com https://static.cloudflareinsights.com${prod ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  `connect-src 'self' https://accounts.google.com${prod ? "" : " ws: wss:"}`,
-  "frame-src 'self' about: https://accounts.google.com",
+  `connect-src 'self' https://accounts.google.com https://challenges.cloudflare.com https://cloudflareinsights.com${prod ? "" : " ws: wss:"}`,
+  "frame-src 'self' about: https://accounts.google.com https://challenges.cloudflare.com",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",

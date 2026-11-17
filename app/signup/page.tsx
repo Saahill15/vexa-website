@@ -12,7 +12,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ n
   return (
     <section className="auth">
       <div className="wrap">
-        <AuthForm mode="signup" next={next} googleClientId={process.env.GOOGLE_CLIENT_ID ?? null} devNote={process.env.NODE_ENV !== "production"} />
+        <AuthForm mode="signup" next={next} googleClientId={process.env.GOOGLE_CLIENT_ID ?? null} devNote={process.env.NODE_ENV !== "production"} turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? null} />
       </div>
     </section>
   );

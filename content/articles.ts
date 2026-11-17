@@ -13,6 +13,8 @@ export type Article = {
   /** How many blocks anonymous visitors can read before the sign-in wall. */
   previewBlocks: number;
   blocks: Block[];
+  /** Rich text body written in the admin editor (sanitised HTML). When present it is shown instead of `blocks`. */
+  html?: string;
 };
 
 export type ArticleStatus = "draft" | "published";

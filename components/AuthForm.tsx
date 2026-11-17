@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { GoogleSignIn } from "./GoogleSignIn";
+import { Turnstile } from "./Turnstile";
 
-type Props = { mode: "login" | "signup"; next: string; googleClientId: string | null; devNote: boolean };
+type Props = { mode: "login" | "signup"; next: string; googleClientId: string | null; devNote: boolean; turnstileSiteKey?: string | null };
 type Waiting = { email: string; devLink?: string };
 
 const COPY = {
@@ -27,7 +28,7 @@ const WAITING = { eyebrow: "Almost there", title: "Check your email", lede: "Con
 
 const POINTS = ["Read every article in full", "Join the conversation in the comments", "Manage your sign-in methods from your account page"];
 
-export function AuthForm({ mode, next, googleClientId, devNote }: Props) {
+export function AuthForm({ mode, next, googleClientId, devNote, turnstileSiteKey = null }: Props) {
   const router = useRouter();
   const [linking, setLinking] = useState(false);
   const [notice, setNotice] = useState("");
@@ -39,6 +40,8 @@ export function AuthForm({ mode, next, googleClientId, devNote }: Props) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [cfToken, setCfToken] = useState("");
+  const [cfReset, setCfReset] = useState(0);
 
   // the link opens in its own window; when it is confirmed, this tab carries on into the account
   useEffect(() => {
@@ -57,8 +60,20 @@ export function AuthForm({ mode, next, googleClientId, devNote }: Props) {
   async function send(url: string, body: Record<string, string>) {
     setBusy(true);
     setError("");
+    const signupCheck = url.endsWith("/signup");
+    if (signupCheck && turnstileSiteKey) {
+      if (!cfToken) {
+        setBusy(false);
+        return setError("Please wait for the security check to finish, then try again.");
+      }
+      body = { ...body, turnstile: cfToken };
+    }
     try {
       const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (signupCheck && turnstileSiteKey) {
+        setCfToken("");
+        setCfReset((n) => n + 1);
+      }
       const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; needsLink?: boolean; pending?: boolean; secondStep?: boolean; email?: string; devLink?: string };
       if (data.needsLink) {
         // Google matched an existing password account: ask for its password instead of merging silently
@@ -134,6 +149,7 @@ export function AuthForm({ mode, next, googleClientId, devNote }: Props) {
             <p className="auth-info" role="status">We sent a link to <strong>{waiting.email}</strong>. Open it to create your account. It works for 24 hours.</p>
             {waiting.devLink ? <p className="acc-dev">Development link: <a href={waiting.devLink}>{waiting.devLink}</a></p> : null}
             {error ? <p className="err" role="alert">{error}</p> : null}
+            {turnstileSiteKey ? <Turnstile siteKey={turnstileSiteKey} onToken={setCfToken} resetSignal={cfReset} /> : null}
             <button type="button" className="btn auth-submit" disabled={busy} onClick={() => void send("/api/auth/signup", { name, email: waiting.email, password })}>
               {busy ? "Sending…" : "Send the link again"}
             </button>
@@ -178,6 +194,7 @@ export function AuthForm({ mode, next, googleClientId, devNote }: Props) {
                   <input className="in" id="auth-password-again" type={showPassword ? "text" : "password"} autoComplete="new-password" maxLength={200} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                 </div>
               ) : null}
+              {isSignup && turnstileSiteKey ? <Turnstile siteKey={turnstileSiteKey} onToken={setCfToken} resetSignal={cfReset} /> : null}
               {error ? <p className="err" role="alert">{error}</p> : null}
               {mode === "login" && !linking ? <Link className="auth-forgot" href="/forgot-password">Forgot password?</Link> : null}
               <button type="submit" className="btn auth-submit" disabled={busy}>{busy ? "One moment…" : copy.submit} <span className="arr" aria-hidden="true">→</span></button>

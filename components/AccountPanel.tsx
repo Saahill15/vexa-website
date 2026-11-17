@@ -156,6 +156,7 @@ export function AccountPanel({ account, googleClientId, comments, enquiries, two
 
   return (
     <div className="acc-page">
+      <div className="acc-band">
       <header className="acc-top">
         <div>
           <h1 className="acc-title">Your account</h1>
@@ -175,6 +176,7 @@ export function AccountPanel({ account, googleClientId, comments, enquiries, two
           </button>
         ))}
       </nav>
+      </div>
 
       <div className="acc-panel" role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
         {message ? <p className={message.kind === "ok" ? "auth-info acc-message" : "err acc-message"} role={message.kind === "ok" ? "status" : "alert"}>{message.text}</p> : null}

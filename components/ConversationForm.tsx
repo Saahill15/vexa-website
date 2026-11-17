@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Icon } from "@/components/Icon";
 import { SERVICES } from "@/lib/services";
+import { Turnstile } from "./Turnstile";
 import { SITE } from "@/lib/site";
 
 /*
@@ -43,7 +44,7 @@ const STEP_FIELDS: Field[][] = [["role"], ["problem"], ["email", "consent"]];
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function ConversationForm() {
+export function ConversationForm({ turnstileSiteKey = null }: { turnstileSiteKey?: string | null }) {
   const [step, setStep] = useState(0);
   const [role, setRole] = useState<Role | "">("");
   const [interest, setInterest] = useState<string[]>([]);
@@ -57,6 +58,8 @@ export function ConversationForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
   const [serverError, setServerError] = useState("");
+  const [cfToken, setCfToken] = useState("");
+  const [cfReset, setCfReset] = useState(0);
 
   const formRef = useRef<HTMLFormElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -136,18 +139,21 @@ export function ConversationForm() {
       return;
     }
     if (!check(["role", "problem", "email", "consent"])) return;
+    if (turnstileSiteKey && !cfToken) return setServerError("Please wait for the security check to finish, then send again.");
     setStatus("sending");
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, interest: interest.join(", "), problem, company, timing, name, email, consent, website }),
+        body: JSON.stringify({ role, interest: interest.join(", "), problem, company, timing, name, email, consent, website, turnstile: cfToken }),
       });
       const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
       if (!res.ok || !data.ok) throw new Error(data.error || `Your message did not send. Please try again, or email ${SITE.email}.`);
       setStatus("sent");
     } catch (cause) {
       setStatus("idle");
+      setCfToken("");
+      setCfReset((n) => n + 1); // a check can be used once, so ask for a new one
       setServerError(cause instanceof Error && cause.message !== "Failed to fetch" ? cause.message : `Your message did not send because of a connection problem. Please try again, or email ${SITE.email}.`);
     }
   }
@@ -274,6 +280,8 @@ export function ConversationForm() {
         <label htmlFor="website">Leave this empty</label>
         <input id="website" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
       </div>
+
+      {turnstileSiteKey && step === 2 ? <Turnstile siteKey={turnstileSiteKey} onToken={setCfToken} resetSignal={cfReset} /> : null}
 
       {serverError ? <p className="brief-alert" role="alert">{serverError}</p> : null}
 
