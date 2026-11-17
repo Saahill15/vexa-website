@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 import type { DraftContent } from "@/lib/gmail";
 import { composeMailAction, discardDraftAction, saveDraftAction, type MailFormState } from "@/app/admin/actions";
 import { MailIcon } from "./MailIcons";
+import { RecipientInput } from "./RecipientInput";
 
 type Option = { value: string; label: string };
 type Mode = "closed" | "open" | "min" | "max";
@@ -68,7 +69,21 @@ export function ComposeWindow({ options }: { options: Option[] }) {
 
   useEffect(() => {
     const open = (e: Event) => {
-      const saved = (e as CustomEvent<DraftContent | undefined>).detail;
+      const detail = (e as CustomEvent<(DraftContent & { prefill?: undefined }) | { prefill: { to: string; subject: string; html: string } } | undefined>).detail;
+      if (detail && typeof detail === "object" && "prefill" in detail && detail.prefill) {
+        // a new message with the address, subject and text filled in (the Reply button on an enquiry)
+        if (modeRef.current !== "closed" && contentRef.current()) return window.dispatchEvent(new CustomEvent("vexa:toast", { detail: "Close the message you are writing first" }));
+        const p = detail.prefill;
+        setSeed({ id: "", from: "partnerships", to: p.to, cc: "", bcc: "", subject: p.subject, html: p.html, files: [], lostFiles: 0 });
+        setDraft("");
+        setCc(false);
+        setBcc(false);
+        setFiles([]);
+        setProblem("");
+        setMode("open");
+        return;
+      }
+      const saved = detail as DraftContent | undefined;
       if (saved && typeof saved === "object" && "id" in saved) {
         // opening a saved draft; a message being written is not replaced
         if (modeRef.current !== "closed" && contentRef.current()) return window.dispatchEvent(new CustomEvent("vexa:toast", { detail: "Close the message you are writing first" }));
@@ -186,17 +201,17 @@ export function ComposeWindow({ options }: { options: Option[] }) {
           </label>
           <label className="adm-cw-row">
             <span>To</span>
-            <input name="to" className="adm-gm-input" maxLength={600} autoComplete="off" defaultValue={state.values?.to ?? seed?.to} />
+            <RecipientInput name="to" className="adm-gm-input" defaultValue={state.values?.to ?? seed?.to} />
             <span className="adm-cw-links">
               {!cc ? <button type="button" onClick={() => setCc(true)}>Cc</button> : null}
               {!bcc ? <button type="button" onClick={() => setBcc(true)}>Bcc</button> : null}
             </span>
           </label>
           {cc || state.values?.cc ? (
-            <label className="adm-cw-row"><span>Cc</span><input name="cc" className="adm-gm-input" maxLength={600} defaultValue={state.values?.cc ?? seed?.cc} /></label>
+            <label className="adm-cw-row"><span>Cc</span><RecipientInput name="cc" className="adm-gm-input" defaultValue={state.values?.cc ?? seed?.cc} /></label>
           ) : null}
           {bcc || state.values?.bcc ? (
-            <label className="adm-cw-row"><span>Bcc</span><input name="bcc" className="adm-gm-input" maxLength={600} defaultValue={state.values?.bcc ?? seed?.bcc} /></label>
+            <label className="adm-cw-row"><span>Bcc</span><RecipientInput name="bcc" className="adm-gm-input" defaultValue={state.values?.bcc ?? seed?.bcc} /></label>
           ) : null}
           <label className="adm-cw-row">
             <span className="sr-only">Subject</span>

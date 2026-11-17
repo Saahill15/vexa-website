@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { htmlToBlocks, sanitizeArticleHtml, topLevel } from "@/lib/article-html";
 import { deleteArticle, getById, saveArticle } from "@/lib/articles";
+import { audit } from "@/lib/audit";
 import { requireAdmin } from "@/lib/auth";
 import { removeComment } from "@/lib/comments";
 import { deleteEnquiry, isStatus, updateEnquiry } from "@/lib/enquiries";
@@ -15,24 +16,31 @@ const str = (v: FormDataEntryValue | null, max = 500) => (typeof v === "string" 
 /* ---------- enquiries ---------- */
 
 export async function saveEnquiryAction(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = str(formData.get("id"), 100);
   const status = str(formData.get("status"), 30);
   await updateEnquiry(id, { status: isStatus(status) ? status : undefined, notes: str(formData.get("notes"), 5000) });
+  await audit("enquiry.update", { actor: admin, target: `Enquiry VX-${id.slice(0, 4).toUpperCase()}`, detail: isStatus(status) ? `Status: ${status}; notes saved` : "Notes saved" });
   revalidatePath("/admin", "layout");
   redirect(`/admin/enquiries/${id}?saved=1`);
 }
 
 export async function setEnquiryStatusAction(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const status = str(formData.get("status"), 30);
-  if (isStatus(status)) await updateEnquiry(str(formData.get("id"), 100), { status });
+  const eid = str(formData.get("id"), 100);
+  if (isStatus(status)) {
+    await updateEnquiry(eid, { status });
+    await audit("enquiry.status", { actor: admin, target: `Enquiry VX-${eid.slice(0, 4).toUpperCase()}`, detail: `Status: ${status}` });
+  }
   revalidatePath("/admin", "layout");
 }
 
 export async function deleteEnquiryAction(formData: FormData) {
-  await requireAdmin();
-  await deleteEnquiry(str(formData.get("id"), 100));
+  const admin = await requireAdmin();
+  const did = str(formData.get("id"), 100);
+  await deleteEnquiry(did);
+  await audit("enquiry.delete", { actor: admin, target: `Enquiry VX-${did.slice(0, 4).toUpperCase()}` });
   revalidatePath("/admin", "layout");
   redirect("/admin/enquiries?deleted=1");
 }
@@ -42,7 +50,7 @@ export async function deleteEnquiryAction(formData: FormData) {
 export type ArticleFormState = { error?: string } | undefined;
 
 export async function saveArticleAction(_prev: ArticleFormState, formData: FormData): Promise<ArticleFormState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = str(formData.get("id"), 100) || undefined;
   const title = str(formData.get("title"), 160);
   const slug = str(formData.get("slug"), 100).toLowerCase();
@@ -63,25 +71,30 @@ export async function saveArticleAction(_prev: ArticleFormState, formData: FormD
 
   const result = await saveArticle({ slug, title, excerpt, category, date, previewBlocks, blocks, html, status }, id);
   if ("error" in result) return { error: result.error };
+  await audit(id ? "article.update" : "article.create", { actor: admin, target: title, detail: `/articles/${slug} (${status})` });
   revalidatePath("/articles");
   revalidatePath("/admin", "layout");
   redirect(`/admin/articles?saved=${encodeURIComponent(title)}`);
 }
 
 export async function deleteArticleAction(formData: FormData) {
-  await requireAdmin();
-  await deleteArticle(str(formData.get("id"), 100));
+  const admin = await requireAdmin();
+  const aid = str(formData.get("id"), 100);
+  const gone = await getById(aid);
+  await deleteArticle(aid);
+  await audit("article.delete", { actor: admin, target: gone?.title ?? aid, detail: gone ? `/articles/${gone.slug}` : "" });
   revalidatePath("/articles");
   revalidatePath("/admin", "layout");
   redirect("/admin/articles?deleted=1");
 }
 
 export async function setArticleStatusAction(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const article = await getById(str(formData.get("id"), 100));
   if (!article) return;
   const { id, slug, title, excerpt, category, date, previewBlocks, blocks, html } = article;
   await saveArticle({ slug, title, excerpt, category, date, previewBlocks, blocks, html, status: article.status === "published" ? "draft" : "published" }, id);
+  await audit(article.status === "published" ? "article.unpublish" : "article.publish", { actor: admin, target: title, detail: `/articles/${slug}` });
   revalidatePath("/articles");
   revalidatePath("/admin", "layout");
 }
@@ -90,7 +103,9 @@ export async function setArticleStatusAction(formData: FormData) {
 
 export async function deleteCommentAction(formData: FormData) {
   const admin = await requireAdmin();
-  await removeComment(str(formData.get("id"), 100), { id: admin.id, admin: true });
+  const cid = str(formData.get("id"), 100);
+  await removeComment(cid, { id: admin.id, admin: true });
+  await audit("comment.delete", { actor: admin, target: `Comment ${cid.slice(0, 8)}` });
   revalidatePath("/admin", "layout");
 }
 
@@ -100,7 +115,9 @@ export async function setRoleAction(formData: FormData) {
   const admin = await requireAdmin();
   const id = str(formData.get("id"), 100);
   if (id === admin.id) redirect("/admin/users?error=" + encodeURIComponent("You can't change your own role."));
-  const error = await setRole(id, str(formData.get("role"), 10) === "admin" ? "admin" : "user");
+  const newRole = str(formData.get("role"), 10) === "admin" ? "admin" : "user";
+  const error = await setRole(id, newRole);
+  if (!error) await audit("user.role", { actor: admin, target: `Account ${id.slice(0, 8)}`, detail: `New role: ${newRole}` });
   revalidatePath("/admin/users");
   redirect(error ? `/admin/users?error=${encodeURIComponent(error)}` : "/admin/users");
 }
@@ -109,7 +126,9 @@ export async function setDisabledAction(formData: FormData) {
   const admin = await requireAdmin();
   const id = str(formData.get("id"), 100);
   if (id === admin.id) redirect("/admin/users?error=" + encodeURIComponent("You can't disable your own account."));
-  const error = await setDisabled(id, str(formData.get("disabled"), 5) === "1");
+  const nowDisabled = str(formData.get("disabled"), 5) === "1";
+  const error = await setDisabled(id, nowDisabled);
+  if (!error) await audit("user.disable", { actor: admin, target: `Account ${id.slice(0, 8)}`, detail: nowDisabled ? "Disabled" : "Enabled" });
   revalidatePath("/admin/users");
   redirect(error ? `/admin/users?error=${encodeURIComponent(error)}` : "/admin/users");
 }
@@ -166,7 +185,7 @@ const withItem = (href: string, thread: string, extra = "") => `${href}&item=${e
 
 /** Sends a reply to a mail conversation from one of the three Vexa addresses. */
 export async function replyMailAction(_prev: MailFormState, formData: FormData): Promise<MailFormState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const thread = str(formData.get("thread"), 40);
   const from = str(formData.get("from"), 20);
   const base = listHref(str(formData.get("ctx"), 400));
@@ -182,6 +201,7 @@ export async function replyMailAction(_prev: MailFormState, formData: FormData):
       html: String(formData.get("html") ?? "").slice(0, 300_000),
       files: await readFiles(formData.getAll("files")),
     });
+    await audit("mail.reply", { actor: admin, target: `Reply from ${from}@`, detail: `To: ${str(formData.get("to"), 200)}` });
   } catch (error) {
     // what was typed is sent back, so a mistake never costs the admin their message
     return {
@@ -208,7 +228,7 @@ async function readFiles(entries: FormDataEntryValue[]): Promise<OutFile[]> {
  * conversation that is open stays open while the compose window shows "sent".
  */
 export async function composeMailAction(_prev: MailFormState, formData: FormData): Promise<MailFormState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const from = str(formData.get("from"), 20);
   const typed = {
     from,
@@ -220,6 +240,7 @@ export async function composeMailAction(_prev: MailFormState, formData: FormData
   try {
     if (!isAddress(from)) throw new MailError("Choose one of the Vexa addresses to send from.");
     await sendNew({ ...typed, from, body: String(formData.get("body") ?? ""), html: String(formData.get("html") ?? "").slice(0, 300_000), files: await readFiles(formData.getAll("files")) });
+    await audit("mail.send", { actor: admin, target: typed.subject || "(no subject)", detail: `From ${from}@ to ${typed.to.slice(0, 200)}` });
     const draft = str(formData.get("draft"), 40);
     if (draft) await deleteDraft(draft).catch(() => undefined); // the sent message replaces the draft
   } catch (error) {
@@ -231,7 +252,7 @@ export async function composeMailAction(_prev: MailFormState, formData: FormData
 
 /** Keeps the compose window's contents as a Gmail draft, like closing a message in Gmail. Answers with the draft's id. */
 export async function saveDraftAction(formData: FormData): Promise<{ id?: string; error?: string }> {
-  await requireAdmin();
+  await requireAdmin(); // drafts autosave constantly, so they are not logged one by one
   try {
     const id = await saveDraft({
       id: str(formData.get("draft"), 40),
@@ -260,7 +281,7 @@ export async function discardDraftAction(id: string): Promise<void> {
 
 /** Mark unread, archive, star, unstar or trash one conversation. */
 export async function mailThreadAction(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const thread = str(formData.get("thread"), 40);
   const op = str(formData.get("op"), 12);
   const base = listHref(str(formData.get("ctx"), 400));
@@ -274,6 +295,7 @@ export async function mailThreadAction(formData: FormData) {
     else if (op === "star") await setStarred(thread, true);
     else if (op === "unstar") await setStarred(thread, false);
     else throw new MailError("That action is not available.");
+    if (op !== "unread" && op !== "star" && op !== "unstar") await audit("mail.action", { actor: admin, target: `Conversation ${thread.slice(0, 8)}`, detail: op === "trash" ? "Moved to trash" : op === "archive" ? "Archived" : op === "spam" ? "Marked as spam" : "Moved back to the inbox" });
   } catch (error) {
     problem = error instanceof MailError ? error.message : "That did not work. Please try again.";
   }

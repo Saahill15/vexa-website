@@ -61,6 +61,7 @@ export default function PrivacyPage() {
 
               <h3>Our own team</h3>
               <p>People who run the website have accounts with a second sign-in step. For that we keep an encrypted authenticator secret, scrambled backup codes and the public part of any passkey. None of this is visible to visitors.</p>
+              <p>Sign-ins to the admin panel, and every change made there (for example editing an article or answering an enquiry), are recorded in an activity log with the time, the account, what was changed and the IP address. A team member who stays inactive for 45 minutes is signed out.</p>
 
               <h3>Email</h3>
               <p>What you send us by email, and what we send back, is kept in our mailbox. We also email you when the law or the service needs it, for example to confirm your address or to reset a password.</p>
@@ -138,6 +139,7 @@ export default function PrivacyPage() {
               <li>Accounts: until you delete your account. Unconfirmed sign-ups are deleted after 24 hours, and password reset links after 30 minutes.</li>
               <li>Sign-in sessions: up to 14 days, or until you sign out.</li>
               <li>Request counts: about one day. Technical records: for as long as needed to keep the website safe.</li>
+              <li>The team activity log (sign-ins and changes in the admin panel): one year.</li>
               <li>Records we must keep by law, such as invoices for paid work, are kept for the period the law requires.</li>
             </ul>
           ),

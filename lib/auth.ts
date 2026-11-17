@@ -1,6 +1,7 @@
 import { createHash, randomBytes, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { cache } from "react";
+import { audit } from "./audit";
 import { db } from "./db";
 import { sign } from "./token";
 import { effectiveRole, getUserById, type Role } from "./users";
@@ -21,11 +22,18 @@ export type Session = { id: string; name: string; email: string; role: Role; pen
 const COOKIE = "vexa_session";
 /** How long a sign-in lasts, in seconds. */
 export const SESSION_SECONDS = 60 * 60 * 24 * 14;
+/**
+ * An administrator is signed out after this long without activity (45 minutes). Their session expires this long after the last
+ * request, and every request pushes it forward again, so only real use keeps it alive. Readers keep the long sign-in above.
+ */
+export const ADMIN_IDLE_SECONDS = 45 * 60;
 const hash = (token: string) => createHash("sha256").update(token).digest("hex");
 
 export async function startSession(userId: string) {
   const token = randomBytes(32).toString("base64url");
-  await db.query("insert into sessions (token_hash, user_id, expires_at) values ($1, $2, now() + make_interval(secs => $3))", [hash(token), userId, SESSION_SECONDS]);
+  const user = await getUserById(userId);
+  const seconds = user && effectiveRole(user) === "admin" ? ADMIN_IDLE_SECONDS : SESSION_SECONDS;
+  await db.query("insert into sessions (token_hash, user_id, expires_at) values ($1, $2, now() + make_interval(secs => $3))", [hash(token), userId, seconds]);
   // old sessions that have run out are removed now and then, so the table does not grow forever
   if (Math.random() < 0.05) await db.query("delete from sessions where expires_at < now() - interval '1 day' or revoked_at < now() - interval '1 day'").catch(() => undefined);
   (await cookies()).set(COOKIE, token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: SESSION_SECONDS });
@@ -42,8 +50,8 @@ export async function endSession() {
 export const getSession = cache(async (): Promise<Session | null> => {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token || token.length > 100) return null;
-  const { rows } = await db.query<{ user_id: string; created_at: Date | string; mfa_at: Date | string | null }>(
-    "select user_id, created_at, mfa_at from sessions where token_hash = $1 and revoked_at is null and expires_at > now()",
+  const { rows } = await db.query<{ user_id: string; created_at: Date | string; mfa_at: Date | string | null; expires_at: Date | string }>(
+    "select user_id, created_at, mfa_at, expires_at from sessions where token_hash = $1 and revoked_at is null and expires_at > now()",
     [hash(token)],
   );
   const row = rows[0];
@@ -54,6 +62,17 @@ export const getSession = cache(async (): Promise<Session | null> => {
   const cutoff = Math.max(user.passwordChangedAt ? Date.parse(user.passwordChangedAt) : 0, user.sessionsRevokedAt ? Date.parse(user.sessionsRevokedAt) : 0);
   if (new Date(row.created_at).getTime() < cutoff) return null;
   const role = effectiveRole(user);
+  if (role === "admin") {
+    // administrators: a sign-in from before the idle limit existed is ended once, and every request keeps a live one going
+    const left = new Date(row.expires_at).getTime() - Date.now();
+    if (left > (ADMIN_IDLE_SECONDS + 120) * 1000) {
+      await db.query("update sessions set revoked_at = now() where token_hash = $1", [hash(token)]).catch(() => undefined);
+      return null;
+    }
+    if (left < (ADMIN_IDLE_SECONDS - 300) * 1000) {
+      await db.query("update sessions set expires_at = now() + make_interval(secs => $2) where token_hash = $1 and revoked_at is null", [hash(token), ADMIN_IDLE_SECONDS]).catch(() => undefined);
+    }
+  }
   if (role === "admin" && !row.mfa_at) return { id: user.id, name: user.name, email: user.email, role: "user", pendingAdmin: true };
   return { id: user.id, name: user.name, email: user.email, role };
 });
@@ -63,6 +82,8 @@ export async function completeSecondStep(): Promise<void> {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token) return;
   await db.query("update sessions set mfa_at = now() where token_hash = $1 and revoked_at is null", [hash(token)]);
+  const who = await getSession();
+  if (who) await audit("auth.second_step", { actor: who });
 }
 
 /** True for an admin, whether or not the second step is done yet. Used where enrolling is allowed before verifying. */

@@ -1,4 +1,5 @@
 import { deleteAccount } from "@/lib/account";
+import { audit } from "@/lib/audit";
 import { endSession, getSession } from "@/lib/auth";
 import { fail, ok, readJson, sameOrigin, text } from "@/lib/http";
 import { clientIp } from "@/lib/http";
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
   }
 
   await deleteAccount(user.id);
+  await audit("auth.account_deleted", { actor: { email: user.email, name: user.name } });
   await endSession();
   return ok();
 }

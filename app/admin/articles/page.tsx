@@ -2,6 +2,7 @@ import { adminOnly } from "@/lib/admin-guard";
 import Link from "next/link";
 import { deleteArticleAction, setArticleStatusAction } from "@/app/admin/actions";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
+import { RowMenu } from "@/components/admin/RowMenu";
 import { formatDate } from "@/content/articles";
 import { listAll } from "@/lib/articles";
 import { listAllComments } from "@/lib/comments";
@@ -33,10 +34,12 @@ export default async function ArticlesAdmin({ searchParams }: { searchParams: Pr
                   <td>{comments.filter((c) => c.slug === a.slug).length}</td>
                   <td><span className={`adm-badge adm-badge--${a.status}`}>{a.status === "published" ? "Published" : "Draft"}</span></td>
                   <td className="adm-actions">
-                    <Link href={`/articles/${a.slug}`} target="_blank" className="adm-mini">{a.status === "published" ? "View" : "Preview"}</Link>
-                    <Link href={`/admin/articles/${a.id}`} className="adm-mini">Edit</Link>
-                    <form action={setArticleStatusAction}><input type="hidden" name="id" value={a.id} /><button className="adm-mini">{a.status === "published" ? "Unpublish" : "Publish"}</button></form>
-                    <form action={deleteArticleAction}><input type="hidden" name="id" value={a.id} /><ConfirmButton message={`Delete “${a.title}” and keep no copy?`} className="adm-mini adm-mini--danger">Delete</ConfirmButton></form>
+                    <RowMenu label={`Actions for ${a.title}`}>
+                      <Link href={`/articles/${a.slug}`} target="_blank" role="menuitem">{a.status === "published" ? "View on the site" : "Preview"}</Link>
+                      <Link href={`/admin/articles/${a.id}`} role="menuitem">Edit</Link>
+                      <form action={setArticleStatusAction}><input type="hidden" name="id" value={a.id} /><button role="menuitem">{a.status === "published" ? "Unpublish" : "Publish"}</button></form>
+                      <form action={deleteArticleAction}><input type="hidden" name="id" value={a.id} /><ConfirmButton role="menuitem" message={`Delete “${a.title}” and keep no copy?`} className="is-danger">Delete</ConfirmButton></form>
+                    </RowMenu>
                   </td>
                 </tr>
               ))}

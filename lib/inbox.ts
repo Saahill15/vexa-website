@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { listAll } from "./articles";
 import { db } from "./db";
 import { listAllComments, type Comment } from "./comments";
@@ -57,17 +58,16 @@ export const unreadCount = (items: InboxItem[]) => items.filter((i) => i.unread)
  * The two numbers the admin sidebar shows, counted in the database. Same rules as the inbox list (what is unread for this
  * admin, and enquiries waiting for a first reply), without loading every row on each page.
  */
-export async function inboxBadges(adminId: string): Promise<{ unread: number; newEnquiries: number }> {
-  const { rows: [me] } = await db.query<{ inbox_read_all: Date | string | null; inbox_read: string[] | null }>("select inbox_read_all, inbox_read from users where id = $1", [adminId]);
-  const since = me?.inbox_read_all ? new Date(me.inbox_read_all) : new Date(0);
-  const read = me?.inbox_read ?? [];
+export const inboxBadges = cache(async (adminId: string): Promise<{ unread: number; newEnquiries: number }> => {
+  // one round trip: the admin's read marks are looked up inside the same query that counts
   const { rows: [counts] } = await db.query<{ enquiries: number; comments: number; users: number; new_enquiries: number }>(
-    `select
-       (select count(*)::int from enquiries where at > $1 and not ('enq:' || id::text = any($2))) as enquiries,
-       (select count(*)::int from comments where created_at > $1 and not ('com:' || id::text = any($2))) as comments,
-       (select count(*)::int from users where created_at > $1 and id <> $3 and not ('usr:' || id::text = any($2))) as users,
+    `with me as (select coalesce(inbox_read_all, 'epoch'::timestamptz) as since, coalesce(inbox_read, '{}') as read from users where id = $1)
+     select
+       (select count(*)::int from enquiries, me where at > me.since and not ('enq:' || id::text = any(me.read))) as enquiries,
+       (select count(*)::int from comments, me where created_at > me.since and not ('com:' || id::text = any(me.read))) as comments,
+       (select count(*)::int from users u, me where u.created_at > me.since and u.id <> $1 and not ('usr:' || u.id::text = any(me.read))) as users,
        (select count(*)::int from enquiries where status = 'new') as new_enquiries`,
-    [since, read, adminId],
+    [adminId],
   );
   return { unread: counts.enquiries + counts.comments + counts.users, newEnquiries: counts.new_enquiries };
-}
+});

@@ -1,3 +1,4 @@
+import { audit } from "@/lib/audit";
 import { clientIp, fail, ok, readJson, sameOrigin, text } from "@/lib/http";
 import { consumeReset } from "@/lib/password-reset";
 import { tooMany } from "@/lib/ratelimit";
@@ -21,5 +22,7 @@ export async function POST(request: Request) {
   const user = await getUserById(userId);
   if (!user || user.disabled) return fail("This account can't be reset. Please contact us.", 403);
   await setPassword(userId, password);
+  const who = await getUserById(userId);
+  await audit("auth.password_reset", { actor: who ?? { id: userId } });
   return ok();
 }

@@ -1,5 +1,6 @@
 import { adminOnly } from "@/lib/admin-guard";
 import { setDisabledAction, setRoleAction } from "@/app/admin/actions";
+import { RowMenu } from "@/components/admin/RowMenu";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { getSession } from "@/lib/auth";
 import { formatDateTime, formatShortDate } from "@/lib/format";
@@ -33,14 +34,14 @@ export default async function UsersAdmin({ searchParams }: { searchParams: Promi
                     <td><span className={`adm-badge adm-badge--${role}`}>{role === "admin" ? "Admin" : "Reader"}</span>{u.disabled ? <span className="adm-badge adm-badge--off">Disabled</span> : null}{isListedAdmin(u) ? <small>via ADMIN_EMAILS</small> : null}</td>
                     <td className="adm-actions">
                       {self ? <span className="adm-faint">This is you</span> : (
-                        <>
+                        <RowMenu label={`Actions for ${u.name}`}>
                           {!isListedAdmin(u) ? (
                             <form action={setRoleAction}><input type="hidden" name="id" value={u.id} /><input type="hidden" name="role" value={role === "admin" ? "user" : "admin"} />
-                              <ConfirmButton message={role === "admin" ? `Remove admin access from ${u.name}?` : `Give ${u.name} full admin access?`} className="adm-mini">{role === "admin" ? "Remove admin" : "Make admin"}</ConfirmButton></form>
+                              <ConfirmButton role="menuitem" message={role === "admin" ? `Remove admin access from ${u.name}?` : `Give ${u.name} full admin access?`}>{role === "admin" ? "Remove admin" : "Make admin"}</ConfirmButton></form>
                           ) : null}
                           <form action={setDisabledAction}><input type="hidden" name="id" value={u.id} /><input type="hidden" name="disabled" value={u.disabled ? "0" : "1"} />
-                            <ConfirmButton message={u.disabled ? `Let ${u.name} sign in again?` : `Disable ${u.name}? They are signed out straight away.`} className={u.disabled ? "adm-mini" : "adm-mini adm-mini--danger"}>{u.disabled ? "Enable" : "Disable"}</ConfirmButton></form>
-                        </>
+                            <ConfirmButton role="menuitem" message={u.disabled ? `Let ${u.name} sign in again?` : `Disable ${u.name}? They are signed out straight away.`} className={u.disabled ? "" : "is-danger"}>{u.disabled ? "Enable" : "Disable"}</ConfirmButton></form>
+                        </RowMenu>
                       )}
                     </td>
                   </tr>

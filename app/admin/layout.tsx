@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminNav } from "@/components/admin/AdminNav";
+import { IdleGuard } from "@/components/admin/IdleGuard";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { getSession } from "@/lib/auth";
 import { inboxBadges } from "@/lib/inbox";
@@ -28,6 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const badges = await inboxBadges(session.id);
   return (
     <div className="adm">
+      <IdleGuard />
       <AdminNav newEnquiries={badges.newEnquiries} unread={badges.unread} />
       <div className="adm-main">
         <AdminTopbar name={session.name} email={session.email} />

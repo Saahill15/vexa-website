@@ -1,3 +1,4 @@
+import { audit } from "@/lib/audit";
 import { getSession } from "@/lib/auth";
 import { listEnquiries } from "@/lib/enquiries";
 import { ROLE_LABEL } from "@/lib/format";
@@ -14,6 +15,7 @@ export async function GET() {
   const session = await getSession();
   if (!session || session.role !== "admin") return new Response("Not found", { status: 404 });
   const rows = await listEnquiries();
+  await audit("enquiry.export", { actor: session, detail: `${rows.length} enquiries downloaded as CSV` });
   const head = ["Received", "Status", "Name", "Email", "Is", "Interested in", "Company", "Timing", "Message", "Notes", "Inbox email"];
   const lines = [head, ...rows.map((e) => [e.at, e.status, e.name, e.email, ROLE_LABEL[e.role] ?? e.role, e.interest, e.company, e.launch, e.problem, e.notes, e.emailed])].map((r) => r.map(cell).join(","));
   return new Response("﻿" + lines.join("\r\n"), {

@@ -1,3 +1,4 @@
+import { audit } from "@/lib/audit";
 import { startSession } from "@/lib/auth";
 import { consumeVerification } from "@/lib/email-verify";
 import { clientIp, fail, ok, readJson, sameOrigin, text } from "@/lib/http";
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
     const user = await createConfirmedUser(signup);
     if (!user) return fail("An account with that email already exists. Try logging in instead.", 409);
     await startSession(user.id);
+    await audit("auth.signup", { actor: user });
     return ok({ created: true });
   }
 

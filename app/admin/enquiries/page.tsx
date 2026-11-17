@@ -2,6 +2,7 @@ import { StatusDot } from "@/components/admin/StatusDot";
 import { adminOnly } from "@/lib/admin-guard";
 import Link from "next/link";
 import { setEnquiryStatusAction } from "@/app/admin/actions";
+import { RowMenu } from "@/components/admin/RowMenu";
 import { listEnquiries, STATUSES } from "@/lib/enquiries";
 import { formatDateTime, preview, ROLE_LABEL } from "@/lib/format";
 
@@ -46,7 +47,7 @@ export default async function EnquiriesPage({ searchParams }: { searchParams: Pr
       ) : (
         <div className="adm-table-wrap">
           <table className="adm-table">
-            <thead><tr><th>Received</th><th>From</th><th>About</th><th>Message</th><th>Status</th></tr></thead>
+            <thead><tr><th>Received</th><th>From</th><th>About</th><th>Message</th><th>Status</th><th><span className="sr-only">Actions</span></th></tr></thead>
             <tbody>
               {shown.map((e) => (
                 <tr key={e.id}>
@@ -54,14 +55,17 @@ export default async function EnquiriesPage({ searchParams }: { searchParams: Pr
                   <td><div className="adm-who"><StatusDot status={e.status} /><div><Link href={`/admin/enquiries/${e.id}`}><strong>{e.name || e.email}</strong></Link>{e.name ? <small>{e.email}</small> : null}{e.company ? <small>{e.company}</small> : null}</div></div></td>
                   <td>{ROLE_LABEL[e.role] ?? e.role}{e.interest ? <small>{e.interest}</small> : null}</td>
                   <td className="adm-msg">{preview(e.problem, 110)}</td>
-                  <td>
-                    <form action={setEnquiryStatusAction} className="adm-inline">
-                      <input type="hidden" name="id" value={e.id} />
-                      <select name="status" defaultValue={e.status} aria-label={`Status for ${e.name || e.email}`}>
-                        {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                      </select>
-                      <button type="submit" className="adm-mini">Save</button>
-                    </form>
+                  <td>{STATUSES.find((s) => s.value === e.status)?.label ?? e.status}</td>
+                  <td className="adm-actions">
+                    <RowMenu label={`Actions for ${e.name || e.email}`}>
+                      <Link href={`/admin/enquiries/${e.id}`} role="menuitem">Open</Link>
+                      {STATUSES.filter((s) => s.value !== e.status).map((s) => (
+                        <form key={s.value} action={setEnquiryStatusAction}>
+                          <input type="hidden" name="id" value={e.id} /><input type="hidden" name="status" value={s.value} />
+                          <button role="menuitem">Mark as {s.label.toLowerCase()}</button>
+                        </form>
+                      ))}
+                    </RowMenu>
                   </td>
                 </tr>
               ))}

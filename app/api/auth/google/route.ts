@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { audit } from "@/lib/audit";
 import { setPendingLink, startSession } from "@/lib/auth";
 import { verifyGoogleToken } from "@/lib/google";
 import { clientIp, fail, ok, readJson, sameOrigin } from "@/lib/http";
@@ -30,5 +31,6 @@ export async function POST(request: Request) {
 
   await touchLogin(result.user.id);
   await startSession(result.user.id);
+  await audit("auth.google", { actor: result.user });
   return ok();
 }
