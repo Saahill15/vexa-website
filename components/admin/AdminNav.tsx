@@ -58,6 +58,8 @@ export function AdminNav({ newEnquiries, unread }: { newEnquiries: number; unrea
   const path = usePathname();
   const [collapsed, setCollapsed] = useState<string[]>([]);
   // on phones the menu is a button; it closes again as soon as a page is chosen
+  // on the inbox the sidebar is an icon strip that opens on hover; after a link is clicked it stays shut until the pointer leaves
+  const [shut, setShut] = useState(false);
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [path]);
 
@@ -99,7 +101,16 @@ export function AdminNav({ newEnquiries, unread }: { newEnquiries: number; unrea
   const count = (b?: Item["badge"]) => (b === "unread" ? unread : b === "enquiries" ? newEnquiries : 0);
 
   return (
-    <aside className={`adm-side${open ? " is-open" : ""}`}>
+    <aside
+      className={`adm-side${open ? " is-open" : ""}${shut ? " is-shut" : ""}`}
+      onMouseLeave={() => setShut(false)}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest("a")) {
+          setShut(true);
+          (document.activeElement as HTMLElement | null)?.blur?.();
+        }
+      }}
+    >
       <Link href="/admin" className="adm-brand" aria-label="Vexa Admin"><Logo onDark /><b className="adm-nav-label adm-brand-tag">Admin</b></Link>
       <button type="button" className="adm-menu-btn" aria-expanded={open} aria-controls="adm-nav" onClick={() => setOpen((v) => !v)}>{open ? "Close" : "Menu"}</button>
       <nav id="adm-nav" aria-label="Admin">

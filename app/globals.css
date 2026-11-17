@@ -1371,13 +1371,13 @@ p{text-align:justify;text-justify:inter-word;hyphens:manual;-webkit-hyphens:manu
   .adm:has(.adm-inbox){grid-template-columns:60px minmax(0,1fr)}
   .adm:has(.adm-inbox) .adm-main{grid-column:2}
   .adm:has(.adm-inbox) .adm-side{position:fixed;top:0;left:0;z-index:40;width:60px;overflow:hidden;padding:16px 10px;transition:width .18s ease,box-shadow .18s ease}
-  .adm:has(.adm-inbox) .adm-side:hover,.adm:has(.adm-inbox) .adm-side:focus-within{width:232px;padding-inline:12px;box-shadow:14px 0 40px -18px rgba(10,35,34,.3)}
-  .adm:has(.adm-inbox) .adm-side:not(:hover):not(:focus-within) .adm-nav-label,
-  .adm:has(.adm-inbox) .adm-side:not(:hover):not(:focus-within) .adm-group-label{display:none}
-  .adm:has(.adm-inbox) .adm-side:not(:hover):not(:focus-within) nav{gap:8px}
-  .adm:has(.adm-inbox) .adm-side:not(:hover):not(:focus-within) .adm-brand{justify-content:center;padding-inline:0}
-  .adm:has(.adm-inbox) .adm-side:not(:hover):not(:focus-within) nav a{position:relative;justify-content:center;padding:10px 0}
-  .adm:has(.adm-inbox) .adm-side:not(:hover):not(:focus-within) .adm-count{position:absolute;top:5px;right:9px;width:8px;height:8px;min-width:0;padding:0;border-radius:50%;font-size:0;background:var(--teal);color:transparent}
+  .adm:has(.adm-inbox) .adm-side:hover:not(.is-shut),.adm:has(.adm-inbox) .adm-side:has(:focus-visible):not(.is-shut){width:232px;padding-inline:12px;box-shadow:14px 0 40px -18px rgba(10,35,34,.3)}
+  .adm:has(.adm-inbox) .adm-side:is(.is-shut,:not(:hover):not(:has(:focus-visible))) .adm-nav-label,
+  .adm:has(.adm-inbox) .adm-side:is(.is-shut,:not(:hover):not(:has(:focus-visible))) .adm-group-label{display:none}
+  .adm:has(.adm-inbox) .adm-side:is(.is-shut,:not(:hover):not(:has(:focus-visible))) nav{gap:8px}
+  .adm:has(.adm-inbox) .adm-side:is(.is-shut,:not(:hover):not(:has(:focus-visible))) .adm-brand{justify-content:center;padding-inline:0}
+  .adm:has(.adm-inbox) .adm-side:is(.is-shut,:not(:hover):not(:has(:focus-visible))) nav a{position:relative;justify-content:center;padding:10px 0}
+  .adm:has(.adm-inbox) .adm-side:is(.is-shut,:not(:hover):not(:has(:focus-visible))) .adm-count{position:absolute;top:5px;right:9px;width:8px;height:8px;min-width:0;padding:0;border-radius:50%;font-size:0;background:var(--teal);color:transparent}
 }
 
 /* ---------- the open mail conversation, laid out like Gmail ---------- */
@@ -1513,11 +1513,11 @@ select.adm-gm-input{cursor:pointer}
 
 /* mail folders under Inbox in the sidebar: closed until hovered or focused */
 .adm-sub{display:none;padding:2px 0 6px 12px}
-.adm-has-sub:hover .adm-sub,.adm-has-sub:focus-within .adm-sub{display:block}
+.adm-has-sub:hover .adm-sub,.adm-has-sub:has(:focus-visible) .adm-sub{display:block}
 .adm-sub a{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:8px;font-size:13px;color:#4d6665}
 .adm-sub a:hover{background:var(--adm-hover);color:var(--deep)}
 .adm-sub-gap{margin-top:6px}
-@media (min-width:901px){.adm:has(.adm-inbox) .adm-side:not(:hover):not(:focus-within) .adm-sub{display:none!important}}
+@media (min-width:901px){.adm:has(.adm-inbox) .adm-side:is(.is-shut,:not(:hover):not(:has(:focus-visible))) .adm-sub{display:none!important}}
 .adm-sub a.adm-sub-unread,.adm-folders-group a.is-unread{font-weight:700;color:var(--deep)}
 .adm-sub a b{margin-left:auto;font-size:12px;font-weight:700}
 .adm-folders-group a.is-unread span{font-weight:700}
@@ -1772,7 +1772,7 @@ body{font-size:16px;color:var(--slate);letter-spacing:0}
 .adm-stat strong{font-weight:900;letter-spacing:-.02em}
 .adm-badge,.adm-tag{font-weight:700}
 .adm-brand-tag{display:none}
-@media (min-width:901px){.adm:has(.adm-inbox) .adm-side:not(:hover):not(:focus-within) .logo-text{display:none}.adm:has(.adm-inbox) .adm-side:not(:hover):not(:focus-within) .adm-brand .logo{gap:0}}
+@media (min-width:901px){.adm:has(.adm-inbox) .adm-side:is(.is-shut,:not(:hover):not(:has(:focus-visible))) .logo-text{display:none}.adm:has(.adm-inbox) .adm-side:is(.is-shut,:not(:hover):not(:has(:focus-visible))) .adm-brand .logo{gap:0}}
 
 /* account page in the new look: dark header band with the title and pill tabs, white card below */
 .acc-page-section{padding-top:0;overflow-x:clip}
@@ -1880,3 +1880,10 @@ p{text-align:left;text-justify:auto}
 /* the bar leaves only after the wordmark has folded, so the animation can be seen */
 .nav.is-hidden{transition:background .4s,border-color .4s,transform .6s var(--ease) .4s}
 @media (prefers-reduced-motion:reduce){.nav-logo .logo,.nav-logo .logo-text{transition:none}.nav.is-hidden{transition-delay:0s}}
+
+/* mail folders in the dark sidebar (they were still using the old light-sidebar colours, so Starred, Important, Primary… looked black) */
+.adm-side .adm-sub a{color:rgba(255,255,255,.78);border-radius:999px}
+.adm-side .adm-sub a:hover{background:rgba(255,255,255,.09);color:#fff}
+.adm-side .adm-sub a.adm-sub-unread{color:#fff}
+.adm-side .adm-sub a b{color:#3FE0D0}
+.adm-side .adm-sub a[aria-current="page"],.adm-side .adm-sub a[aria-current="true"]{background:rgba(255,255,255,.14);color:#fff}
