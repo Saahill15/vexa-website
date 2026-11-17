@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { currentIp, isBanned } from "@/lib/ipblock";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { IdleGuard } from "@/components/admin/IdleGuard";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
@@ -10,6 +11,7 @@ import { inboxBadges } from "@/lib/inbox";
 export const metadata: Metadata = { title: { default: "Admin", template: "%s · Vexa Admin" }, robots: { index: false, follow: false } };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  if (await isBanned(await currentIp())) notFound();
   const session = await getSession();
   if (!session) redirect("/login?next=/admin");
   if (session.pendingAdmin) redirect("/login/verify");

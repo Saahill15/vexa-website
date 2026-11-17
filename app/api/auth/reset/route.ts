@@ -1,3 +1,4 @@
+import { requestBanned } from "@/lib/ipblock";
 import { audit } from "@/lib/audit";
 import { clientIp, fail, ok, readJson, sameOrigin, text } from "@/lib/http";
 import { consumeReset } from "@/lib/password-reset";
@@ -8,6 +9,7 @@ const EXPIRED = "This link is invalid or has expired. Request a new one.";
 
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("This form can only be sent from the Vexa website.", 403);
+  if (await requestBanned(request)) return fail("This address is not allowed to use this.", 403);
   if (await tooMany(`reset-ip:${clientIp(request)}`, 20, 15 * 60_000)) return fail("Too many attempts. Please wait a few minutes.", 429);
 
   const body = await readJson(request);

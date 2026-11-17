@@ -2039,3 +2039,33 @@ p{text-align:left;text-justify:auto}
 .enq-ev small{display:block;margin-top:3px;font-size:12.5px;color:var(--slate)}
 .rcpt-av{position:relative;overflow:hidden}
 .rcpt-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* users page; row-action cells must stay table cells (adm-actions makes them flex boxes, which breaks the row) */
+.adm-table td.adm-actions,.adm-table td.usr-act{display:table-cell;width:64px;text-align:right}
+.usr-tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
+.usr-tiles .dash-tile{cursor:default}
+.usr-search{display:flex;gap:8px;align-items:center}
+.usr-search .in{min-width:0}
+.usr-search select.in{width:auto}
+.usr-who{display:flex;align-items:center;gap:12px}
+.usr-who small{display:block}
+.usr-av{display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#3FE0D0,#0b7f7c);color:#fff;font-size:13px;font-weight:700}
+.is-off .usr-av{filter:grayscale(1)}
+@media (max-width:900px){.usr-tiles{grid-template-columns:1fr 1fr}.usr-search{flex-wrap:wrap}}
+.adm-table td.usr-act{width:1%;white-space:nowrap}
+/* banned addresses */
+.adm-ip-kind{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;background:var(--adm-bg);font-size:11px;font-weight:700;color:var(--slate);letter-spacing:.02em}
+.adm-ban{display:inline;margin:0}
+.adm-ban-btn{padding:0;border:0;background:none;font:inherit;font-size:12.5px;color:#b42318;cursor:pointer}
+.adm-ban-btn:hover{text-decoration:underline}
+.adm-ip-banned{color:#b42318!important;font-weight:700}
+.adm-banned{margin-bottom:16px}
+.adm-banned ul{list-style:none;margin:0;padding:0}
+.adm-banned li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}
+.adm-banned li div{display:grid;gap:2px;min-width:0}
+.adm-banned li form{margin:0}
+.adm-ban{display:block;margin-top:8px}
+.adm-ban-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px;border:1px solid #f1b8b2;border-radius:999px;background:#fff0ee;font:inherit;font-size:13.5px;font-weight:700;color:#b42318;cursor:pointer;transition:background .15s,border-color .15s}
+.adm-ban-btn:hover{background:#fbd9d5;border-color:#e5978f;text-decoration:none}
+.adm-banned--tab{margin:0;border:0}
+.adm-ban-add{display:flex;flex-wrap:wrap;gap:8px;padding:16px;border-bottom:1px solid var(--line)}
+.adm-ban-add .in{flex:1;min-width:180px}

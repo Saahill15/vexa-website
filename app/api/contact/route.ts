@@ -1,3 +1,4 @@
+import { requestBanned } from "@/lib/ipblock";
 import { NextResponse } from "next/server";
 import { acceptEnquiry } from "@/lib/enquiries";
 import { clientIp, readBody, sameOrigin } from "@/lib/http";
@@ -14,6 +15,7 @@ const fail = (error: string, status = 400) => NextResponse.json({ ok: false, err
 
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("This form can only be sent from the Vexa website.", 403);
+  if (await requestBanned(request)) return fail("This address is not allowed to use this.", 403);
 
   const ip = clientIp(request);
   // 5 accepted enquiries an hour per address (a refused attempt does not count against it)

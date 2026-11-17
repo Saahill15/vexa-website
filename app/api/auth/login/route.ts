@@ -1,3 +1,4 @@
+import { requestBanned } from "@/lib/ipblock";
 import { audit } from "@/lib/audit";
 import { startSession, takePendingLink } from "@/lib/auth";
 import { clientIp, EMAIL, fail, ok, readJson, sameOrigin, text } from "@/lib/http";
@@ -8,6 +9,7 @@ const WRONG = "Incorrect email or password.";
 
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("This form can only be sent from the Vexa website.", 403);
+  if (await requestBanned(request)) return fail("This address is not allowed to use this.", 403);
   const ip = clientIp(request);
   const body = await readJson(request);
   if (!body) return fail("The form could not be read. Please try again.");

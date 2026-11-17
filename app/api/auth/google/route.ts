@@ -1,3 +1,4 @@
+import { requestBanned } from "@/lib/ipblock";
 import { NextResponse } from "next/server";
 import { audit } from "@/lib/audit";
 import { setPendingLink, startSession } from "@/lib/auth";
@@ -8,6 +9,7 @@ import { googleLogin, touchLogin } from "@/lib/users";
 
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("This request can only be sent from the Vexa website.", 403);
+  if (await requestBanned(request)) return fail("This address is not allowed to use this.", 403);
   if (!process.env.GOOGLE_CLIENT_ID) return fail("Google sign-in is not set up yet.", 503);
   if (await tooMany(`google:${clientIp(request)}`, 30, 15 * 60_000)) return fail("Too many attempts. Please wait a few minutes.", 429);
 
