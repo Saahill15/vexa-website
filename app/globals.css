@@ -2039,3 +2039,16 @@ p{text-align:left;text-justify:auto}
 .enq-ev small{display:block;margin-top:3px;font-size:12.5px;color:var(--slate)}
 .rcpt-av{position:relative;overflow:hidden}
 .rcpt-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* users page; row-action cells must stay table cells (adm-actions makes them flex boxes, which breaks the row) */
+.adm-table td.adm-actions,.adm-table td.usr-act{display:table-cell;width:64px;text-align:right}
+.usr-tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
+.usr-tiles .dash-tile{cursor:default}
+.usr-search{display:flex;gap:8px;align-items:center}
+.usr-search .in{min-width:0}
+.usr-search select.in{width:auto}
+.usr-who{display:flex;align-items:center;gap:12px}
+.usr-who small{display:block}
+.usr-av{display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#3FE0D0,#0b7f7c);color:#fff;font-size:13px;font-weight:700}
+.is-off .usr-av{filter:grayscale(1)}
+@media (max-width:900px){.usr-tiles{grid-template-columns:1fr 1fr}.usr-search{flex-wrap:wrap}}
+.adm-table td.usr-act{width:1%;white-space:nowrap}
