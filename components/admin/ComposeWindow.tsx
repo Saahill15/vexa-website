@@ -69,7 +69,21 @@ export function ComposeWindow({ options }: { options: Option[] }) {
 
   useEffect(() => {
     const open = (e: Event) => {
-      const saved = (e as CustomEvent<DraftContent | undefined>).detail;
+      const detail = (e as CustomEvent<(DraftContent & { prefill?: undefined }) | { prefill: { to: string; subject: string; html: string } } | undefined>).detail;
+      if (detail && typeof detail === "object" && "prefill" in detail && detail.prefill) {
+        // a new message with the address, subject and text filled in (the Reply button on an enquiry)
+        if (modeRef.current !== "closed" && contentRef.current()) return window.dispatchEvent(new CustomEvent("vexa:toast", { detail: "Close the message you are writing first" }));
+        const p = detail.prefill;
+        setSeed({ id: "", from: "partnerships", to: p.to, cc: "", bcc: "", subject: p.subject, html: p.html, files: [], lostFiles: 0 });
+        setDraft("");
+        setCc(false);
+        setBcc(false);
+        setFiles([]);
+        setProblem("");
+        setMode("open");
+        return;
+      }
+      const saved = detail as DraftContent | undefined;
       if (saved && typeof saved === "object" && "id" in saved) {
         // opening a saved draft; a message being written is not replaced
         if (modeRef.current !== "closed" && contentRef.current()) return window.dispatchEvent(new CustomEvent("vexa:toast", { detail: "Close the message you are writing first" }));

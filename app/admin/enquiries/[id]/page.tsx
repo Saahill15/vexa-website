@@ -2,6 +2,10 @@ import { adminOnly } from "@/lib/admin-guard";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deleteEnquiryAction, saveEnquiryAction } from "@/app/admin/actions";
+import { ComposeWindow } from "@/components/admin/ComposeWindow";
+import { MailToast } from "@/components/admin/MailToast";
+import { ReplyButton } from "@/components/admin/ReplyButton";
+import { ADDRESSES, type Address } from "@/lib/gmail";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { StatusDot } from "@/components/admin/StatusDot";
 import { getEnquiry, listForEmail, STATUSES } from "@/lib/enquiries";
@@ -18,8 +22,11 @@ export default async function EnquiryPage({ params, searchParams }: { params: Pr
   if (!e) notFound();
   const { saved } = await searchParams;
   const earlier = (await listForEmail(e.email)).filter((x) => x.id !== e.id).slice(0, 5);
-  const subject = encodeURIComponent("Re: your message to Vexa Digital");
-  const mailto = `mailto:${e.email}?subject=${subject}`;
+  const subject = "Re: your message to Vexa Digital";
+  const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const first = (e.name || "").trim().split(/\s+/)[0];
+  const replyHtml = `<p>Hi${first ? ` ${esc(first)}` : ""},</p><p><br></p><p><br></p><p>Warm regards,<br>Team Vexa Digital</p><blockquote>${esc(e.problem).replace(/\n/g, "<br>")}</blockquote>`;
+  const options = (Object.keys(ADDRESSES) as Address[]).map((a) => ({ value: a, label: ADDRESSES[a] }));
   const who = e.name || e.email;
   const initials = who.split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
 
@@ -38,10 +45,10 @@ export default async function EnquiryPage({ params, searchParams }: { params: Pr
         <span className="enq-avatar" aria-hidden="true">{initials}</span>
         <div className="enq-id">
           <h1>{who}</h1>
-          <p><a href={mailto}>{e.email}</a> · received {formatDateTime(e.at)}</p>
+          <p>{e.email} · received {formatDateTime(e.at)}</p>
         </div>
         <span className={`enq-status enq-status--${e.status}`}><StatusDot status={e.status} />{label(e.status)}</span>
-        <a className="btn btn--sm" href={mailto}>Reply by email</a>
+        <ReplyButton small to={e.email} subject={subject} html={replyHtml} />
       </header>
       {saved ? <p className="adm-note" role="status">Saved.</p> : null}
 
@@ -100,6 +107,8 @@ export default async function EnquiryPage({ params, searchParams }: { params: Pr
           </form>
         </aside>
       </div>
+      <ComposeWindow options={options} />
+      <MailToast />
     </div>
   );
 }

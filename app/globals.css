@@ -2025,3 +2025,4 @@ p{text-align:left;text-justify:auto}
 .enq .adm-dot{position:static;width:14px;height:14px;border-radius:0;background:none}
 .enq .enq-msg p{padding:16px 20px}
 .enq .enq-msg > p:last-child{padding-bottom:16px}
+.enq .adm-card.enq-msg > p{padding:16px 20px!important;min-height:56px}
