@@ -957,9 +957,10 @@ export function threadsSignature(list: MailThreadSummary[]): string {
 
 const photoCache = new Map<string, { url: string | null; at: number }>();
 
-async function photoFor(email: string, token: string): Promise<string | null> {
+async function photoFor(email: string, token: string, cacheOnly = false): Promise<string | null> {
   const hit = photoCache.get(email);
   if (hit && Date.now() - hit.at < 6 * 3600_000) return hit.url;
+  if (cacheOnly) return null;
   let url: string | null = null;
   const find = async (route: string, key: string) => {
     const res = await fetch(`https://people.googleapis.com/v1/${route}?query=${encodeURIComponent(email)}&readMask=photos,emailAddresses&pageSize=5`, {
@@ -988,14 +989,55 @@ async function photoFor(email: string, token: string): Promise<string | null> {
 }
 
 /** Photo addresses for the given emails; missing ones are simply left out. Never throws. */
-export async function contactPhotos(emails: string[]): Promise<Record<string, string>> {
+export async function contactPhotos(emails: string[], cacheOnly = false): Promise<Record<string, string>> {
   if (!photosEnabled() || !emails.length) return {};
   try {
-    const token = await accessToken();
+    const token = cacheOnly ? "" : await accessToken();
     const list = [...new Set(emails.map((e) => e.toLowerCase()))].slice(0, 8);
-    const found = await Promise.all(list.map(async (e) => [e, await photoFor(e, token)] as const));
+    const found = await Promise.all(list.map(async (e) => [e, await photoFor(e, token, cacheOnly)] as const));
     return Object.fromEntries(found.filter((f): f is readonly [string, string] => Boolean(f[1])));
   } catch {
     return {};
+  }
+}
+
+/* ---------- address suggestions from Google (the same contacts Gmail suggests from) ---------- */
+
+type PersonHit = { person?: { names?: { displayName?: string }[]; emailAddresses?: { value?: string }[]; photos?: { url?: string; default?: boolean }[] } };
+const googleSearchCache = new Map<string, { at: number; hits: { email: string; name: string }[] }>();
+
+/** People matching the start of a name or address, from saved contacts and from "Other contacts" (everyone the mailbox has emailed). Never throws. */
+export async function googleContacts(q: string): Promise<{ email: string; name: string }[]> {
+  const term = q.trim().toLowerCase().slice(0, 60);
+  if (!photosEnabled() || term.length < 2) return [];
+  const hit = googleSearchCache.get(term);
+  if (hit && Date.now() - hit.at < 120_000) return hit.hits;
+  try {
+    const token = await accessToken();
+    const one = async (route: string): Promise<PersonHit[]> => {
+      const res = await fetch(`https://people.googleapis.com/v1/${route}?query=${encodeURIComponent(term)}&readMask=names,emailAddresses,photos&pageSize=10`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+        signal: AbortSignal.timeout(2500),
+      });
+      return res.ok ? (((await res.json()) as { results?: PersonHit[] }).results ?? []) : [];
+    };
+    const [saved, other] = await Promise.all([one("people:searchContacts"), one("otherContacts:search")]);
+    const seen = new Set<string>();
+    const hits: { email: string; name: string }[] = [];
+    for (const r of [...saved, ...other]) {
+      const email = r.person?.emailAddresses?.[0]?.value?.toLowerCase();
+      if (!email || seen.has(email) || ours(email) || /^(no-?reply|do-?not-?reply|mailer-daemon|postmaster|bounce|notifications?)[@+._-]/.test(email)) continue;
+      seen.add(email);
+      hits.push({ email, name: (r.person?.names?.[0]?.displayName ?? "").slice(0, 120) });
+      // the same answer carries the photo, so the photo lookup needs no extra call
+      const photo = r.person?.photos?.find((p) => p.url && !p.default);
+      if (photo?.url) photoCache.set(email, { url: photo.url.replace(/=s\d+$/, "") + "=s96-c", at: Date.now() });
+    }
+    if (googleSearchCache.size > 100) googleSearchCache.clear();
+    googleSearchCache.set(term, { at: Date.now(), hits });
+    return hits;
+  } catch {
+    return [];
   }
 }
