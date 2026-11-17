@@ -11,7 +11,7 @@ import { formatDate, headingId, readingMinutes } from "@/content/articles";
 import { headingsOf, sanitizeArticleHtml, topLevel, withHeadingIds } from "@/lib/article-html";
 import { getBySlug, listPublished } from "@/lib/articles";
 import { listForArticle } from "@/lib/comments";
-import { ORG_ID, abs, breadcrumbs } from "@/lib/seo";
+import { ORG_REF, abs, breadcrumbs } from "@/lib/seo";
 import { authHref, getSession } from "@/lib/session";
 
 type Params = { slug: string };
@@ -66,7 +66,7 @@ export default async function ArticlePage({ params }: { params: Promise<Params> 
   return (
     <article className="art">
       <JsonLd data={breadcrumbs([["Articles", "/articles"], [article.title, path]])} />
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "Article", headline: article.title, description: article.excerpt, datePublished: article.date, dateModified: (article.updatedAt ?? article.date).slice(0, 10), articleSection: article.category, inLanguage: "en-IN", mainEntityOfPage: abs(path), image: abs("/opengraph-image.png"), author: { "@id": ORG_ID }, publisher: { "@id": ORG_ID } }} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "Article", headline: article.title, description: article.excerpt, datePublished: article.date, dateModified: (article.updatedAt ?? article.date).slice(0, 10), articleSection: article.category, inLanguage: "en-IN", mainEntityOfPage: abs(path), image: abs("/opengraph-image.png"), author: ORG_REF, publisher: ORG_REF }} />
       <ReadingProgress />
 
       <header className="art-hero">

@@ -65,17 +65,17 @@ export function HeroTunnel() {
             </p>
           </Reveal>
           <Title />
-          <Reveal delay={0.7}>
+          <Reveal delay={0.3}>
             <p className="lede">We help brands succeed in gaming, and help esports teams build partnerships brands can buy.</p>
           </Reveal>
-          <Reveal delay={0.8}>
+          <Reveal delay={0.4}>
             <ul className="hero-checks">
               <li><b>Know exactly what a brand buys</b> in a partnership</li>
               <li><b>Build offers</b> a brand can price and say yes to</li>
               <li><b>Agree a written scope</b> before any work starts</li>
             </ul>
           </Reveal>
-          <Reveal delay={0.95} className="row">
+          <Reveal delay={0.5} className="row">
             <Link href="/services" className="btn">Our services <span className="arr" aria-hidden="true">→</span></Link>
             <Link href="/contact#form" className="btn btn--line">Start a conversation</Link>
           </Reveal>

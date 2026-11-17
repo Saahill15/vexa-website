@@ -5,7 +5,7 @@ import { ClosingCall, FreeStart, HowWeWork, PainPoints, Testimonials, TrustStrip
 import { Reveal } from "@/components/motion/Reveal";
 import { WordReveal } from "@/components/motion/WordReveal";
 import { JsonLd } from "@/components/JsonLd";
-import { ORG_ID } from "@/lib/seo";
+import { ORG_ID, ORG_REF } from "@/lib/seo";
 import { LEGAL_ENTITY, PUBLIC_URL, SITE } from "@/lib/site";
 
 // who we are, for search engines (shown in results and knowledge panels)
@@ -30,7 +30,7 @@ export default function HomePage() {
   return (
     <>
       <JsonLd data={ORGANISATION} />
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebSite", name: "Vexa Digital", url: PUBLIC_URL, inLanguage: "en-IN", publisher: { "@id": ORG_ID } }} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "WebSite", name: "Vexa Digital", url: PUBLIC_URL, inLanguage: "en-IN", publisher: ORG_REF }} />
       <HeroTunnel />
 
       <section className="sec" id="services" style={{ scrollMarginTop: 70 }} aria-labelledby="svc-h">

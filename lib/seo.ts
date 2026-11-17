@@ -19,3 +19,6 @@ export function breadcrumbs(items: [name: string, path: string][]) {
 }
 
 export const ORG_ID = `${PUBLIC_URL}/#organization`;
+
+/** The organisation spelled out in full, so search engines do not have to resolve a reference to another data block. */
+export const ORG_REF = { "@type": "Organization", "@id": ORG_ID, name: "Vexa Digital", url: PUBLIC_URL, logo: `${PUBLIC_URL}/icons/icon-512.png` } as const;

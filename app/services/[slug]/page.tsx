@@ -6,7 +6,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { WordReveal } from "@/components/motion/WordReveal";
 import { JsonLd } from "@/components/JsonLd";
 import { APPROACH, SERVICES, serviceHref } from "@/lib/services";
-import { ORG_ID, abs, breadcrumbs, snippet } from "@/lib/seo";
+import { ORG_REF, abs, breadcrumbs, snippet } from "@/lib/seo";
 
 type Params = { slug: string };
 
@@ -33,7 +33,7 @@ export default async function ServicePage({ params }: { params: Promise<Params> 
   return (
     <>
       <JsonLd data={breadcrumbs([["Services", "/services"], [service.title, serviceHref(service)]])} />
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "Service", name: service.title, description: service.body, serviceType: approach.label, url: abs(serviceHref(service)), areaServed: "IN", provider: { "@id": ORG_ID } }} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "Service", name: service.title, description: service.body, serviceType: approach.label, url: abs(serviceHref(service)), areaServed: "IN", provider: ORG_REF }} />
       <header className="svc-hero">
         <div className="wrap">
           <Link className="tl back-link svc-back" href={`/services#${service.audience}`}>All services</Link>
