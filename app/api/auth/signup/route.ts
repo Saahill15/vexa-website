@@ -2,6 +2,7 @@ import { isLocal, clientIp, EMAIL, fail, ok, publicOrigin, readJson, sameOrigin,
 import { mailReady } from "@/lib/mail";
 import { sendAlreadyRegistered, sendSignupLink, startSignup } from "@/lib/pending-signup";
 import { tooMany } from "@/lib/ratelimit";
+import { TURNSTILE_FAILED, verifyTurnstile } from "@/lib/turnstile";
 import { getUserByEmail, hashPassword } from "@/lib/users";
 
 /**
@@ -13,6 +14,8 @@ export async function POST(request: Request) {
   if (await tooMany(`signup:${clientIp(request)}`, 10, 3600_000)) return fail("Too many sign-ups from this connection. Please try again later.", 429);
   const body = await readJson(request);
   if (!body) return fail("The form could not be read. Please try again.");
+
+  if (!(await verifyTurnstile(body.turnstile, clientIp(request)))) return fail(TURNSTILE_FAILED);
 
   const name = text(body.name, 80);
   const email = text(body.email, 254).toLowerCase();

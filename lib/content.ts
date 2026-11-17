@@ -24,7 +24,15 @@ export const FAQ: FaqItem[] = [
   },
   {
     q: "Where are you based?",
-    a: `Our operating office is in New Delhi: ${SITE.address}.`,
+    a: "We are based in New Delhi, India, and work with brands, teams and organisers across the country.",
+  },
+  {
+    q: "What do you do with the details I send?",
+    a: "We use them only to reply to you and to discuss working together. We do not sell them or use them for advertising. The Privacy Policy explains what we keep, for how long, and how to ask us to correct or delete it.",
+  },
+  {
+    q: "Do I need an account to read your articles?",
+    a: "You can read the opening of every article without one. A free account lets you read the full article and join the comments. You can delete your account yourself at any time from your account page.",
   },
 ];
 

@@ -11,6 +11,8 @@
 | `ADMIN_EMAILS` | Only addresses whose email is confirmed become admins. |
 | HTTPS in front of the site | The login cookie is `Secure`; HSTS is sent in production. |
 | Cloudflare (or another proxy) in front | Rate limits are per visitor address. Cloudflare sets `CF-Connecting-IP`, which visitors cannot fake. If the site were exposed directly, they could fake `X-Real-IP` and dodge the per-address limits (the per-account limits still hold). |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | Spam check on the enquiry and sign-up forms. With the secret set, the server refuses a form without a valid Turnstile token; with neither set, the check is off. The site key is read at build time. |
+| `CF_ANALYTICS_TOKEN` | Cloudflare Web Analytics beacon (no cookies), on public pages only. Read at build time. |
 | `DATABASE_URL` (PostgreSQL) | Accounts, enquiries, comments and content live in the database. Back it up daily (for example `pg_dump`) and keep it on the server only, never exposed to the internet. The role should own only the `vexa` database. |
 
 ## What is in place

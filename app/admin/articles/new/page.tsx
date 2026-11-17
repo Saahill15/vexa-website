@@ -12,7 +12,7 @@ export default async function NewArticle() {
     <div className="adm-page adm-page--wide">
       <Link href="/admin/articles" className="adm-back">← All articles</Link>
       <header className="adm-head"><div><h1>New article</h1></div></header>
-      <ArticleEditor initial={{ title: "", slug: "", excerpt: "", category: "", date: today, previewBlocks: 4, status: "draft", body: "" }} />
+      <ArticleEditor initial={{ title: "", slug: "", excerpt: "", category: "", date: today, previewBlocks: 4, status: "draft", html: "" }} />
     </div>
   );
 }

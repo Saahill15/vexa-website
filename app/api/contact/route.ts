@@ -3,6 +3,7 @@ import { acceptEnquiry } from "@/lib/enquiries";
 import { clientIp, readBody, sameOrigin } from "@/lib/http";
 import { peekLimit, tooMany } from "@/lib/ratelimit";
 import { SITE } from "@/lib/site";
+import { TURNSTILE_FAILED, verifyTurnstile } from "@/lib/turnstile";
 import { istIso } from "@/lib/time";
 
 const ROLES = ["brand", "organisation", "other"];
@@ -30,6 +31,9 @@ export async function POST(request: Request) {
 
   // honeypot: people never see this field, so anything in it is a bot. Pretend it worked.
   if (text(body.website, 200)) return NextResponse.json({ ok: true });
+
+  // Cloudflare Turnstile: a person, not a script (only checked when the keys are set)
+  if (!(await verifyTurnstile(body.turnstile, ip))) return fail(TURNSTILE_FAILED);
 
   const role = text(body.role, 40);
   const problem = text(body.problem, 2000);

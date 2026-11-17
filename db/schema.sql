@@ -37,6 +37,9 @@ create table if not exists articles (
   updated_at timestamptz not null default now()
 );
 
+-- rich text body of an article (sanitised HTML). Older articles have only `blocks` and keep working.
+alter table articles add column if not exists body_html text;
+
 create table if not exists comments (
   id uuid primary key default gen_random_uuid(),
   slug text not null,

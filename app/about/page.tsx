@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbs } from "@/lib/seo";
 import Image from "next/image";
 import { Icon, type IconName } from "@/components/Icon";
 import { Reveal } from "@/components/motion/Reveal";
@@ -6,8 +8,8 @@ import { WordReveal } from "@/components/motion/WordReveal";
 import { TEAM } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: "About",
-  description: "Vexa is an esports consultancy founded in 2025. Meet Kaustubh Srivastava, Pratham Asknani and Bhaskar.",
+  title: "About Vexa: esports consultancy, New Delhi",
+  description: "Meet the team behind Vexa Digital, an esports consultancy founded in 2025 by a former competitive player. Strategy, research and design for gaming partnerships.",
 };
 
 // How engagements work, in the words of the original Brands and Organisations pages
@@ -27,6 +29,7 @@ const MORE: { icon: IconName; title: string; text: string; label: string; href: 
 export default function AboutPage() {
   return (
     <>
+      <JsonLd data={breadcrumbs([["About", "/about"]])} />
       <header className="xl-head">
         <div className="wrap">
           <Reveal><span className="label">About Vexa</span></Reveal>

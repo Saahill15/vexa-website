@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbs } from "@/lib/seo";
 import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icon";
 import { Reveal } from "@/components/motion/Reveal";
@@ -6,7 +8,7 @@ import { WordReveal } from "@/components/motion/WordReveal";
 import { ValuateDemo } from "@/components/ValuateDemo";
 
 export const metadata: Metadata = {
-  title: "Valuate",
+  title: "Valuate: creator quote estimator",
   description: "Valuate helps creators estimate a quote for a sponsored post, with the work, audience input and assumptions beside the range.",
 };
 
@@ -23,6 +25,7 @@ const SCOPES: { icon: IconName; title: string; text: string }[] = [
 export default function ValuatePage() {
   return (
     <>
+      <JsonLd data={breadcrumbs([["Valuate", "/valuate"]])} />
       <header className="v-hero">
         <div className="wrap v-hero-grid">
           <div className="v-hero-copy">

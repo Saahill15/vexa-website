@@ -20,12 +20,17 @@ export function LegalTabs({ current }: { current: "privacy" | "terms" }) {
   const reduce = useReducedMotion();
   const [active, setActive] = useState<string>(current);
 
+  // load the other document ahead of the click, so the switch does not wait on the network
+  useEffect(() => {
+    DOCS.forEach((d) => router.prefetch(d.href));
+  }, [router]);
+
   // arriving from the other tab: the page enters from the side it came from
   useEffect(() => {
     try {
       const forward = sessionStorage.getItem(DIR_KEY) === "forward";
       sessionStorage.removeItem(DIR_KEY);
-      if (forward) document.querySelector(".legal")?.classList.add("legal-enter-left");
+      if (forward) document.querySelector(".legal-layout")?.classList.add("legal-enter-left");
     } catch {
       /* storage unavailable */
     }
@@ -46,10 +51,10 @@ export function LegalTabs({ current }: { current: "privacy" | "terms" }) {
       /* storage unavailable */
     }
     // drop the entrance direction first, so it can't override the exit animation
-    const page = document.querySelector(".legal");
+    const page = document.querySelector(".legal-layout"); // only the content moves; the header and tabs stay put
     page?.classList.remove("legal-enter-left");
     page?.classList.add(forward ? "legal-leave-right" : "legal-leave-left");
-    setTimeout(() => router.push(href), 260);
+    setTimeout(() => router.push(href), 200);
   }
 
   return (

@@ -54,10 +54,13 @@ Or from the terminal: `npx wrangler secret put NAME`.
 
 | Name | Type | Value |
 | --- | --- | --- |
-| `SITE_URL` | text | `https://www.vexadigital.in` (the final address, https, no trailing slash). While testing, use the Worker's `https://....workers.dev` address. |
+| `SITE_URL` | text | `https://vexadigital.in` (the final address, https, no trailing slash). While testing, use the Worker's `https://....workers.dev` address. |
 | `SESSION_SECRET` | **secret** | 48+ random characters: `openssl rand -base64 48`. Required, the site refuses to run without it. |
 | `ADMIN_EMAILS` | text | Already set in `wrangler.jsonc` to `sahil@vexadigital.in` only. Other admins are made from Admin > Users. |
 | `GOOGLE_CLIENT_ID` | text | Google sign-in client id (no secret needed). |
+| `TURNSTILE_SITE_KEY` | text | Cloudflare Turnstile site key (spam check on the enquiry and sign-up forms). Public. Set it together with the secret below. |
+| `TURNSTILE_SECRET_KEY` | **secret** | Turnstile secret key. With it set the server refuses forms without a valid check, so set the site key too. With neither, the check is off. |
+| `CF_ANALYTICS_TOKEN` | text | Cloudflare Web Analytics token (Web Analytics > your site > Manage site, with "Enable with JS Snippet installation" selected, so it is not injected automatically). Read at request time. It loads only after a visitor accepts the cookie notice. |
 | `RESEND_API_KEY` | **secret** | Resend key for verification and reset emails. |
 | `MAIL_FROM` | text | `Vexa Digital <no-reply@mail.vexadigital.in>` |
 | `GMAIL_AUTH` | text | `oauth` |
@@ -79,8 +82,8 @@ The site is deployed by Cloudflare, from GitHub. Nothing is deployed from your c
 
 ## 5. Your domain
 
-1. Workers & Pages > your Worker > Settings > **Domains & Routes** > Add > Custom domain > `www.vexadigital.in`.
-2. Optionally redirect the bare domain `vexadigital.in` to `www` (Rules > Redirect Rules).
+1. Workers & Pages > your Worker > Settings > **Domains & Routes** > Add > Custom domain > `vexadigital.in` (the bare domain is the site's address).
+2. Redirect `www.vexadigital.in` to `https://vexadigital.in` (Rules > Redirect Rules, 301, keep path and query). Already done for this site.
 3. Set `SITE_URL` to the final address, and add it to your Google OAuth client's **Authorised JavaScript origins**
    (Google Cloud Console > Credentials).
 4. **Email keeps working** only if the DNS records stay as they are: do not delete the MX records, and keep the SPF, DKIM

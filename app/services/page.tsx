@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbs } from "@/lib/seo";
 import Link from "next/link";
 import { FolderDeck } from "@/components/FolderDeck";
 import { Reveal } from "@/components/motion/Reveal";
@@ -7,8 +9,8 @@ import { PageHead } from "@/components/PageHead";
 import { SERVICES, serviceHref } from "@/lib/services";
 
 export const metadata: Metadata = {
-  title: "Services",
-  description: "Brand campaigns in gaming, and business advisory for esports teams and tournament organisers.",
+  title: "Brand campaigns and esports advisory",
+  description: "Vexa Digital plans creator, team and tournament campaigns for brands entering gaming, and advises esports teams and organisers on partnerships brands can buy.",
 };
 
 const GROUPS = [
@@ -31,6 +33,7 @@ const GROUPS = [
 export default function ServicesPage() {
   return (
     <>
+      <JsonLd data={breadcrumbs([["Services", "/services"]])} />
       <PageHead label="Services" lines={["Two types of service,", "one clear approach."]} lede="Brand campaigns for companies entering gaming, and advisory for esports teams and tournament organisers." />
       {GROUPS.map((g, gi) => (
         <section key={g.id} id={g.id} className={gi === 1 ? "sec sec--deep" : "sec sec--brands"} style={{ scrollMarginTop: 70 }} aria-labelledby={`${g.id}-h`}>

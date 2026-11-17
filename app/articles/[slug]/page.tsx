@@ -4,11 +4,14 @@ import { notFound } from "next/navigation";
 import { ArticleBody } from "@/components/ArticleBody";
 import { ReadingProgress, ShareLinks } from "@/components/ArticleTools";
 import { Comments } from "@/components/Comments";
+import { JsonLd } from "@/components/JsonLd";
 import { Gate } from "@/components/Gate";
 import { Icon, type IconName } from "@/components/Icon";
 import { formatDate, headingId, readingMinutes } from "@/content/articles";
+import { headingsOf, sanitizeArticleHtml, topLevel, withHeadingIds } from "@/lib/article-html";
 import { getBySlug, listPublished } from "@/lib/articles";
 import { listForArticle } from "@/lib/comments";
+import { ORG_ID, abs, breadcrumbs } from "@/lib/seo";
 import { authHref, getSession } from "@/lib/session";
 
 type Params = { slug: string };
@@ -21,7 +24,17 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return {
     title: article.title,
     description: article.excerpt,
-    openGraph: { type: "article", title: article.title, description: article.excerpt, publishedTime: article.date },
+    openGraph: {
+      type: "article",
+      siteName: "Vexa Digital",
+      locale: "en_IN",
+      title: article.title,
+      description: article.excerpt,
+      publishedTime: article.date,
+      url: `/articles/${article.slug}`,
+      images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "Vexa Digital: where brands meet gaming" }],
+    },
+    twitter: { card: "summary_large_image", title: article.title, description: article.excerpt, images: ["/twitter-image.png"] },
   };
 }
 
@@ -33,19 +46,27 @@ export default async function ArticlePage({ params }: { params: Promise<Params> 
   const path = `/articles/${article.slug}`;
 
   // The server only sends the rest of the article to signed-in readers.
+  // Articles written in the editor are rich text (HTML); older ones are simple blocks.
+  const pieces = article.html ? topLevel(sanitizeArticleHtml(article.html)) : null;
+  const total = pieces ? pieces.length : article.blocks.length;
+  const locked = !session && total > article.previewBlocks;
   const blocks = session ? article.blocks : article.blocks.slice(0, article.previewBlocks);
-  const locked = !session && article.blocks.length > article.previewBlocks;
+  const richHtml = pieces ? withHeadingIds((session ? pieces : pieces.slice(0, article.previewBlocks)).join("")) : null;
 
   // Section list: every heading in the article; the ones past the wall are shown as locked.
-  const sections = article.blocks
-    .map((b, i) => (b.type === "h2" ? { text: b.text, id: headingId(b.text), open: !locked || i < article.previewBlocks } : null))
-    .filter((s): s is { text: string; id: string; open: boolean } => s !== null);
+  const sections = pieces
+    ? headingsOf(pieces).map((h) => ({ text: h.text, id: h.id, open: !locked || h.index < article.previewBlocks }))
+    : article.blocks
+        .map((b, i) => (b.type === "h2" ? { text: b.text, id: headingId(b.text), open: !locked || i < article.previewBlocks } : null))
+        .filter((s): s is { text: string; id: string; open: boolean } => s !== null);
 
   const related = (await listPublished()).filter((a) => a.slug !== article.slug).slice(0, 2);
   const comments = session ? await listForArticle(article.slug) : [];
 
   return (
     <article className="art">
+      <JsonLd data={breadcrumbs([["Articles", "/articles"], [article.title, path]])} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "Article", headline: article.title, description: article.excerpt, datePublished: article.date, dateModified: (article.updatedAt ?? article.date).slice(0, 10), articleSection: article.category, inLanguage: "en-IN", mainEntityOfPage: abs(path), image: abs("/opengraph-image.png"), author: { "@id": ORG_ID }, publisher: { "@id": ORG_ID } }} />
       <ReadingProgress />
 
       <header className="art-hero">
@@ -75,7 +96,7 @@ export default async function ArticlePage({ params }: { params: Promise<Params> 
 
         <div className="art-main">
           <div className={locked ? "prose-body art-body is-locked" : "prose-body art-body"}>
-            <ArticleBody blocks={blocks} />
+            {richHtml !== null ? <div dangerouslySetInnerHTML={{ __html: richHtml }} /> : <ArticleBody blocks={blocks} />}
           </div>
           {locked ? <Gate next={path} /> : null}
           <Comments

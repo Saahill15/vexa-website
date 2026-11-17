@@ -11,6 +11,7 @@ type ArticleRow = {
   status: ArticleStatus;
   preview_blocks: number;
   blocks: Article["blocks"];
+  body_html: string | null;
   created_at: Date;
   updated_at: Date;
 };
@@ -25,6 +26,7 @@ const toArticle = (r: ArticleRow): StoredArticle => ({
   status: r.status,
   previewBlocks: r.preview_blocks,
   blocks: r.blocks,
+  html: r.body_html ?? undefined,
   createdAt: iso(r.created_at),
   updatedAt: iso(r.updated_at),
 });
@@ -69,7 +71,7 @@ export async function getById(id: string): Promise<StoredArticle | null> {
   return rows[0] ? toArticle(rows[0]) : null;
 }
 
-export type ArticleInput = Pick<Article, "slug" | "title" | "excerpt" | "category" | "date" | "previewBlocks" | "blocks"> & { status: ArticleStatus };
+export type ArticleInput = Pick<Article, "slug" | "title" | "excerpt" | "category" | "date" | "previewBlocks" | "blocks"> & { html?: string | null; status: ArticleStatus };
 
 const SLUG_TAKEN = { error: "Another article already uses that address. Choose a different one." };
 
@@ -77,19 +79,19 @@ const SLUG_TAKEN = { error: "Another article already uses that address. Choose a
 export async function saveArticle(input: ArticleInput, id?: string): Promise<{ error: string } | { id: string }> {
   await ensureSeeded();
   if (id && !isUuid(id)) return { error: "That article no longer exists." };
-  const values = [input.slug, input.title, input.excerpt, input.category, input.date, input.status, input.previewBlocks, JSON.stringify(input.blocks)];
+  const values = [input.slug, input.title, input.excerpt, input.category, input.date, input.status, input.previewBlocks, JSON.stringify(input.blocks), input.html ?? null];
   try {
     if (id) {
       const { rows } = await db.query<{ id: string }>(
         `update articles set slug = $1, title = $2, excerpt = $3, category = $4, date = $5, status = $6,
-           preview_blocks = $7, blocks = $8, updated_at = now() where id = $9 returning id`,
+           preview_blocks = $7, blocks = $8, body_html = $9, updated_at = now() where id = $10 returning id`,
         [...values, id],
       );
       return rows[0] ? { id: rows[0].id } : { error: "That article no longer exists." };
     }
     const { rows } = await db.query<{ id: string }>(
-      `insert into articles (slug, title, excerpt, category, date, status, preview_blocks, blocks)
-       values ($1, $2, $3, $4, $5, $6, $7, $8) returning id`,
+      `insert into articles (slug, title, excerpt, category, date, status, preview_blocks, blocks, body_html)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id`,
       values,
     );
     return { id: rows[0].id };

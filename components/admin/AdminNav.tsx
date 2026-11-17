@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Icon, type IconName } from "../Icon";
 import { MailIcon, type MailIconName } from "./MailIcons";
+import { Logo } from "../Logo";
 
 type Item = { href: string; label: string; icon: IconName; badge?: "unread" | "enquiries"; external?: boolean };
 type Group = { id: string; label?: string; items: Item[] };
@@ -99,7 +100,7 @@ export function AdminNav({ newEnquiries, unread }: { newEnquiries: number; unrea
 
   return (
     <aside className={`adm-side${open ? " is-open" : ""}`}>
-      <Link href="/admin" className="adm-brand" aria-label="Vexa Admin"><b className="adm-nav-label">Vexa <span>Admin</span></b></Link>
+      <Link href="/admin" className="adm-brand" aria-label="Vexa Admin"><Logo onDark /><b className="adm-nav-label adm-brand-tag">Admin</b></Link>
       <button type="button" className="adm-menu-btn" aria-expanded={open} aria-controls="adm-nav" onClick={() => setOpen((v) => !v)}>{open ? "Close" : "Menu"}</button>
       <nav id="adm-nav" aria-label="Admin">
         {GROUPS.map((g) => {

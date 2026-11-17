@@ -1,12 +1,12 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { expoOut } from "@/lib/ease";
 import { NAV } from "@/lib/site";
+import { Logo } from "./Logo";
 
 export function Header() {
   const pathname = usePathname();
@@ -81,7 +81,7 @@ export function Header() {
     <header className={`nav${solid ? " is-solid" : ""}${hidden && !open ? " is-hidden" : ""}`}>
       <div className="nav-card">
         <Link href="/" className="nav-logo" aria-label="Vexa Digital, home">
-          <Image src="/img/vexa-logo-teal.png" alt="Vexa Esports Consultancy" width={65} height={34} priority />
+          <Logo />
         </Link>
         <nav className="nav-links" aria-label="Main">
           <Link href="/" aria-current={pathname === "/" ? "page" : undefined}>Home</Link>

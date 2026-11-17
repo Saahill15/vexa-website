@@ -1,15 +1,18 @@
 import type { ReactNode } from "react";
 import { headingId } from "@/content/articles";
+import { JsonLd } from "./JsonLd";
 import { LegalTabs } from "./LegalTabs";
+import { breadcrumbs } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
 type Section = { title: string; body: ReactNode };
 type Props = { title: string; updated: string; summary: string; current: "privacy" | "terms"; sections: Section[] };
 
-/** Shared layout for the legal pages: tinted heading band, section list beside numbered sections. */
+/** Shared layout for the legal pages: heading band, section list beside numbered sections. */
 export function LegalPage({ title, updated, summary, current, sections }: Props) {
   return (
     <article className="legal">
+      <JsonLd data={breadcrumbs([[title, `/${current}`]])} />
       <header className="art-hero">
         <div className="wrap art-hero-in">
           <LegalTabs current={current} />
@@ -17,8 +20,6 @@ export function LegalPage({ title, updated, summary, current, sections }: Props)
           <p className="art-dek">{summary}</p>
           <div className="art-meta">
             <span>Last updated {updated}</span>
-            <span aria-hidden="true">·</span>
-            <span className="legal-draft">Draft for review before launch</span>
           </div>
         </div>
       </header>
@@ -35,7 +36,7 @@ export function LegalPage({ title, updated, summary, current, sections }: Props)
 
         <div className="legal-main">
           {sections.map((s, i) => (
-            <section key={s.title} className="legal-sec" style={{ animationDelay: `${140 + i * 70}ms` }} id={headingId(s.title)} aria-labelledby={`${headingId(s.title)}-h`}>
+            <section key={s.title} className="legal-sec" id={headingId(s.title)} aria-labelledby={`${headingId(s.title)}-h`}>
               <span className="legal-num">{String(i + 1).padStart(2, "0")}</span>
               <div className="prose-body">
                 <h2 id={`${headingId(s.title)}-h`}>{s.title}</h2>
