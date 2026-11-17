@@ -37,6 +37,7 @@ export default function ContactPage() {
 
       <section className="xl-sec" aria-label="Who is getting in touch">
         <div className="wrap gc-grid">
+          <h2 className="sr-only">Who is getting in touch</h2>
           {AUDIENCES.map((a, i) => (
             <Reveal key={a.title} delay={i * 0.06} className="gc">
               <span className="gc-ico"><Icon name={a.icon} size={22} /></span>

@@ -1345,7 +1345,7 @@ p{text-align:justify;text-justify:inter-word;hyphens:manual;-webkit-hyphens:manu
 .skel-stack{display:grid;gap:8px}
 .skel-detail{display:grid;gap:18px;padding:28px 32px}
 .skel-page{display:grid;gap:20px;padding:clamp(24px,4vw,48px) 0}
-.loading-center{display:grid;place-items:center;min-height:50svh}
+.loading-center{display:grid;place-items:center;min-height:100svh}
 @media (prefers-reduced-motion:reduce){
   .skel,.spin,.progress::after{animation:none}
   .progress::after{width:100%;opacity:.5}
@@ -1866,3 +1866,8 @@ p{text-align:left;text-justify:auto}
 .foot-link-btn:hover{color:#fff}
 .foot-bar .foot-link-btn{font-size:inherit}
 @media (max-width:520px){.cookie{left:12px;right:12px;bottom:12px;width:auto}}
+
+/* contrast on the mint bands (checked with Lighthouse) */
+.art-toc-h,.legal-toc .art-toc-h{color:var(--deep)}
+.art-toc .is-locked,.ct-form-intro p,.legal-help p{color:#4a5f5e}
+.sec--tint .tl,.art-more .tl{color:#086a67}

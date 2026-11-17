@@ -9,7 +9,7 @@ export function Logo({ onDark = false }: { onDark?: boolean }) {
     <span className={`logo${onDark ? " logo--dark" : ""}`}>
       <Image src="/img/vexa-vmark-teal.png" alt="" width={335} height={318} priority />
       <span className="logo-text">
-        <b>VEXA</b>
+        <b>VEXA</b>{" "}
         <small>Esports Consultancy</small>
       </span>
     </span>

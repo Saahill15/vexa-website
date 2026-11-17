@@ -45,6 +45,9 @@ initOpenNextCloudflareForDev();
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Title, description, canonical link, social tags and structured data go in the page <head> for every visitor, not streamed into
+  // the body for browsers and Googlebot. Search engines and link previews then read them without running scripts.
+  htmlLimitedBots: /.*/,
   // the Cloudflare build only follows pg's default import, which skips the file that opens connections on Workers
   outputFileTracingIncludes: { "/**": ["./node_modules/pg-cloudflare/dist/index.js", "./node_modules/pg-cloudflare/esm/index.mjs"] },
   // the logos are small static files; Cloudflare Images is not set up, so they are served as they are

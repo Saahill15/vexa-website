@@ -27,7 +27,7 @@ export function FolderCard({ number, title, text, href, tone = "teal" }: Props) 
 
   return (
     <motion.div className={`fc fc--${tone}`} initial="rest" animate="rest" whileHover={reduce ? undefined : "hover"} whileFocus={reduce ? undefined : "hover"}>
-      <Link href={href} className="fc-link" aria-label={`${title}: ${text}`}>
+      <Link href={href} className="fc-link">
         <div className="fc-in">
           <motion.div className="fc-bg" variants={{ rest: rest.bg, hover: hover.bg }} transition={folderSpring}>
             <span className="fc-grain" />
