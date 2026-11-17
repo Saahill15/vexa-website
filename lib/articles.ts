@@ -35,7 +35,11 @@ const toArticle = (r: ArticleRow): StoredArticle => ({
  * On first run the site starts with the seed articles; after that the database is the only source. The flag is
  * set in the same transaction as the insert, so the seeds are written once even if two requests race.
  */
+// once the check has run in this process there is nothing left to do, so later requests skip it
+let seeded = false;
+
 async function ensureSeeded() {
+  if (seeded) return;
   await transaction(async (client) => {
     const flag = await client.query("insert into app_meta (key) values ('articles_seeded') on conflict do nothing returning key");
     if (!flag.rowCount) return;
@@ -47,6 +51,7 @@ async function ensureSeeded() {
       );
     }
   });
+  seeded = true;
 }
 
 export async function listAll(): Promise<StoredArticle[]> {

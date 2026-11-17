@@ -7,9 +7,6 @@ import { Reveal } from "@/components/motion/Reveal";
 import { WordReveal } from "@/components/motion/WordReveal";
 import { SITE } from "@/lib/site";
 
-// read at request time, so the Turnstile site key comes from the Worker's settings rather than the build machine
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Contact Vexa Digital: start a conversation",
   description: "Tell us about a gaming campaign or an esports business. Send a short message and we reply by email with the next step. No finished brief or budget needed.",
@@ -57,7 +54,7 @@ export default function ContactPage() {
             <p>Three short steps. No finished brief or budget needed. We reply by email with the next step.</p>
           </div>
           <div className="ct-form-card">
-            <ConversationForm turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? null} />
+            <ConversationForm />
           </div>
         </div>
       </section>

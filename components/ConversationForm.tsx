@@ -44,7 +44,19 @@ const STEP_FIELDS: Field[][] = [["role"], ["problem"], ["email", "consent"]];
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function ConversationForm({ turnstileSiteKey = null }: { turnstileSiteKey?: string | null }) {
+export function ConversationForm() {
+  // the page is static; the spam-check key is fetched while the visitor fills in the first steps
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    fetch("/api/turnstile")
+      .then((r) => r.json())
+      .then((d: { siteKey?: string | null }) => live && setTurnstileSiteKey(d.siteKey ?? null))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, []);
   const [step, setStep] = useState(0);
   const [role, setRole] = useState<Role | "">("");
   const [interest, setInterest] = useState<string[]>([]);

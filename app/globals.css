@@ -1345,7 +1345,7 @@ p{text-align:justify;text-justify:inter-word;hyphens:manual;-webkit-hyphens:manu
 .skel-stack{display:grid;gap:8px}
 .skel-detail{display:grid;gap:18px;padding:28px 32px}
 .skel-page{display:grid;gap:20px;padding:clamp(24px,4vw,48px) 0}
-.loading-center{display:grid;place-items:center;min-height:100svh}
+.loading-center{display:grid;place-items:center;min-height:50svh}
 @media (prefers-reduced-motion:reduce){
   .skel,.spin,.progress::after{animation:none}
   .progress::after{width:100%;opacity:.5}
