@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FolderDeck } from "@/components/FolderDeck";
 import { Reveal } from "@/components/motion/Reveal";
 import { WordReveal } from "@/components/motion/WordReveal";
+import { HowWeWork } from "@/components/HomeSections";
 import { PageHead } from "@/components/PageHead";
 import { SERVICES, serviceHref } from "@/lib/services";
 
@@ -54,6 +55,7 @@ export default function ServicesPage() {
           </div>
         </section>
       ))}
+      <HowWeWork />
     </>
   );
 }
