@@ -1,3 +1,4 @@
+import { audit } from "@/lib/audit";
 import { getSession, startSession } from "@/lib/auth";
 import { clientIp, fail, ok, readJson, sameOrigin } from "@/lib/http";
 import { tooMany } from "@/lib/ratelimit";
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
   await setPassword(user.id, password);
   // a password change signs out other sessions, so this one is re-issued to keep the user signed in here
   await startSession(user.id);
+  await audit("auth.password_changed", { actor: user });
   return ok({ hadPassword: Boolean(user.passwordHash) });
 }
 

@@ -1,6 +1,7 @@
 import { adminOnly } from "@/lib/admin-guard";
 import Link from "next/link";
 import { deleteCommentAction } from "@/app/admin/actions";
+import { RowMenu } from "@/components/admin/RowMenu";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { listAll } from "@/lib/articles";
 import { listAllComments } from "@/lib/comments";
@@ -23,12 +24,17 @@ export default async function CommentsAdmin() {
                 <strong>{c.name}</strong>
                 <span className="adm-faint">{formatDateTime(c.createdAt)}</span>
                 <Link href={`/articles/${c.slug}`} target="_blank">on “{title(c.slug)}”</Link>
+                <span className="adm-comment-menu">
+                  <RowMenu label={`Actions for the comment by ${c.name}`}>
+                    <Link href={`/articles/${c.slug}`} target="_blank" role="menuitem">View article</Link>
+                    <form action={deleteCommentAction}>
+                      <input type="hidden" name="id" value={c.id} />
+                      <ConfirmButton role="menuitem" message="Delete this comment?" className="is-danger">Delete</ConfirmButton>
+                    </form>
+                  </RowMenu>
+                </span>
               </div>
               <p className="adm-body">{c.text}</p>
-              <form action={deleteCommentAction}>
-                <input type="hidden" name="id" value={c.id} />
-                <ConfirmButton message="Delete this comment?" className="adm-mini adm-mini--danger">Delete</ConfirmButton>
-              </form>
             </li>
           ))}
         </ul>

@@ -1,3 +1,4 @@
+import { audit } from "@/lib/audit";
 import { startSession, takePendingLink } from "@/lib/auth";
 import { clientIp, EMAIL, fail, ok, readJson, sameOrigin, text } from "@/lib/http";
 import { resetLimit, tooMany } from "@/lib/ratelimit";
@@ -23,8 +24,14 @@ export async function POST(request: Request) {
 
   const user = await getUserByEmail(email);
   const good = await verifyPassword(password, user?.passwordHash);
-  if (!user || !good) return fail(WRONG, 401);
-  if (user.disabled) return fail("This account has been disabled. Please contact us if you think that is a mistake.", 403);
+  if (!user || !good) {
+    await audit("auth.login_failed", { actor: { email }, ip, detail: user ? "Wrong password" : "No account with this address" });
+    return fail(WRONG, 401);
+  }
+  if (user.disabled) {
+    await audit("auth.login_failed", { actor: user, ip, detail: "Account is disabled" });
+    return fail("This account has been disabled. Please contact us if you think that is a mistake.", 403);
+  }
 
   await resetLimit(perAccount);
   // a Google sign-in that was waiting for this password is now confirmed
@@ -32,6 +39,7 @@ export async function POST(request: Request) {
   if (pending && pending.email.toLowerCase() === user.email) await linkGoogle(user.id, pending.googleId);
   await touchLogin(user.id);
   await startSession(user.id);
+  await audit("auth.login", { actor: user, ip, detail: effectiveRole(user) === "admin" ? "Administrator (second step still to do)" : "" });
   // an admin still has to confirm the second step before the admin panel opens
   return ok({ secondStep: effectiveRole(user) === "admin" });
 }

@@ -6,7 +6,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { GoogleSignIn } from "./GoogleSignIn";
 import { Turnstile } from "./Turnstile";
 
-type Props = { mode: "login" | "signup"; next: string; googleClientId: string | null; devNote: boolean; turnstileSiteKey?: string | null };
+type Props = { mode: "login" | "signup"; next: string; googleClientId: string | null; devNote: boolean; turnstileSiteKey?: string | null; idle?: boolean };
 type Waiting = { email: string; devLink?: string };
 
 const COPY = {
@@ -28,10 +28,10 @@ const WAITING = { eyebrow: "Almost there", title: "Check your email", lede: "Con
 
 const POINTS = ["Read every article in full", "Join the conversation in the comments", "Manage your sign-in methods from your account page"];
 
-export function AuthForm({ mode, next, googleClientId, devNote, turnstileSiteKey = null }: Props) {
+export function AuthForm({ mode, next, googleClientId, devNote, turnstileSiteKey = null, idle = false }: Props) {
   const router = useRouter();
   const [linking, setLinking] = useState(false);
-  const [notice, setNotice] = useState("");
+  const [notice, setNotice] = useState(idle ? "You were signed out after 45 minutes without activity. Please sign in again." : "");
   const [waiting, setWaiting] = useState<Waiting | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

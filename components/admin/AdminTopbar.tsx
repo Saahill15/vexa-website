@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 const TITLES: [string, string][] = [
   ["/admin/inbox", "Inbox"],
+  ["/admin/logs", "Activity log"],
   ["/admin/enquiries", "Enquiries"],
   ["/admin/articles", "Articles"],
   ["/admin/comments", "Comments"],

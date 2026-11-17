@@ -2,6 +2,7 @@ import { createHash, randomBytes } from "crypto";
 import { readFile } from "fs/promises";
 import os from "os";
 import path from "path";
+import { contactsFromHeaders, rememberContacts } from "./contacts";
 import { istIso } from "./time";
 
 /*
@@ -182,6 +183,13 @@ type GmailThread = { id: string; messages?: GmailMessage[] };
 
 const header = (m: GmailMessage, name: string): string => m.payload?.headers?.find((h) => h.name.toLowerCase() === name.toLowerCase())?.value ?? "";
 const emailsIn = (value: string): string[] => (value.toLowerCase().match(/[a-z0-9._%+-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+/g) ?? []);
+/** Learn the addresses in some threads for the compose suggestions (never blocks and never fails the mail screen). */
+function harvest(threads: GmailThread[], sent = false) {
+  const values = threads.flatMap((t) => (t.messages ?? []).flatMap((m) => [header(m, "From"), header(m, "To"), header(m, "Cc")]));
+  const list = contactsFromHeaders(values).filter((c) => !ours(c.email));
+  if (list.length) void rememberContacts(list, sent);
+}
+
 const ours = (email: string): Address | null => (Object.keys(ADDRESSES) as Address[]).find((a) => ADDRESSES[a] === email) ?? null;
 const clean = (value: string) => value.replace(/[\r\n]+/g, " ").trim();
 
@@ -434,6 +442,7 @@ async function fetchThreads(query: string): Promise<MailThreadSummary[]> {
   for (let i = 0; i < threads.length; i += 5) {
     full.push(...(await Promise.all(threads.slice(i, i + 5).map((t) => api<GmailThread>(`/threads/${t.id}?format=metadata&${METADATA}`)))));
   }
+  harvest(full);
   return full.filter((t) => t.messages?.length).map(summarise);
 }
 
@@ -548,6 +557,7 @@ export async function getThread(id: string): Promise<MailThread> {
   const thread = await api<GmailThread>(`/threads/${id}?format=full`);
   const messages = thread.messages ?? [];
   if (!messages.length) throw new MailError("That conversation has no messages.");
+  harvest([{ id: thread.id, messages }]);
   const mapped = messages.map((m): MailMessage => {
     const body = readBody(m.payload);
     const view = body.html.trim() ? sanitizeHtml(body.html) : plainToHtml(body.text || m.snippet || "");
@@ -687,6 +697,7 @@ export async function sendReply(input: { threadId: string; from: Address; to: st
   const reply = await prepareReply(input.threadId);
   const raw = buildMime({ from: input.from, to, cc, bcc, subject: reply.subject, body, html, files, inReplyTo: reply.inReplyTo, references: reply.references });
   await sendMime(raw, input.threadId);
+  void rememberContacts(contactsFromHeaders([to, cc, bcc]), true);
   expire();
 }
 
@@ -806,6 +817,7 @@ export async function sendNew(input: { from: Address; to: string; cc?: string; b
 
   const html = input.html?.trim() ? cleanOutgoingHtml(input.html) : undefined;
   await sendMime(buildMime({ from: input.from, to, cc, bcc, subject, body, html, files }));
+  void rememberContacts(contactsFromHeaders([to, cc, bcc]), true);
   expire();
 }
 

@@ -1,130 +1,192 @@
 import Link from "next/link";
 import { StatusDot } from "@/components/admin/StatusDot";
 import { adminOnly } from "@/lib/admin-guard";
+import { AUDIT_ACTIONS, queryAudit, type AuditAction } from "@/lib/audit";
 import { listAll } from "@/lib/articles";
 import { listAllComments } from "@/lib/comments";
-import { listEnquiries, STATUSES } from "@/lib/enquiries";
-import { formatShortDate, preview, ROLE_LABEL } from "@/lib/format";
+import { listEnquiries, STATUSES, type EnquiryStatus } from "@/lib/enquiries";
+import { ago, formatShortDate, ROLE_LABEL, preview } from "@/lib/format";
+import { inboxBadges } from "@/lib/inbox";
 import { listUsers } from "@/lib/users";
 
+export const metadata = { title: "Dashboard" };
+
 const shortId = (id: string) => `VX-${id.slice(0, 4).toUpperCase()}`;
-const day = (iso: string) => formatShortDate(iso).replace(/ \d{4}$/, "");
+const DAY = 86_400_000;
+/** "3 days ago" for recent things, the date for anything older than a month. */
+const when = (iso: string) => ago(iso) || formatShortDate(iso);
 
 export default async function Dashboard() {
   const session = await adminOnly();
-  const [enquiries, articles, comments, users] = await Promise.all([listEnquiries(), listAll(), listAllComments(), listUsers()]);
-  const fresh = enquiries.filter((e) => e.status === "new").length;
+  const [enquiries, articles, comments, users, badges, recent] = await Promise.all([
+    listEnquiries(),
+    listAll(),
+    listAllComments(),
+    listUsers(),
+    inboxBadges(session.id).catch(() => ({ unread: 0, newEnquiries: 0 })),
+    queryAudit({ group: "all", range: "week", page: 1, perPage: 8 }).catch(() => ({ rows: [], total: 0 })),
+  ]);
+
+  const now = Date.now();
+  const byStatus = (s: EnquiryStatus) => enquiries.filter((e) => e.status === s);
+  const fresh = byStatus("new").length;
+  const open = enquiries.filter((e) => e.status !== "resolved");
+  const weekEnq = enquiries.filter((e) => now - Date.parse(e.at) < 7 * DAY).length;
   const published = articles.filter((a) => a.status === "published");
   const drafts = articles.length - published.length;
-  const hour = new Date().toLocaleString("en-GB", { hour: "numeric", hour12: false, timeZone: "Asia/Kolkata" });
-  const greeting = Number(hour) < 12 ? "Good morning" : Number(hour) < 18 ? "Good afternoon" : "Good evening";
+  const newAccounts = users.filter((u) => now - Date.parse(u.createdAt) < 7 * DAY).length;
+  const hour = Number(new Date().toLocaleString("en-GB", { hour: "numeric", hour12: false, timeZone: "Asia/Kolkata" }));
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const oldestNew = byStatus("new").map((e) => Date.parse(e.at)).sort((a, b) => a - b)[0];
 
-  const stats = [
-    { label: "New enquiries", value: fresh, note: `${enquiries.length} in total`, href: "/admin/enquiries?status=new", hot: fresh > 0 },
-    { label: "Published articles", value: published.length, note: drafts ? `${drafts} draft${drafts === 1 ? "" : "s"}` : "No drafts", href: "/admin/articles" },
-    { label: "Comments", value: comments.length, note: "on all articles", href: "/admin/comments" },
-    { label: "Accounts", value: users.length, note: `${users.filter((u) => u.googleId).length} with Google`, href: "/admin/users" },
-  ];
+  // enquiries that need attention come first: new, then waiting, then in progress, oldest within each group first
+  const rank: Record<EnquiryStatus, number> = { new: 0, waiting: 1, in_progress: 2, resolved: 3 };
+  const queue = [...open].sort((a, b) => rank[a.status] - rank[b.status] || Date.parse(a.at) - Date.parse(b.at)).slice(0, 6);
 
-  const setup = [
-    { done: !!process.env.GOOGLE_CLIENT_ID, label: "Google sign-in", hint: "Set GOOGLE_CLIENT_ID to show the Google button on the login and signup pages." },
-    { done: !!process.env.RESEND_API_KEY || !!process.env.CONTACT_WEBHOOK_URL, label: "Enquiry emails", hint: "Enquirers get a confirmation and the team gets the details by email. Set RESEND_API_KEY (or CONTACT_WEBHOOK_URL) to turn this on." },
-    { done: published.length > 0, label: "A published article", hint: "Readers see published articles on the Articles page." },
-    { done: !!process.env.ADMIN_EMAILS, label: "Admin emails", hint: "ADMIN_EMAILS makes those addresses admins when they sign in with Google. Optional." },
+  const tiles = [
+    { label: "Need a reply", value: fresh, note: fresh ? `oldest is ${when(new Date(oldestNew).toISOString())}` : "all caught up", href: "/admin/enquiries?status=new", hot: fresh > 0 },
+    { label: "Unread in the inbox", value: badges.unread, note: "mail, enquiries, comments and sign-ups", href: "/admin/inbox" },
+    { label: "Enquiries this week", value: weekEnq, note: `${enquiries.length} in total`, href: "/admin/enquiries" },
+    { label: "Articles live", value: published.length, note: drafts ? `${drafts} draft${drafts === 1 ? "" : "s"} waiting` : "no drafts", href: "/admin/articles" },
+    { label: "Accounts", value: users.length, note: newAccounts ? `${newAccounts} new this week` : "none new this week", href: "/admin/users" },
   ];
 
   return (
-    <div className="adm-page">
+    <div className="adm-page dash">
       <header className="adm-head">
         <div>
           <h1>{greeting}, {session.name.split(" ")[0]}</h1>
-          <p>{fresh > 0 ? `${fresh} enquir${fresh === 1 ? "y is" : "ies are"} waiting for a reply.` : "You're all caught up."}</p>
+          <p>{fresh > 0 ? `${fresh} enquir${fresh === 1 ? "y is" : "ies are"} waiting for a first reply.` : "Every enquiry has had a first reply."}</p>
         </div>
         <div className="adm-head-actions">
-          <Link href="/admin/enquiries" className="btn btn--line btn--sm">All enquiries</Link>
+          <Link href="/admin/inbox" className="btn btn--line btn--sm">Open inbox</Link>
           <Link href="/admin/articles/new" className="btn btn--sm">New article</Link>
         </div>
       </header>
 
-      <div className="adm-strip">
-        {stats.map((s) => (
-          <Link key={s.label} href={s.href} className={`adm-stat${s.hot ? " is-hot" : ""}`}>
-            <span>{s.label}</span>
-            <strong>{s.value}</strong>
-            <small>{s.note}</small>
+      <div className="dash-tiles">
+        {tiles.map((t) => (
+          <Link key={t.label} href={t.href} className={`dash-tile${t.hot ? " is-hot" : ""}`}>
+            <span>{t.label}</span>
+            <strong>{t.value}</strong>
+            <small>{t.note}</small>
           </Link>
         ))}
       </div>
 
-      <section className="adm-card" aria-label="Enquiry board">
-        <div className="adm-card-head"><h2>Enquiries <em>{enquiries.length}</em></h2><Link href="/admin/enquiries">Open list</Link></div>
-        <div className="adm-board">
-          {STATUSES.map((s) => {
-            const items = enquiries.filter((e) => e.status === s.value);
-            return (
-              <div key={s.value} className="adm-col">
-                <div className="adm-col-head"><StatusDot status={s.value} /> {s.label} <em>{items.length}</em></div>
-                {items.slice(0, 5).map((e) => (
-                  <Link key={e.id} href={`/admin/enquiries/${e.id}`} className="adm-ticket">
-                    <span className="adm-ticket-top"><code>{shortId(e.id)}</code><span>{day(e.at)}</span></span>
-                    <strong>{e.name || e.email}</strong>
-                    <p>{preview(e.problem, 110)}</p>
-                    <span className="adm-tags"><span className="adm-tag">{ROLE_LABEL[e.role] ?? e.role}</span>{e.interest ? <span className="adm-tag">{preview(e.interest, 22)}</span> : null}</span>
+      <div className="dash-main">
+        <section className="adm-card dash-enq" aria-labelledby="enq-h">
+          <div className="adm-card-head">
+            <h2 id="enq-h">Enquiries to deal with</h2>
+            <Link href="/admin/enquiries">View all {enquiries.length}</Link>
+          </div>
+          <div className="dash-chips" role="list">
+            {STATUSES.map((s) => (
+              <Link key={s.value} href={`/admin/enquiries?status=${s.value}`} className="dash-chip" role="listitem">
+                <StatusDot status={s.value} /> {s.label} <b>{byStatus(s.value).length}</b>
+              </Link>
+            ))}
+          </div>
+          {queue.length ? (
+            <ul className="dash-queue">
+              {queue.map((e) => (
+                <li key={e.id}>
+                  <Link href={`/admin/enquiries/${e.id}`}>
+                    <span className="dash-q-status"><StatusDot status={e.status} /></span>
+                    <span className="dash-q-main">
+                      <strong>{e.name || e.email}</strong>
+                      <small>{preview(e.problem, 96)}</small>
+                      <em>{ROLE_LABEL[e.role] ?? e.role}{e.interest ? ` · ${preview(e.interest, 36)}` : ""}</em>
+                    </span>
+                    <span className="dash-q-when"><code>{shortId(e.id)}</code><time dateTime={e.at}>{when(e.at)}</time></span>
                   </Link>
-                ))}
-                {items.length > 5 ? <Link href={`/admin/enquiries?status=${s.value}`} className="adm-faint">+{items.length - 5} more</Link> : null}
-                {items.length === 0 ? <div className="adm-col-empty">Nothing here</div> : null}
-              </div>
-            );
-          })}
-        </div>
-      </section>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="adm-empty">Nothing open. New enquiries from the website appear here.</p>
+          )}
+          {open.length > queue.length ? <Link className="dash-more" href="/admin/enquiries">+{open.length - queue.length} more open</Link> : null}
+        </section>
 
-      <div className="adm-cols">
-        <section className="adm-card">
-          <div className="adm-card-head"><h2>Latest comments</h2><Link href="/admin/comments">View all</Link></div>
-          {comments.length === 0 ? <p className="adm-empty">No comments yet.</p> : (
+        <section className="adm-card dash-act" aria-labelledby="act-h">
+          <div className="adm-card-head">
+            <h2 id="act-h">Recent activity</h2>
+            <Link href="/admin/logs">Open the log</Link>
+          </div>
+          {recent.rows.length ? (
+            <ul className="dash-feed">
+              {recent.rows.map((r) => (
+                <li key={r.id}>
+                  <span className="dash-feed-dot" aria-hidden="true" />
+                  <span className="dash-feed-main">
+                    <strong>{AUDIT_ACTIONS[r.action as AuditAction] ?? r.action}</strong>
+                    <small>{r.actor || "Not signed in"}{r.target ? ` · ${preview(r.target, 40)}` : ""}</small>
+                  </span>
+                  <time dateTime={r.at}>{when(r.at)}</time>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="adm-empty">Sign-ins and changes will be listed here.</p>
+          )}
+        </section>
+      </div>
+
+      <div className="dash-row">
+        <section className="adm-card" aria-labelledby="art-h">
+          <div className="adm-card-head"><h2 id="art-h">Articles</h2><Link href="/admin/articles">Manage</Link></div>
+          {articles.length ? (
+            <ul className="adm-list">
+              {articles.slice(0, 5).map((a) => (
+                <li key={a.id}>
+                  <Link href={`/admin/articles/${a.id}`}>
+                    <span className={`adm-badge adm-badge--${a.status}`}>{a.status === "published" ? "Live" : "Draft"}</span>
+                    <span className="main"><strong>{a.title}</strong><small>{a.category} · {comments.filter((c) => c.slug === a.slug).length} comments</small></span>
+                    <time dateTime={a.date}>{when(a.date + "T00:00:00Z")}</time>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="adm-empty">No articles yet. <Link href="/admin/articles/new">Write the first one.</Link></p>
+          )}
+        </section>
+
+        <section className="adm-card" aria-labelledby="com-h">
+          <div className="adm-card-head"><h2 id="com-h">Latest comments</h2><Link href="/admin/comments">View all</Link></div>
+          {comments.length ? (
             <ul className="adm-list">
               {comments.slice(0, 5).map((c) => (
                 <li key={c.id}>
                   <Link href="/admin/comments">
                     <span className="avatar-mini" aria-hidden="true">{c.name.charAt(0).toUpperCase()}</span>
                     <span className="main"><strong>{c.name}</strong><small>{preview(c.text, 80)}</small></span>
-                    <time dateTime={c.createdAt}>{day(c.createdAt)}</time>
+                    <time dateTime={c.createdAt}>{when(c.createdAt)}</time>
                   </Link>
                 </li>
               ))}
             </ul>
+          ) : (
+            <p className="adm-empty">No comments yet. Readers who sign in can comment on articles.</p>
           )}
         </section>
 
-        <section className="adm-card">
-          <div className="adm-card-head"><h2>Articles</h2><Link href="/admin/articles">Manage</Link></div>
+        <section className="adm-card" aria-labelledby="usr-h">
+          <div className="adm-card-head"><h2 id="usr-h">New accounts</h2><Link href="/admin/users">All accounts</Link></div>
           <ul className="adm-list">
-            {articles.slice(0, 5).map((a) => (
-              <li key={a.id}>
-                <Link href={`/admin/articles/${a.id}`}>
-                  <span className={`adm-badge adm-badge--${a.status}`}>{a.status === "published" ? "Live" : "Draft"}</span>
-                  <span className="main"><strong>{a.title}</strong><small>{a.category} · {comments.filter((c) => c.slug === a.slug).length} comments</small></span>
-                  <time dateTime={a.date}>{day(a.date + "T00:00:00Z")}</time>
+            {[...users].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)).slice(0, 5).map((u) => (
+              <li key={u.id}>
+                <Link href="/admin/users">
+                  <span className="avatar-mini" aria-hidden="true">{u.name.charAt(0).toUpperCase()}</span>
+                  <span className="main"><strong>{u.name}</strong><small>{u.googleId ? "Google" : "Email"}{u.role === "admin" ? " · Admin" : ""}</small></span>
+                  <time dateTime={u.createdAt}>{when(u.createdAt)}</time>
                 </Link>
               </li>
             ))}
           </ul>
         </section>
       </div>
-
-      <section className="adm-card">
-        <div className="adm-card-head"><h2>Setup</h2><span className="adm-faint">{setup.filter((s) => s.done).length} of {setup.length} done</span></div>
-        <ul className="adm-setup">
-          {setup.map((s) => (
-            <li key={s.label} className={s.done ? "is-done" : ""}>
-              <span aria-hidden="true">✓</span>
-              <div><strong>{s.label}</strong><small>{s.done ? "Connected" : s.hint}</small></div>
-            </li>
-          ))}
-        </ul>
-      </section>
     </div>
   );
 }

@@ -131,6 +131,31 @@ create table if not exists mail_cache (
 );
 alter table mail_cache enable row level security;
 
+-- activity log: sign-ins, sign-outs and every change made in the admin panel (kept for a year)
+create table if not exists audit_log (
+  id bigserial primary key,
+  at timestamptz not null default now(),
+  actor_id uuid,
+  actor text not null default '',
+  action text not null,
+  target text not null default '',
+  detail text not null default '',
+  ip text not null default '',
+  agent text not null default ''
+);
+create index if not exists audit_log_at_idx on audit_log (at desc);
+create index if not exists audit_log_action_idx on audit_log (action, at desc);
+alter table audit_log enable row level security;
+
+-- addresses seen in the shared mailbox (from, to, cc) or written to; the compose window suggests them as you type
+create table if not exists mail_contacts (
+  email text primary key,
+  name text not null default '',
+  uses integer not null default 1,
+  last_at timestamptz not null default now()
+);
+alter table mail_contacts enable row level security;
+
 -- signed-in sessions: only a hash of each token is stored; revoked_at is set when someone signs out
 create table if not exists sessions (
   token_hash text primary key,

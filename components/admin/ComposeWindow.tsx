@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 import type { DraftContent } from "@/lib/gmail";
 import { composeMailAction, discardDraftAction, saveDraftAction, type MailFormState } from "@/app/admin/actions";
 import { MailIcon } from "./MailIcons";
+import { RecipientInput } from "./RecipientInput";
 
 type Option = { value: string; label: string };
 type Mode = "closed" | "open" | "min" | "max";
@@ -186,17 +187,17 @@ export function ComposeWindow({ options }: { options: Option[] }) {
           </label>
           <label className="adm-cw-row">
             <span>To</span>
-            <input name="to" className="adm-gm-input" maxLength={600} autoComplete="off" defaultValue={state.values?.to ?? seed?.to} />
+            <RecipientInput name="to" className="adm-gm-input" defaultValue={state.values?.to ?? seed?.to} />
             <span className="adm-cw-links">
               {!cc ? <button type="button" onClick={() => setCc(true)}>Cc</button> : null}
               {!bcc ? <button type="button" onClick={() => setBcc(true)}>Bcc</button> : null}
             </span>
           </label>
           {cc || state.values?.cc ? (
-            <label className="adm-cw-row"><span>Cc</span><input name="cc" className="adm-gm-input" maxLength={600} defaultValue={state.values?.cc ?? seed?.cc} /></label>
+            <label className="adm-cw-row"><span>Cc</span><RecipientInput name="cc" className="adm-gm-input" defaultValue={state.values?.cc ?? seed?.cc} /></label>
           ) : null}
           {bcc || state.values?.bcc ? (
-            <label className="adm-cw-row"><span>Bcc</span><input name="bcc" className="adm-gm-input" maxLength={600} defaultValue={state.values?.bcc ?? seed?.bcc} /></label>
+            <label className="adm-cw-row"><span>Bcc</span><RecipientInput name="bcc" className="adm-gm-input" defaultValue={state.values?.bcc ?? seed?.bcc} /></label>
           ) : null}
           <label className="adm-cw-row">
             <span className="sr-only">Subject</span>

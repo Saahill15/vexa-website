@@ -35,6 +35,11 @@ const GROUPS: Group[] = [
     ],
   },
   {
+    id: "system",
+    label: "System",
+    items: [{ href: "/admin/logs", label: "Activity log", icon: "shield" }],
+  },
+  {
     id: "shortcuts",
     label: "Shortcuts",
     items: [
