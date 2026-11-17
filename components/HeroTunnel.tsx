@@ -91,7 +91,7 @@ export function HeroTunnel() {
               </textPath>
             </text>
           </svg>
-          <Image src="/img/vexa-vmark-teal.png" alt="" width={335} height={318} priority />
+          <Image src="/img/vexa-vmark.png" alt="" width={335} height={318} priority />
         </Reveal>
       </div>
       <a href="#services" className="scroll-cue" aria-label="Scroll to services">
