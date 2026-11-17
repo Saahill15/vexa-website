@@ -1,3 +1,4 @@
+import { requestBanned } from "@/lib/ipblock";
 import { getSession } from "@/lib/auth";
 import { getBySlug } from "@/lib/articles";
 import { addComment, COMMENT_MAX, removeComment } from "@/lib/comments";
@@ -6,6 +7,7 @@ import { tooMany } from "@/lib/ratelimit";
 
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("Not allowed.", 403);
+  if (await requestBanned(request)) return fail("This address is not allowed to use this.", 403);
   const session = await getSession();
   if (!session) return fail("Log in to comment.", 401);
   if (await tooMany(`comment:${session.id}`, 6, 60_000)) return fail("You're posting quickly. Wait a moment and try again.", 429);

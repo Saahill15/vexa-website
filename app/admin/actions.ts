@@ -8,6 +8,7 @@ import { deleteArticle, getById, saveArticle } from "@/lib/articles";
 import { audit } from "@/lib/audit";
 import { requireAdmin } from "@/lib/auth";
 import { removeComment } from "@/lib/comments";
+import { banIp, currentIp, ipKey, unbanIp } from "@/lib/ipblock";
 import { deleteEnquiry, isStatus, updateEnquiry } from "@/lib/enquiries";
 import { markAllInboxRead, markInboxRead, setDisabled, setRole } from "@/lib/users";
 
@@ -313,4 +314,29 @@ export async function syncMailAction(formData: FormData) {
   await listFolder(folder, true).catch(() => undefined);
   // only the inbox data is refreshed: no redirect, so the page, the open message and the filters stay as they are
   revalidatePath("/admin/inbox");
+}
+
+
+/* ---------- banned addresses ---------- */
+
+export async function banIpAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const ip = str(formData.get("ip"), 64);
+  const key = ipKey(ip);
+  if (!key) redirect("/admin/logs?ban=invalid");
+  // never lock out the address the admin is using right now
+  if (key === ipKey(await currentIp())) redirect("/admin/logs?ban=self");
+  await banIp(ip, str(formData.get("reason"), 200), admin.email);
+  await audit("security.ip_ban", { actor: admin, target: key, detail: str(formData.get("reason"), 200) });
+  revalidatePath("/admin/logs");
+  redirect("/admin/logs?ban=done");
+}
+
+export async function unbanIpAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const key = str(formData.get("key"), 64);
+  await unbanIp(key);
+  await audit("security.ip_unban", { actor: admin, target: key });
+  revalidatePath("/admin/logs");
+  redirect("/admin/logs?ban=lifted");
 }

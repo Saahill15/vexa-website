@@ -212,3 +212,13 @@ alter table mfa_challenges enable row level security;
 -- faster admin pages: the enquiry timeline looks entries up by target, and enquiries are counted by status
 create index if not exists audit_log_target_idx on audit_log (target, at desc);
 create index if not exists enquiries_status_idx on enquiries (status);
+
+-- banned addresses (an IPv4 address, or the /64 block of an IPv6 address); checked on sign-in, sign-up, forms, comments and the admin panel
+create table if not exists blocked_ips (
+  key text primary key,
+  ip text not null,
+  reason text not null default '',
+  by text not null default '',
+  at timestamptz not null default now()
+);
+alter table blocked_ips enable row level security;

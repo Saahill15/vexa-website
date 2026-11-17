@@ -35,6 +35,8 @@ export const AUDIT_ACTIONS = {
   "mail.reply": "Email reply sent",
   "mail.action": "Email moved, starred or deleted",
   "mail.draft": "Draft saved or discarded",
+  "security.ip_ban": "Address banned",
+  "security.ip_unban": "Address allowed again",
 } as const;
 export type AuditAction = keyof typeof AUDIT_ACTIONS;
 
@@ -45,13 +47,13 @@ const cut = (v: string | null | undefined, n: number) => (v ?? "").replace(/[\r\
 export async function audit(action: AuditAction, o: { actor?: AuditActor; target?: string; detail?: string; ip?: string; agent?: string } = {}): Promise<void> {
   try {
     let { ip, agent } = o;
-    if (ip === undefined) {
+    if (ip === undefined || agent === undefined) {
       try {
         const h = await headers();
-        ip = h.get("cf-connecting-ip") ?? h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "";
+        if (ip === undefined) ip = h.get("cf-connecting-ip") ?? h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "";
         agent = h.get("user-agent") ?? "";
       } catch {
-        ip = ""; // not inside a request
+        ip ??= ""; // not inside a request
       }
     }
     const who = o.actor ? cut(o.actor.email || o.actor.name, 160) : "";
@@ -74,6 +76,7 @@ export const AUDIT_GROUPS = [
   { key: "articles", label: "Articles", like: ["article.%"] },
   { key: "mail", label: "Email", like: ["mail.%"] },
   { key: "people", label: "People and comments", like: ["user.%", "comment.%"] },
+  { key: "security", label: "Security", like: ["security.%", "auth.login_failed"] },
 ] as const;
 
 export const AUDIT_RANGES = [

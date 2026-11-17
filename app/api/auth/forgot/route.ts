@@ -1,3 +1,4 @@
+import { requestBanned } from "@/lib/ipblock";
 import { clientIp, EMAIL, fail, isLocal, ok, publicOrigin, readJson, sameOrigin, text } from "@/lib/http";
 import { mailReady } from "@/lib/mail";
 import { createReset, RESET_MINUTES, sendResetLink } from "@/lib/password-reset";
@@ -6,6 +7,7 @@ import { getUserByEmail } from "@/lib/users";
 
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return fail("This form can only be sent from the Vexa website.", 403);
+  if (await requestBanned(request)) return fail("This address is not allowed to use this.", 403);
   const body = await readJson(request);
   const email = text(body?.email, 254).toLowerCase();
   if (!EMAIL.test(email)) return fail("Enter a full email address.");
