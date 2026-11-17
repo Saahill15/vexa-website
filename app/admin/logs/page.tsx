@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TabLink } from "@/components/admin/TabLink";
 import { adminOnly } from "@/lib/admin-guard";
 import { AUDIT_ACTIONS, AUDIT_GROUPS, AUDIT_RANGES, auditStats, queryAudit, type AuditAction } from "@/lib/audit";
 import { formatDateTime } from "@/lib/format";
@@ -78,7 +79,7 @@ export default async function LogsPage({ searchParams }: { searchParams: Promise
         <div className="adm-toolbar adm-log-tools">
           <nav className="adm-tabs" aria-label="Kind of activity">
             {AUDIT_GROUPS.map((g) => (
-              <Link key={g.key} href={href({ group: g.key, page: "1" })} aria-current={group === g.key ? "page" : undefined}>{g.label}</Link>
+              <TabLink key={g.key} href={href({ group: g.key, page: "1" })} current={group === g.key}>{g.label}</TabLink>
             ))}
           </nav>
           {group !== "banned" ? (
@@ -127,6 +128,7 @@ export default async function LogsPage({ searchParams }: { searchParams: Promise
                     <td className="adm-log-from">
                       <code>{r.ip || "—"}</code>{r.ip && ipKey(r.ip) ? <span className="adm-ip-kind">{isV6(ipKey(r.ip)!) ? "IPv6" : "IPv4"}</span> : null}
                       {browser(r.agent) ? <small>{browser(r.agent)} · {device(r.agent)}</small> : null}
+                      {r.ip && ipKey(r.ip) && ipKey(r.ip) === myKey ? <small className="adm-faint">Your address, can't be banned</small> : null}
                       {r.ip && ipKey(r.ip) && ipKey(r.ip) !== myKey ? (bannedKeys.has(ipKey(r.ip)!) ? <small className="adm-ip-banned">Banned</small> : (
                         <form action={banIpAction} className="adm-ban"><input type="hidden" name="ip" value={r.ip} /><ConfirmButton message={`Ban ${r.ip}${isV6(ipKey(r.ip)!) ? " and the rest of its IPv6 block" : ""}? It will not be able to sign in, sign up, send forms or comment, or open the admin panel.`} className="adm-ban-btn">Ban</ConfirmButton></form>
                       )) : null}

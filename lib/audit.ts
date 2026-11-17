@@ -116,11 +116,14 @@ export async function queryAudit(f: AuditFilter): Promise<{ rows: AuditRow[]; to
   const { sql, params } = where(f);
   const perPage = Math.min(Math.max(f.perPage ?? 50, 1), 5000);
   const offset = Math.max((f.page ?? 1) - 1, 0) * perPage;
-  const total = await db.query<{ n: number }>(`select count(*)::int as n from audit_log ${sql}`, params);
-  const list = await db.query<{ id: string; at: Date; actor: string; action: string; target: string; detail: string; ip: string; agent: string }>(
-    `select id::text, at, actor, action, target, detail, ip, agent from audit_log ${sql} order by at desc, id desc limit ${perPage} offset ${offset}`,
-    params,
-  );
+  // the count and the page are asked for together, not one after the other
+  const [total, list] = await Promise.all([
+    db.query<{ n: number }>(`select count(*)::int as n from audit_log ${sql}`, params),
+    db.query<{ id: string; at: Date; actor: string; action: string; target: string; detail: string; ip: string; agent: string }>(
+      `select id::text, at, actor, action, target, detail, ip, agent from audit_log ${sql} order by at desc, id desc limit ${perPage} offset ${offset}`,
+      params,
+    ),
+  ]);
   return { total: total.rows[0]?.n ?? 0, rows: list.rows.map((r) => ({ ...r, at: new Date(r.at).toISOString() })) };
 }
 
