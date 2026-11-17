@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { FolderDeck } from "@/components/FolderDeck";
 import { HeroTunnel } from "@/components/HeroTunnel";
-import { ClosingCall, FreeStart, HowWeWork, PainPoints, Testimonials, TrustStrip } from "@/components/HomeSections";
 import { Reveal } from "@/components/motion/Reveal";
 import { WordReveal } from "@/components/motion/WordReveal";
 import { JsonLd } from "@/components/JsonLd";
@@ -54,12 +53,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <TrustStrip />
-      <PainPoints />
-      <HowWeWork />
-      <Testimonials />
-      <FreeStart />
-      <ClosingCall />
     </>
   );
 }
