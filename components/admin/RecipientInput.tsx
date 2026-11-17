@@ -23,8 +23,10 @@ export function RecipientInput({ name, defaultValue, maxLength = 600, className,
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const input = useRef<HTMLInputElement>(null);
+  const activeRef = useRef(0);
   const typed = useRef(false); // suggestions appear only after the person types, not for the value the field starts with
 
+  activeRef.current = active;
   const token = value.split(/[,;]/).pop()!.trim();
   const already = new Set((value.match(/[a-z0-9._%+-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+/gi) ?? []).map((e) => e.toLowerCase()));
 
@@ -34,17 +36,24 @@ export function RecipientInput({ name, defaultValue, maxLength = 600, className,
       return;
     }
     const controller = new AbortController();
-    const timer = setTimeout(() => {
-      fetch(`/api/admin/contacts?q=${encodeURIComponent(token)}`, { signal: controller.signal })
+    const ask = (full: boolean) =>
+      fetch(`/api/admin/contacts?q=${encodeURIComponent(token)}${full ? "&full=1" : ""}`, { signal: controller.signal })
         .then((r) => (r.ok ? r.json() : { contacts: [] }))
         .then((d: { contacts?: Contact[] }) => {
           // the address being typed is not offered again, and neither are ones already in the field
           const list = (d.contacts ?? []).filter((c) => !already.has(c.email.toLowerCase()));
-          setItems(list);
-          setActive(0);
+          setItems((prev) => {
+            // when the fuller list arrives, the highlighted person stays highlighted
+            const keep = full ? prev[activeRef.current]?.email : undefined;
+            const at = keep ? list.findIndex((c) => c.email === keep) : -1;
+            setActive(at >= 0 ? at : 0);
+            return list;
+          });
           setOpen(list.length > 0);
-        })
-        .catch(() => undefined);
+        });
+    const timer = setTimeout(() => {
+      // the site's own list shows at once; Google's people and photos follow a moment later
+      ask(false).then(() => ask(true)).catch(() => undefined);
     }, 140);
     return () => {
       clearTimeout(timer);
