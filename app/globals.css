@@ -2069,3 +2069,7 @@ p{text-align:left;text-justify:auto}
 .adm-banned--tab{margin:0;border:0}
 .adm-ban-add{display:flex;flex-wrap:wrap;gap:8px;padding:16px;border-bottom:1px solid var(--line)}
 .adm-ban-add .in{flex:1;min-width:180px}
+.tab-spin{display:inline-block;width:12px;height:12px;margin-left:7px;vertical-align:-1px;border:2px solid rgba(10,35,34,.2);border-top-color:var(--teal);border-radius:50%;animation:tab-spin .7s linear infinite}
+@keyframes tab-spin{to{transform:rotate(360deg)}}
+.adm-card:has(.tab-spin) .adm-log-wrap,.adm-card:has(.tab-spin) .adm-banned--tab{opacity:.45;transition:opacity .15s}
+@media (prefers-reduced-motion:reduce){.tab-spin{animation-duration:2s}}
