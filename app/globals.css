@@ -2073,3 +2073,8 @@ p{text-align:left;text-justify:auto}
 @keyframes tab-spin{to{transform:rotate(360deg)}}
 .adm-card:has(.tab-spin) .adm-log-wrap,.adm-card:has(.tab-spin) .adm-banned--tab{opacity:.45;transition:opacity .15s}
 @media (prefers-reduced-motion:reduce){.tab-spin{animation-duration:2s}}
+/* page titles: the wording is split into "lines" in the code, but they run on as one sentence and wrap only when the space runs out */
+h1 .tt-line{display:inline}
+h1 .tt-line:not(:last-child)::after{content:" "}
+.phead-in{max-width:none}
+.phead-in .lede{max-width:640px}
