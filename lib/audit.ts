@@ -77,6 +77,8 @@ export const AUDIT_GROUPS = [
   { key: "mail", label: "Email", like: ["mail.%"] },
   { key: "people", label: "People and comments", like: ["user.%", "comment.%"] },
   { key: "security", label: "Security", like: ["security.%", "auth.login_failed"] },
+  // not a filter on the log itself: this tab lists the addresses that are banned right now
+  { key: "banned", label: "Banned IPs", like: [] as string[] },
 ] as const;
 
 export const AUDIT_RANGES = [

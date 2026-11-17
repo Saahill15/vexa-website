@@ -26,7 +26,7 @@ export default async function LogsPage({ searchParams }: { searchParams: Promise
   const range = AUDIT_RANGES.some((r) => r.key === sp.range) ? sp.range! : "week";
   const q = (sp.q ?? "").slice(0, 80);
   const page = Math.max(parseInt(sp.page ?? "1", 10) || 1, 1);
-  const [{ rows, total }, stats, banned, mine] = await Promise.all([queryAudit({ group, range, q, page, perPage: PER_PAGE }), auditStats(), listBanned().catch(() => []), currentIp()]);
+  const [{ rows, total }, stats, banned, mine] = await Promise.all([group === "banned" ? Promise.resolve({ rows: [], total: 0 }) : queryAudit({ group, range, q, page, perPage: PER_PAGE }), auditStats(), listBanned().catch(() => []), currentIp()]);
   const myKey = ipKey(mine);
   const bannedKeys = new Set(banned.map((b) => b.key));
   const pages = Math.max(Math.ceil(total / PER_PAGE), 1);
@@ -60,7 +60,7 @@ export default async function LogsPage({ searchParams }: { searchParams: Promise
         <div className="adm-stat"><span>Changes made</span><strong>{stats.changes}</strong><small>articles, enquiries, email, people</small></div>
       </div>
 
-      {banned.length ? (
+      {banned.length && group !== "banned" ? (
         <section className="adm-card adm-banned" aria-labelledby="ban-h">
           <div className="adm-card-head"><h2 id="ban-h">Banned addresses <em>{banned.length}</em></h2></div>
           <ul>
@@ -81,6 +81,7 @@ export default async function LogsPage({ searchParams }: { searchParams: Promise
               <Link key={g.key} href={href({ group: g.key, page: "1" })} aria-current={group === g.key ? "page" : undefined}>{g.label}</Link>
             ))}
           </nav>
+          {group !== "banned" ? (
           <form className="adm-log-search" action="/admin/logs" method="get">
             {group !== "all" ? <input type="hidden" name="group" value={group} /> : null}
             <select name="range" className="in" defaultValue={range} aria-label="Time range">
@@ -89,8 +90,29 @@ export default async function LogsPage({ searchParams }: { searchParams: Promise
             <input name="q" className="in" type="search" defaultValue={q} placeholder="Search who, what or IP" aria-label="Search the log" />
             <button className="btn btn--sm" type="submit">Search</button>
           </form>
+          ) : null}
         </div>
 
+        {group === "banned" ? (
+          <div className="adm-banned adm-banned--tab">
+            <form action={banIpAction} className="adm-ban-add">
+              <input className="in" name="ip" placeholder="Address to ban, IPv4 or IPv6" aria-label="Address to ban" required maxLength={64} />
+              <input className="in" name="reason" placeholder="Reason (optional)" aria-label="Reason" maxLength={200} />
+              <button className="btn btn--sm" type="submit">Ban address</button>
+            </form>
+            {banned.length ? (
+              <ul>
+                {banned.map((b) => (
+                  <li key={b.key}>
+                    <div><code>{b.key}</code><span className="adm-ip-kind">{isV6(b.key) ? "IPv6, whole block" : "IPv4"}</span>{b.reason ? <small>{b.reason}</small> : null}<small>by {b.by || "an admin"} · {formatDateTime(b.at)}</small></div>
+                    <form action={unbanIpAction}><input type="hidden" name="key" value={b.key} /><ConfirmButton message={`Let ${b.key} use the site again?`} className="adm-mini">Unban</ConfirmButton></form>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="adm-empty">No addresses are banned. Use Ban next to an address in the log, or add one above.</p>}
+          </div>
+        ) : (
+          <>
         {rows.length ? (
           <div className="adm-table-wrap adm-log-wrap">
             <table className="adm-table adm-log">
@@ -125,6 +147,8 @@ export default async function LogsPage({ searchParams }: { searchParams: Promise
             {page < pages ? <Link className="btn btn--line btn--sm" href={href({ page: String(page + 1) })}>Older →</Link> : null}
           </span>
         </div>
+          </>
+        )}
       </section>
     </div>
   );
